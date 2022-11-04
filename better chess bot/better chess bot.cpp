@@ -49,9 +49,16 @@ const B64 COLUMN_H = 0x0101010101010101ULL;
 
 // constexpr save the function call so they're faster than regular function
 // general bit manipulation
-constexpr void set_bit(B64 board, int bit) { (board |= (1ULL << bit)); } // shift 1 to position and set to OR
+constexpr B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } // shift 1 to position and set to OR
 constexpr bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
-constexpr void clear_bit(B64 board, int bit) { (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
+constexpr B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
+constexpr int find_first_bit(B64 board) { return __builtin_ctzll(board); } // finds the first active bit
+// not sure if this one is suposed to be a constepr
+constexpr int use_first_bit(B64 board) { // returns the location of the first bit and turns it off
+    int first = find_first_bit(board);
+    board &= board - 1; // get rid of the first bit, shlould be faster than 'clear bit'
+    return first;
+}
 // piece movment assists, with bound protections
 constexpr B64 up(B64 board) { return board << 8; } // shifts out of the board would just be 0 anyway
 constexpr B64 down(B64 board) { return board >> 8; }
@@ -67,6 +74,9 @@ constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
 int main()
 {
     std::cout << "Hello World!\n";
+    std::cout << (0xffffffffUL << 8);
+    std::cout << '\n';
+    std::cout << (0xffffffffUL);
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
