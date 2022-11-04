@@ -30,7 +30,7 @@ struct BoardPosition
 };
 
 // info on gamestate
-struct GameState // split off from positiopn to allow memcmp (both the timer and pointer whpd interefere)
+struct GameState // split off from positiopn to allow memcmp (both the timer and pointer whould interefere)
 {
     int turn; // idk why i need this actually, but why not, it's kinda cute
     BoardPosition position;
@@ -42,6 +42,27 @@ bool operator==(const BoardPosition& lhs, const BoardPosition& rhs)
 {
     return memcmp(&lhs, &rhs, sizeof(BoardPosition));
 }
+
+// useful for out of bounds detection
+const B64 COLUMN_A = 0x8080808080808080ULL;
+const B64 COLUMN_H = 0x0101010101010101ULL;
+
+// constexpr save the function call so they're faster than regular function
+// general bit manipulation
+constexpr void set_bit(B64 board, int bit) { (board |= (1ULL << bit)); } // shift 1 to position and set to OR
+constexpr bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
+constexpr void clear_bit(B64 board, int bit) { (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
+// piece movment assists, with bound protections
+constexpr B64 up(B64 board) { return board << 8; } // shifts out of the board would just be 0 anyway
+constexpr B64 down(B64 board) { return board >> 8; }
+constexpr B64 left(B64 board) { return (board & ~COLUMN_A) << 1; }
+constexpr B64 right(B64 board) { return (board & ~COLUMN_H) >> 1; }
+constexpr B64 up_left(B64 board) { return (board & ~COLUMN_A) << 9; }
+constexpr B64 up_right(B64 board) { return (board & ~COLUMN_H) << 7; }
+constexpr B64 down_left(B64 board) { return (board & ~COLUMN_A) >> 7; }
+constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
+
+
 
 int main()
 {
