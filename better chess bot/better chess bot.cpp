@@ -45,13 +45,21 @@ bool operator==(const BoardPosition& lhs, const BoardPosition& rhs)
 
 // useful for out of bounds detection
 const B64 COLUMN_A = 0x8080808080808080ULL;
+const B64 COLUMN_B = 0x4040404040404040ULL;
+const B64 COLUMN_AB = COLUMN_A | COLUMN_B;
+const B64 COLUMB_G = 0x0202020202020202ULL;
 const B64 COLUMN_H = 0x0101010101010101ULL;
+const B64 COLUMN_GH = COLUMB_G | COLUMN_H;
 
 // constexpr save the function call so they're faster than regular function
 // general bit manipulation
 constexpr B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } // shift 1 to position and set to OR
 constexpr bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
 constexpr B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
+
+#define SKIPCOMPILE
+#ifndef SKIPCOMPILE
+// it just refuses to compile, not sure what to do with that, a very useful function
 constexpr int find_first_bit(B64 board) { return __builtin_ctzll(board); } // finds the first active bit
 // not sure if this one is suposed to be a constepr
 constexpr int use_first_bit(B64 board) { // returns the location of the first bit and turns it off
@@ -59,6 +67,9 @@ constexpr int use_first_bit(B64 board) { // returns the location of the first bi
     board &= board - 1; // get rid of the first bit, shlould be faster than 'clear bit'
     return first;
 }
+#endif // !SKIPCOMPILE
+#undef SKIPCOMPILE
+
 // piece movment assists, with bound protections
 constexpr B64 up(B64 board) { return board << 8; } // shifts out of the board would just be 0 anyway
 constexpr B64 down(B64 board) { return board >> 8; }
@@ -69,14 +80,55 @@ constexpr B64 up_right(B64 board) { return (board & ~COLUMN_H) << 7; }
 constexpr B64 down_left(B64 board) { return (board & ~COLUMN_A) >> 7; }
 constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
 
+B64 king_moves[64];
+B64 knight_moves[64];
+
+void generate_king_moves() {
+    B64 current_board = 1ULL;
+    for (size_t i = 0; i < 64; i++)
+    {
+        king_moves[i] = up(current_board) |
+                        down(current_board) |
+                        left(current_board) |
+                        right(current_board) |
+                        up_left(current_board) |
+                        up_right(current_board) |
+                        down_left(current_board) |
+                        down_right(current_board);
+
+        current_board = current_board << 1;
+    }
+}
+
+void generate_knight_moves() {
+    B64 current_board = 1ULL;
+    for (size_t i = 0; i < 64; i++)
+    {
+        knight_moves[i] = (((current_board >> 6) | (current_board << 10)) & ~COLUMN_GH) | // when looping around the board on the other side
+                          (((current_board >> 10) | (current_board << 6)) & ~COLUMN_AB) |
+                          (((current_board >> 15) | (current_board << 17)) & ~COLUMN_H) |
+                          (((current_board >> 17) | (current_board << 15)) & ~COLUMN_A);
+
+        current_board = current_board << 1;
+    }
+}
 
 
 int main()
 {
+    generate_king_moves();
+    generate_knight_moves();
+
     std::cout << "Hello World!\n";
-    std::cout << (0xffffffffUL << 8);
+    for (size_t i = 0; i < 64; i++)
+    {
+        std::cout << i << ':' << king_moves[i] << '\n';
+    }
     std::cout << '\n';
-    std::cout << (0xffffffffUL);
+    for (size_t i = 0; i < 64; i++)
+    {
+        std::cout << i << ':' << knight_moves[i] << '\n';
+    }
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
