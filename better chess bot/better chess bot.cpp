@@ -113,6 +113,26 @@ void generate_knight_moves() {
     }
 }
 
+void visualize_board(B64 board) {
+    for (size_t i = 0; i < 8; i++)
+    {
+        for (size_t j = 0; j < 8; j++)
+        {
+            if (get_bit(board, i*8+j))
+            {
+                std::cout << 'X';
+            }
+            else {
+                std::cout << '_';
+            }
+        }
+
+        std::cout << '\n';
+    }
+
+    std::cout << '\n';
+}
+
 
 int main()
 {
@@ -122,12 +142,12 @@ int main()
     std::cout << "Hello World!\n";
     for (size_t i = 0; i < 64; i++)
     {
-        std::cout << i << ':' << king_moves[i] << '\n';
+        visualize_board(king_moves[i]);
     }
     std::cout << '\n';
     for (size_t i = 0; i < 64; i++)
     {
-        std::cout << i << ':' << knight_moves[i] << '\n';
+        visualize_board(knight_moves[i]);
     }
 }
 
