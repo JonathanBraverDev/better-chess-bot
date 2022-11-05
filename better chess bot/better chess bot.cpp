@@ -50,6 +50,11 @@ const B64 COLUMN_AB = COLUMN_A | COLUMN_B;
 const B64 COLUMB_G = 0x0202020202020202ULL;
 const B64 COLUMN_H = 0x0101010101010101ULL;
 const B64 COLUMN_GH = COLUMB_G | COLUMN_H;
+// used for pawn first move/promotion
+const B64 ROW_1 = 0xFF00000000000000ULL;
+const B64 ROW_2 = 0x00FF000000000000ULL;
+const B64 ROW_7 = 0x000000000000FF00ULL;
+const B64 ROW_8 = 0x00000000000000FFULL;
 
 // constexpr save the function call so they're faster than regular function
 // general bit manipulation
@@ -82,6 +87,8 @@ constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
 
 B64 king_moves[64];
 B64 knight_moves[64];
+B64 pawn_moves[64*2]; // the 2 colors move in opposite direction
+B64 pawn_attacks[64*2]; // further conditional split
 
 void generate_king_moves() {
     B64 current_board = 1ULL;
@@ -113,6 +120,46 @@ void generate_knight_moves() {
     }
 }
 
+void generate_white_pawn_moves() {
+    B64 current_board = 1ULL;
+    for (size_t i = 0; i < 64*2; i+=2)
+    {
+        // missing promotion logic
+        pawn_moves[i] = up(current_board) |
+                        ((current_board & ROW_2) << 8*2); // silimar logic to edge detection, if on jump row, add jump
+                        // missing appassant logic
+
+        pawn_attacks[i] = up_left(current_board) |
+                          up_right(current_board);
+
+        current_board = current_board << 1;
+    }
+}
+
+void generate_black_pawn_moves() {
+    B64 current_board = 1ULL;
+    for (size_t i = 1; i < 64*2; i+=2)
+    {
+        // missing promotion logic
+        pawn_moves[i] = down(current_board) |
+                        ((current_board & ROW_7) >> 8*2); // silimar logic to edge detection, if on jump row, add jump
+                        // missing appassant logic
+
+        pawn_attacks[i] = down_left(current_board) |
+                          down_right(current_board);
+
+        current_board = current_board << 1;
+        // yes, black pawns can't get to the last row, not in a NORMAL game at least
+    }
+}
+
+void generate_pawn_moves() {
+    // promotions and en passant will probably be handled by the actual more proccesing, not in generation
+    // if a pawn has no POTENTIAL moves, he promoted
+    generate_white_pawn_moves();
+    generate_black_pawn_moves();
+}
+
 void visualize_board(B64 board) {
     for (size_t i = 0; i < 8; i++)
     {
@@ -120,10 +167,10 @@ void visualize_board(B64 board) {
         {
             if (get_bit(board, i*8+j))
             {
-                std::cout << 'X';
+                std::cout << "X ";
             }
             else {
-                std::cout << '_';
+                std::cout << "_ ";
             }
         }
 
@@ -138,6 +185,7 @@ int main()
 {
     generate_king_moves();
     generate_knight_moves();
+    generate_pawn_moves();
 
     std::cout << "Hello World!\n";
     for (size_t i = 0; i < 64; i++)
@@ -148,6 +196,11 @@ int main()
     for (size_t i = 0; i < 64; i++)
     {
         visualize_board(knight_moves[i]);
+    }
+    std::cout << '\n';
+    for (size_t i = 0; i < 64; i++)
+    {
+        visualize_board(pawn_moves[i] | pawn_attacks[i]);
     }
 }
 
