@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <chrono>
 
 typedef uint64_t B64; // 64 bit board
 
@@ -23,10 +24,7 @@ struct BoardPosition
     B64 black_rooks;
     B64 black_queens;
     B64 black_king;
-    B64 castle_rigths; // both colors together, the data dosent interfere
-    B64 en_passant_right; // no s, this is the loneliest bit here, the king is at least presistant...
-    // if im exstra space aware i can probalby merge those 2, they will never have overlap anyway
-    // but for now i wont, for readability
+    B64 special_move_rigths; // en passant AND caslte right bot both sides, data cant overlap anyway
 };
 
 // info on gamestate
@@ -125,8 +123,8 @@ void generate_white_pawn_moves() {
     for (size_t i = 0; i < 64*2; i+=2)
     {
         // missing promotion logic
-        pawn_moves[i] = up(current_board) |
-                        ((current_board & ROW_2) << 8*2); // silimar logic to edge detection, if on jump row, add jump
+        pawn_moves[i] = up(current_board);
+                        // pawn jumps require sliding piece logic
                         // missing appassant logic
 
         pawn_attacks[i] = up_left(current_board) |
@@ -141,8 +139,8 @@ void generate_black_pawn_moves() {
     for (size_t i = 1; i < 64*2; i+=2)
     {
         // missing promotion logic
-        pawn_moves[i] = down(current_board) |
-                        ((current_board & ROW_7) >> 8*2); // silimar logic to edge detection, if on jump row, add jump
+        pawn_moves[i] = down(current_board);
+                        // pawn jumps require sliding piece logic
                         // missing appassant logic
 
         pawn_attacks[i] = down_left(current_board) |
@@ -183,11 +181,14 @@ void visualize_board(B64 board) {
 
 int main()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     generate_king_moves();
     generate_knight_moves();
     generate_pawn_moves();
 
-    std::cout << "Hello World!\n";
+    auto end = std::chrono::high_resolution_clock::now();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
     for (size_t i = 0; i < 64; i++)
     {
         visualize_board(king_moves[i]);
@@ -202,6 +203,8 @@ int main()
     {
         visualize_board(pawn_moves[i] | pawn_attacks[i]);
     }
+    
+    std::cout << (double)microseconds;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
