@@ -88,7 +88,7 @@ B64 knight_moves[64];
 B64 pawn_moves[64*2]; // the 2 colors move in opposite direction
 B64 pawn_attacks[64*2]; // further conditional split
 
-void generate_king_moves() {
+void prepare_king_moves() {
     B64 current_board = 1ULL;
     for (size_t i = 0; i < 64; i++)
     {
@@ -105,7 +105,7 @@ void generate_king_moves() {
     }
 }
 
-void generate_knight_moves() {
+void prepare_knight_moves() {
     B64 current_board = 1ULL;
     for (size_t i = 0; i < 64; i++)
     {
@@ -118,7 +118,7 @@ void generate_knight_moves() {
     }
 }
 
-void generate_white_pawn_moves() {
+void prepare_white_pawn_moves() {
     B64 current_board = 1ULL;
     for (size_t i = 0; i < 64*2; i+=2)
     {
@@ -134,7 +134,7 @@ void generate_white_pawn_moves() {
     }
 }
 
-void generate_black_pawn_moves() {
+void prepare_black_pawn_moves() {
     B64 current_board = 1ULL;
     for (size_t i = 1; i < 64*2; i+=2)
     {
@@ -151,11 +151,62 @@ void generate_black_pawn_moves() {
     }
 }
 
-void generate_pawn_moves() {
+void check_proposed_slide(B64& proposed, B64& same_color, B64& diff_color, B64& moves, bool& stop) {
+    if (proposed & same_color) {
+        stop = true;
+    } else if (proposed & diff_color) {
+        moves |= proposed;
+        stop = true;
+    } else {
+        moves |= proposed;
+    }
+}
+
+
+B64 generate_bishop_moves(B64& same_color, B64& diff_color, int origin) {
+    B64 moves = 0;
+    B64 proposed;
+
+    B64 bishop = 0;
+    set_bit(bishop, origin);
+    bool stop = false;
+    do {// up left movemnt
+        proposed = up_left(bishop);
+        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
+    } while (!stop);
+
+    B64 bishop = 0;
+    set_bit(bishop, origin);
+    bool stop = false;
+    do { // up right
+        proposed = up_right(bishop);
+        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
+    } while (!stop);
+
+    B64 bishop = 0;
+    set_bit(bishop, origin);
+    bool stop = false;
+    do { // down left
+        proposed = down_left(bishop);
+        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
+    } while (!stop);
+
+    B64 bishop = 0;
+    set_bit(bishop, origin);
+    bool stop = false;
+    do { // down right
+        proposed = down_right(bishop);
+        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
+    } while (!stop);
+
+    return moves;
+}
+
+void prepare_pawn_moves() {
     // promotions and en passant will probably be handled by the actual more proccesing, not in generation
     // if a pawn has no POTENTIAL moves, he promoted
-    generate_white_pawn_moves();
-    generate_black_pawn_moves();
+    prepare_white_pawn_moves();
+    prepare_black_pawn_moves();
 }
 
 void visualize_board(B64 board) {
@@ -182,9 +233,9 @@ void visualize_board(B64 board) {
 int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
-    generate_king_moves();
-    generate_knight_moves();
-    generate_pawn_moves();
+    prepare_king_moves();
+    prepare_knight_moves();
+    prepare_pawn_moves();
 
     auto end = std::chrono::high_resolution_clock::now();
     auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
