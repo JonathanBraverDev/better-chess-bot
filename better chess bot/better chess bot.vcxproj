@@ -140,9 +140,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="better chess bot.cpp" />
+    <ClCompile Include="Board movment.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
+    <ClInclude Include="Board movment.h" />
+    <ClInclude Include="Board structure.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
