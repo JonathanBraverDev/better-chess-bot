@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 #include "Board structure.h"
 #include "Board movment.h"
@@ -133,6 +134,23 @@ void visualize_board(B64 board) {
     std::cout << '\n';
 }
 
+// returns avector of all pices on the board
+std::vector<B64> extract_first_piece(B64 board) {
+
+    B64 piece = 0;
+    unsigned long location;
+
+    std::vector<B64> pieces;
+
+    while (_BitScanForward64(&location, board)) { // using the loop to get the location AND check if the board is empty
+        set_bit(piece, location); // setting the location of the piece on the empty board
+        board ^= piece; // using the piece on the board to flip the bit on the original board
+        pieces.push_back(piece);
+    }
+
+    return pieces;
+}
+
 
 int main()
 {
@@ -159,5 +177,8 @@ int main()
         visualize_board(pawn_moves[i] | pawn_attacks[i]);
     }
     
+    unsigned long bit = 0;
+
     std::cout << (double)microseconds;
+    std::cout << _BitScanForward(&bit, 0ull);
 }

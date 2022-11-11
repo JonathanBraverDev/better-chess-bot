@@ -21,7 +21,7 @@ void check_proposed_slide(B64& proposed, B64& same_color, B64& diff_color, B64& 
 void slide_up(B64& same_color, B64& diff_color, B64& moves, int origin) {
     B64 proposed;
 
-    B64 piece = 0;
+    B64 piece = 0; // the recriation feels pointless, its probably better to send the board
     set_bit(piece, origin);
 
     bool stop = false;

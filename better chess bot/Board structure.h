@@ -47,6 +47,10 @@ const B64 COLUMN_GH = COLUMB_G | COLUMN_H;
 // used for pawn first move/promotion
 const B64 ROW_1 = 0xFF00000000000000ULL;
 const B64 ROW_2 = 0x00FF000000000000ULL;
+//const B64 ROW_3 = 0x0000FF0000000000ULL;
+//const B64 ROW_4 = 0x000000FF00000000ULL;
+//const B64 ROW_5 = 0x00000000FF000000ULL;
+//const B64 ROW_6 = 0x0000000000FF0000ULL;
 const B64 ROW_7 = 0x000000000000FF00ULL;
 const B64 ROW_8 = 0x00000000000000FFULL;
 
@@ -56,15 +60,5 @@ constexpr B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } /
 constexpr bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
 constexpr B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
 
-#define SKIPCOMPILE
-#ifndef SKIPCOMPILE
-// it just refuses to compile, not sure what to do with that, a very useful function
-constexpr int find_first_bit(B64 board) { return __builtin_ctzll(board); } // finds the first active bit
-// not sure if this one is suposed to be a constepr
-constexpr int use_first_bit(B64 board) { // returns the location of the first bit and turns it off
-    int first = find_first_bit(board);
-    board &= board - 1; // get rid of the first bit, shlould be faster than 'clear bit'
-    return first;
-}
-#endif // !SKIPCOMPILE
-#undef SKIPCOMPILE
+// loads index of first bit found to the bit variable
+# define find_first_bit(board, bit) _BitScanForward64(&bit, board) // not sure if ill use this anywhere
