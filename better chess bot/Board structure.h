@@ -59,6 +59,3 @@ const B64 ROW_8 = 0x00000000000000FFULL;
 constexpr B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } // shift 1 to position and set to OR
 constexpr bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
 constexpr B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
-
-// loads index of first bit found to the bit variable
-# define find_first_bit(board, bit) _BitScanForward64(&bit, board) // not sure if ill use this anywhere

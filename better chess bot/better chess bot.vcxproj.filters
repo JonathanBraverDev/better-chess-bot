@@ -21,12 +21,18 @@
     <ClCompile Include="Board movment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Boad operations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Board movment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Board operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
