@@ -89,29 +89,49 @@ void prepare_pawn_moves() {
 B64 generate_bishop_moves(B64& same_color, B64& diff_color, int origin) {
     B64 moves = 0;
 
-    B64 bishop = 0;
-    set_bit(bishop, origin);
-    bool stop = false;
+    B64 bishop = 1ULL << origin;
     slide_up_left(same_color, diff_color, moves, origin);
 
 
-    bishop = 0;
-    set_bit(bishop, origin);
-    stop = false;
+    bishop = 1ULL << origin;
     slide_up_right(same_color, diff_color, moves, origin);
 
 
-    bishop = 0;
-    set_bit(bishop, origin);
-    stop = false;
+    bishop = 1ULL << origin;
     slide_down_left(same_color, diff_color, moves, origin);
 
 
-    bishop = 0;
-    set_bit(bishop, origin);
-    stop = false;
+    bishop = 1ULL << origin;
     slide_down_right(same_color, diff_color, moves, origin);
 
+    return moves;
+}
+
+B64 generate_rook_moves(B64& same_color, B64& diff_color, int origin) {
+    B64 moves = 0;
+
+    B64 rook = 1ULL << origin;
+    slide_up(same_color, diff_color, moves, origin);
+
+
+    rook = 1ULL << origin;
+    slide_down(same_color, diff_color, moves, origin);
+
+
+    rook = 1ULL << origin;
+    slide_left(same_color, diff_color, moves, origin);
+
+
+    rook = 1ULL << origin;
+    slide_right(same_color, diff_color, moves, origin);
+
+    return moves;
+}
+
+B64 generate_queen_moves(B64& same_color, B64& diff_color, int origin) {
+    B64 moves = 0;
+    moves |= generate_bishop_moves(same_color, diff_color, origin);
+    moves |= generate_rook_moves(same_color, diff_color, origin);
     return moves;
 }
 
@@ -167,23 +187,26 @@ int main()
     auto end = std::chrono::high_resolution_clock::now();
     auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-    for (size_t i = 0; i < 64; i++)
-    {
-        visualize_board(king_moves[i]);
-    }
-    std::cout << '\n';
-    for (size_t i = 0; i < 64; i++)
-    {
-        visualize_board(knight_moves[i]);
-    }
-    std::cout << '\n';
-    for (size_t i = 0; i < 64; i++)
-    {
-        visualize_board(pawn_moves[i] | pawn_attacks[i]);
-    }
+    //for (size_t i = 0; i < 64; i++)
+    //{
+    //    visualize_board(king_moves[i]);
+    //}
+    //std::cout << '\n';
+    //for (size_t i = 0; i < 64; i++)
+    //{
+    //    visualize_board(knight_moves[i]);
+    //}
+    //std::cout << '\n';
+    //for (size_t i = 0; i < 64; i++)
+    //{
+    //    visualize_board(pawn_moves[i] | pawn_attacks[i]);
+    //}
     
     unsigned long bit = 0;
 
-    std::cout << (double)microseconds;
-    std::cout << _BitScanForward(&bit, 0ull);
+    
+    B64 blank = 0;
+
+    std::cout << (double)microseconds << std::endl;
+    visualize_board(generate_queen_moves(blank, blank, 5*8+2));
 }
