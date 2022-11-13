@@ -136,7 +136,7 @@ void visualize_board(B64 board) {
 }
 
 // returns avector of all pices on the board
-std::vector<B64> extract_first_piece(B64 board) {
+std::vector<B64> extract_pieces(B64 board) {
 
     B64 piece = 0;
     uint8_t location;
