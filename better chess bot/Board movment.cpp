@@ -18,10 +18,8 @@ void check_proposed_slide(B64& proposed, B64& same_color, B64& diff_color, B64& 
 // there must be a way to write this better, only one thing is changing here
 // suggested macro array
 // in all honesty this is probably the FASTEST way computationally
-void slide_up(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_up(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin; // the recriation feels pointless, its probably better to send the board
 
     bool stop = false;
     do {
@@ -32,10 +30,8 @@ void slide_up(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_down(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_down(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {
@@ -46,10 +42,8 @@ void slide_down(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_left(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_left(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {
@@ -60,10 +54,8 @@ void slide_left(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_right(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_right(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {
@@ -74,10 +66,8 @@ void slide_right(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_up_left(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_up_left(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {
@@ -88,10 +78,8 @@ void slide_up_left(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_up_right(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_up_right(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {
@@ -104,10 +92,8 @@ void slide_up_right(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_down_left(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_down_left(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {
@@ -118,10 +104,8 @@ void slide_down_left(B64& same_color, B64& diff_color, B64& moves, int origin) {
 }
 
 
-void slide_down_right(B64& same_color, B64& diff_color, B64& moves, int origin) {
+void slide_down_right(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
     B64 proposed;
-
-    B64 piece = 1ULL << origin;
 
     bool stop = false;
     do {

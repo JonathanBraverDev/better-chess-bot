@@ -13,11 +13,11 @@ constexpr B64 down_left(B64 board) { return (board & ~COLUMN_A) >> 7; }
 constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
 
 // more complex sliding movemnt, each of these returns a board with all possible destinations
-void slide_up(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_down(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_left(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_right(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_up_left(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_up_right(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_down_left(B64& same_color, B64& diff_color, B64& moves, int origin);
-void slide_down_right(B64& same_color, B64& diff_color, B64& moves, int origin);
+void slide_up(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_down(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_left(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_right(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_up_left(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_up_right(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_down_left(B64& same_color, B64& diff_color, B64& moves, B64 piece);
+void slide_down_right(B64& same_color, B64& diff_color, B64& moves, B64 piece);

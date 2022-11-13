@@ -86,53 +86,26 @@ void prepare_pawn_moves() {
     prepare_black_pawn_moves();
 }
 
-B64 generate_bishop_moves(B64& same_color, B64& diff_color, int origin) {
-    B64 moves = 0;
+void generate_bishop_moves(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
 
-    B64 bishop = 1ULL << origin;
-    slide_up_left(same_color, diff_color, moves, origin);
-
-
-    bishop = 1ULL << origin;
-    slide_up_right(same_color, diff_color, moves, origin);
-
-
-    bishop = 1ULL << origin;
-    slide_down_left(same_color, diff_color, moves, origin);
-
-
-    bishop = 1ULL << origin;
-    slide_down_right(same_color, diff_color, moves, origin);
-
-    return moves;
+    slide_up_left(same_color, diff_color, moves, piece);
+    slide_up_right(same_color, diff_color, moves, piece);
+    slide_down_left(same_color, diff_color, moves, piece);
+    slide_down_right(same_color, diff_color, moves, piece);
 }
 
-B64 generate_rook_moves(B64& same_color, B64& diff_color, int origin) {
-    B64 moves = 0;
+void generate_rook_moves(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
 
-    B64 rook = 1ULL << origin;
-    slide_up(same_color, diff_color, moves, origin);
-
-
-    rook = 1ULL << origin;
-    slide_down(same_color, diff_color, moves, origin);
-
-
-    rook = 1ULL << origin;
-    slide_left(same_color, diff_color, moves, origin);
-
-
-    rook = 1ULL << origin;
-    slide_right(same_color, diff_color, moves, origin);
-
-    return moves;
+    slide_up(same_color, diff_color, moves, piece);
+    slide_down(same_color, diff_color, moves, piece);
+    slide_left(same_color, diff_color, moves, piece);
+    slide_right(same_color, diff_color, moves, piece);
 }
 
-B64 generate_queen_moves(B64& same_color, B64& diff_color, int origin) {
-    B64 moves = 0;
-    moves |= generate_bishop_moves(same_color, diff_color, origin);
-    moves |= generate_rook_moves(same_color, diff_color, origin);
-    return moves;
+void generate_queen_moves(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
+
+    generate_bishop_moves(same_color, diff_color, moves, piece);
+    generate_rook_moves(same_color, diff_color, moves, piece);
 }
 
 void visualize_board(B64 board) {
@@ -204,9 +177,17 @@ int main()
     
     unsigned long bit = 0;
 
-    
     B64 blank = 0;
+    B64 piece = 1ULL << 5*8+2;
+    B64 moves = 0;
 
     std::cout << (double)microseconds << std::endl;
-    visualize_board(generate_queen_moves(blank, blank, 5*8+2));
+    generate_bishop_moves(blank, blank, moves, piece);
+    visualize_board(moves);
+    moves = 0;
+    generate_rook_moves(blank, blank, moves, piece);
+    visualize_board(moves);
+    moves = 0;
+    generate_queen_moves(blank, blank, moves, piece);
+    visualize_board(moves);
 }
