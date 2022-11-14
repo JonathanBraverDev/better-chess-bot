@@ -84,6 +84,20 @@ void prepare_pawn_moves() {
     prepare_black_pawn_moves();
 }
 
+void generate_white_pawn_jump(B64& all_pieces, B64& moves, B64 piece) {
+    if (!((up(piece) & all_pieces) |
+        ((up(up(piece)) & all_pieces)))) {
+        moves |= up(up(piece));
+    }
+}
+
+void generate_black_pawn_jump(B64& all_pieces, B64& moves, B64 piece) {
+    if (!((down(piece) & all_pieces) |
+        ((down(down(piece)) & all_pieces)))) {
+        moves |= down(down(piece));
+    }
+}
+
 void generate_bishop_moves(B64& all_pieces, B64& moves, B64 piece) {
 
     slide_up_left(all_pieces, moves, piece);
@@ -104,13 +118,6 @@ void generate_queen_moves(B64& all_pieces, B64& moves, B64 piece) {
 
     generate_bishop_moves(all_pieces, moves, piece);
     generate_rook_moves(all_pieces, moves, piece);
-}
-
-void generate_white_pawn_jump(B64& all_pieces, B64& moves, B64 piece) {
-    if ((up(piece) & all_pieces) |
-        ((up(up(piece)) & all_pieces))) {
-        moves |= up(up(piece));
-    }
 }
 
 void visualize_board(B64 board) {
@@ -143,21 +150,6 @@ int main()
 
     auto end = std::chrono::high_resolution_clock::now();
     auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-
-    //for (size_t i = 0; i < 64; i++)
-    //{
-    //    visualize_board(king_moves[i]);
-    //}
-    //std::cout << '\n';
-    //for (size_t i = 0; i < 64; i++)
-    //{
-    //    visualize_board(knight_moves[i]);
-    //}
-    //std::cout << '\n';
-    //for (size_t i = 0; i < 64; i++)
-    //{
-    //    visualize_board(pawn_moves[i] | pawn_attacks[i]);
-    //}
     
     unsigned long bit = 0;
 
@@ -174,4 +166,21 @@ int main()
     moves = 0;
     generate_queen_moves(blank, moves, piece);
     visualize_board(moves);
+    moves = 0;
+    generate_white_pawn_jump(blank, moves, piece);
+    generate_black_pawn_jump(blank, moves, piece);
+    visualize_board(moves);
+
+    piece = 1;
+    for (size_t i = 0; i < 64 * 2; i++) {
+        moves = pawn_moves[i] | pawn_attacks[i];
+        if (i % 2 == 0) {
+            generate_white_pawn_jump(blank, moves, piece);
+        } else {
+            generate_black_pawn_jump(blank, moves, piece);
+            piece = piece << 1;
+        }
+
+        visualize_board(moves);
+    }
 }
