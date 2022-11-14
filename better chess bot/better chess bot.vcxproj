@@ -141,10 +141,8 @@
   <ItemGroup>
     <ClCompile Include="better chess bot.cpp" />
     <ClCompile Include="Boad operations.cpp" />
-    <ClCompile Include="Board movment.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Board movment.h" />
     <ClInclude Include="Board operation.h" />
     <ClInclude Include="Board structure.h" />
   </ItemGroup>

@@ -3,10 +3,8 @@
 
 #include <iostream>
 #include <chrono>
-#include <vector>
 
 #include "Board structure.h"
-#include "Board movment.h"
 #include "Board operation.h"
 
 B64 king_moves[64];
@@ -133,19 +131,6 @@ void visualize_board(B64 board) {
     }
 
     std::cout << '\n';
-}
-
-// returns avector of all pices on the board
-void extract_pieces(B64 board, std::vector<B64>& pieces) {
-
-    B64 piece = 0;
-
-    while (board != 0) { // check that there are pieces left to exstract
-
-        piece = lowestBitBoard(board);
-        board ^= piece; // using the piece on to flip the bit on the original board
-        pieces.push_back(piece);
-    }
 }
 
 

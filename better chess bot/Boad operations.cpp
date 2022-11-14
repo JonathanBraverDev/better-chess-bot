@@ -1,5 +1,6 @@
 
 #include <cassert>
+#include <vector>
 
 #include "Board operation.h"
 
@@ -47,4 +48,79 @@ uint8_t lowestBitIndex64(uint64_t v) {
     // assert(v != 0); // the next operation expects a nonzero board BUT ill handle it in the caller
     // using the De Bruijn Sequence and lookink at the last 6 bits
     return BitPositionLookup[((uint64_t)((v & -v) * 0x022fdd63cc95386dU)) >> 58];
+}
+
+// returns a vector of all pieces on the given board
+void extract_pieces(B64 board, std::vector<B64>& pieces) {
+
+    B64 piece = 0;
+
+    while (board != 0) { // check that there are pieces left to exstract
+
+        piece = lowestBitBoard(board);
+        board ^= piece; // using the piece on to flip the bit on the original board
+        pieces.push_back(piece);
+    }
+}
+
+// the true heavylifter, all collision checks happen here
+void check_proposed_slide(B64& proposed, B64& all_pieces, B64& moves, bool& stop) {
+    if (proposed & all_pieces) {
+        moves |= proposed;
+        stop = true;
+    } else {
+        moves |= proposed;
+    }
+}
+
+void slide(B64(*direction)(B64), B64& all_pieces, B64& moves, B64 piece) {
+    B64 proposed;
+    bool stop = false;
+
+    do {
+        proposed = direction(piece); // running the passed function
+        check_proposed_slide(proposed, all_pieces, moves, stop);
+        piece = proposed;
+    } while (!stop && piece);
+}
+
+// functions below are just for ease of use
+
+void slide_up(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&up, all_pieces, moves, piece);
+}
+
+
+void slide_down(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&down, all_pieces, moves, piece);
+}
+
+
+void slide_left(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&left, all_pieces, moves, piece);
+}
+
+
+void slide_right(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&right, all_pieces, moves, piece);
+}
+
+
+void slide_up_left(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&up_left, all_pieces, moves, piece);
+}
+
+
+void slide_up_right(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&up_right, all_pieces, moves, piece);
+}
+
+
+void slide_down_left(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&down_left, all_pieces, moves, piece);
+}
+
+
+void slide_down_right(B64& all_pieces, B64& moves, B64 piece) {
+    slide(&down_right, all_pieces, moves, piece);
 }
