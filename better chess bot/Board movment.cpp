@@ -15,102 +15,54 @@ void check_proposed_slide(B64& proposed, B64& same_color, B64& diff_color, B64& 
     }
 }
 
-// there must be a way to write this better, only one thing is changing here
-// suggested macro array
-// in all honesty this is probably the FASTEST way computationally
-void slide_up(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
+void slide(B64 (*direction)(B64), B64& same_color, B64& diff_color, B64& moves, B64 piece) {
+    B64 proposed; 
+    bool stop = false; 
 
-    bool stop = false;
     do {
-        proposed = up(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
+        proposed = direction(piece);
+        check_proposed_slide(proposed, same_color, diff_color, moves, stop); 
+        piece = proposed; 
     } while (!stop && piece);
+}
+
+// functions below are just for ease of use
+
+void slide_up(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
+    slide(&up, same_color, diff_color, moves, piece);
 }
 
 
 void slide_down(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = down(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+    slide(&down, same_color, diff_color, moves, piece);
 }
 
 
 void slide_left(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = left(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+    slide(&left, same_color, diff_color, moves, piece);
 }
 
 
 void slide_right(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = right(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+    slide(&right, same_color, diff_color, moves, piece);
 }
 
 
 void slide_up_left(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = up_left(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+    slide(&up_left, same_color, diff_color, moves, piece);
 }
 
 
 void slide_up_right(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = up_right(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
-
-    
+    slide(&up_right, same_color, diff_color, moves, piece);
 }
 
 
 void slide_down_left(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = down_left(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+    slide(&down_left, same_color, diff_color, moves, piece);
 }
 
 
 void slide_down_right(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
-    B64 proposed;
-
-    bool stop = false;
-    do {
-        proposed = down_right(piece);
-        check_proposed_slide(proposed, same_color, diff_color, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+    slide(&down_right, same_color, diff_color, moves, piece);
 }

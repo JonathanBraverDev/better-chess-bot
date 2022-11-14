@@ -132,7 +132,6 @@ void visualize_board(B64 board) {
 void extract_pieces(B64 board, std::vector<B64>& pieces) {
 
     B64 piece = 0;
-    uint8_t location;
 
     while (board != 0) { // check that there are pieces left to exstract
 
@@ -171,7 +170,7 @@ int main()
     unsigned long bit = 0;
 
     B64 blank = 0;
-    B64 piece = 1ULL << 5*8+2;
+    B64 piece = 1ULL << (5*8+2);
     B64 moves = 0;
 
     std::cout << (double)microseconds << std::endl;
