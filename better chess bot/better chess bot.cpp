@@ -21,13 +21,13 @@ void prepare_king_moves() {
     for (size_t i = 0; i < 64; i++)
     {
         king_moves[i] = up(current_board) |
-            down(current_board) |
-            left(current_board) |
-            right(current_board) |
-            up_left(current_board) |
-            up_right(current_board) |
-            down_left(current_board) |
-            down_right(current_board);
+                        down(current_board) |
+                        left(current_board) |
+                        right(current_board) |
+                        up_left(current_board) |
+                        up_right(current_board) |
+                        down_left(current_board) |
+                        down_right(current_board);
 
         current_board = current_board << 1;
     }
@@ -86,26 +86,33 @@ void prepare_pawn_moves() {
     prepare_black_pawn_moves();
 }
 
-void generate_bishop_moves(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
+void generate_bishop_moves(B64& all_pieces, B64& moves, B64 piece) {
 
-    slide_up_left(same_color, diff_color, moves, piece);
-    slide_up_right(same_color, diff_color, moves, piece);
-    slide_down_left(same_color, diff_color, moves, piece);
-    slide_down_right(same_color, diff_color, moves, piece);
+    slide_up_left(all_pieces, moves, piece);
+    slide_up_right(all_pieces, moves, piece);
+    slide_down_left(all_pieces, moves, piece);
+    slide_down_right(all_pieces, moves, piece);
 }
 
-void generate_rook_moves(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
+void generate_rook_moves(B64& all_pieces, B64& moves, B64 piece) {
 
-    slide_up(same_color, diff_color, moves, piece);
-    slide_down(same_color, diff_color, moves, piece);
-    slide_left(same_color, diff_color, moves, piece);
-    slide_right(same_color, diff_color, moves, piece);
+    slide_up(all_pieces, moves, piece);
+    slide_down(all_pieces, moves, piece);
+    slide_left(all_pieces, moves, piece);
+    slide_right(all_pieces, moves, piece);
 }
 
-void generate_queen_moves(B64& same_color, B64& diff_color, B64& moves, B64 piece) {
+void generate_queen_moves(B64& all_pieces, B64& moves, B64 piece) {
 
-    generate_bishop_moves(same_color, diff_color, moves, piece);
-    generate_rook_moves(same_color, diff_color, moves, piece);
+    generate_bishop_moves(all_pieces, moves, piece);
+    generate_rook_moves(all_pieces, moves, piece);
+}
+
+void generate_white_pawn_jump(B64& all_pieces, B64& moves, B64 piece) {
+    if ((up(piece) & all_pieces) |
+        ((up(up(piece)) & all_pieces))) {
+        moves |= up(up(piece));
+    }
 }
 
 void visualize_board(B64 board) {
