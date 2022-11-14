@@ -129,24 +129,17 @@ void visualize_board(B64 board) {
 }
 
 // returns avector of all pices on the board
-std::vector<B64> extract_pieces(B64 board) {
+void extract_pieces(B64 board, std::vector<B64>& pieces) {
 
     B64 piece = 0;
     uint8_t location;
 
-    std::vector<B64> pieces;
+    while (board != 0) { // check that there are pieces left to exstract
 
-    location = lowestBitIndex64(board);
-
-    while (location) { // will be 0 is no bits are set
-        set_bit(piece, location); // setting the location of the piece on the empty board
-        board ^= piece; // using the piece on the board to flip the bit on the original board
+        piece = lowestBitBoard(board);
+        board ^= piece; // using the piece on to flip the bit on the original board
         pieces.push_back(piece);
-
-        location = lowestBitIndex64(board); // find the next active bit
     }
-
-    return pieces;
 }
 
 

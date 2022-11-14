@@ -1,4 +1,6 @@
 
+#include <cassert>
+
 #include "Board operation.h"
 
 // finding the index of the least significant set bit in a 32 bit word
@@ -9,6 +11,7 @@ uint8_t lowestBitIndex(uint32_t v) {
       0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
       31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
     };
+    assert(v != 0); // the next operation expects a nonzero board
     // using the De Bruijn Sequence and lookink at the last 5 bits
     return BitPositionLookup[((uint32_t)((v & -v) * 0x077CB531U)) >> 27];
 }
@@ -16,6 +19,8 @@ uint8_t lowestBitIndex(uint32_t v) {
 // finding the index of the least significant set bit in a 64 bit number
 uint8_t lowestBitIndex32_2(uint64_t v) {
     // splitting the number into 2 words to use the De Bruijn Sequence on both halfs
+
+    assert(v != 0); // the checks reqire a nonzero board
 
     uint8_t ans = lowestBitIndex(v); // cast down to 32 first bits
 
@@ -39,6 +44,7 @@ uint8_t lowestBitIndex64(uint64_t v) {
       51, 38, 12, 25, 50, 36, 9, 18, 37, 10, 21, 42, 20, 41, 19, 39,
       14, 28, 56, 48, 33, 3, 6, 13, 27, 54, 45, 26, 52, 40, 16, 32
     };
+    // assert(v != 0); // the next operation expects a nonzero board BUT ill handle it in the caller
     // using the De Bruijn Sequence and lookink at the last 6 bits
     return BitPositionLookup[((uint64_t)((v & -v) * 0x022fdd63cc95386dU)) >> 58];
 }
