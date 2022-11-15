@@ -65,7 +65,7 @@ void extract_pieces(B64 board, std::vector<B64>& pieces) {
 
 // the true heavylifter, all collision checks happen here
 
-B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece) {
+B64 slide(const B64(*direction)(B64), const B64 all_pieces, B64 piece) {
     B64 moves = 0;
     bool stop = false;
 
