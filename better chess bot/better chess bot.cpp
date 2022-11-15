@@ -136,9 +136,9 @@ B64 generate_queen_moves(const B64 all_pieces, B64 piece) {
 }
 
 void visualize_board(B64 board) {
-    for (int i = 0; i < 8; i++)
+    for (int i = 7; i >= 0; i--)
     {
-        for (int j = 0; j < 8; j++)
+        for (int j = 7; j >= 0; j--)
         {
             if (get_bit(board, i*8+j))
             {
@@ -177,23 +177,12 @@ int main()
     visualize_board(generate_bishop_moves(empty_board, piece));
     visualize_board(generate_rook_moves(empty_board, piece));
     visualize_board(generate_queen_moves(empty_board, piece));
-    
-    B64 pawn_jumps = 0;
-    pawn_jumps |= generate_white_pawn_jump(empty_board, piece);
-    pawn_jumps |= generate_black_pawn_jump(empty_board, piece);
-    visualize_board(pawn_jumps);
 
-    B64 moves = 0;
     piece = 1;
-    for (size_t i = 0; i < 64 * 2; i++) {
-        moves = pawn_moves[i] | pawn_attacks[i];
-        if (i % 2 == 0) {
-            moves |= generate_white_pawn_jump(empty_board, piece);
-        } else {
-            moves |= generate_black_pawn_jump(empty_board, piece);
-            piece = piece << 1;
-        }
+    for (size_t i = 0; i < 8; i++) {
 
-        visualize_board(moves);
+
+        visualize_board(piece);
+        piece = up(piece);
     }
 }
