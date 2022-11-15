@@ -64,63 +64,57 @@ void extract_pieces(B64 board, std::vector<B64>& pieces) {
 }
 
 // the true heavylifter, all collision checks happen here
-void check_proposed_slide(B64& proposed, B64& all_pieces, B64& moves, bool& stop) {
-    if (proposed & all_pieces) {
-        moves |= proposed;
-        stop = true;
-    } else {
-        moves |= proposed;
-    }
-}
 
-void slide(B64(*direction)(B64), B64& all_pieces, B64& moves, B64 piece) {
-    B64 proposed;
+B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece) {
+    B64 moves = 0;
     bool stop = false;
 
     do {
-        proposed = direction(piece); // running the passed function
-        check_proposed_slide(proposed, all_pieces, moves, stop);
-        piece = proposed;
-    } while (!stop && piece);
+        piece = direction(piece); // running the passed function and moving the piece
+        moves |= piece; // adding the move to the move board
+    } while (piece && !(piece & all_pieces)); // stop if piece is 0 (shifted out) or a collision occured on the last move
+    // colisions are added to be figured out by the color making the move, this calculation needs to be fast
+
+    return moves;
 }
 
 // functions below are just for ease of use
 
-void slide_up(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&up, all_pieces, moves, piece);
+B64 slide_up(const B64 all_pieces, B64 piece) {
+    return slide(&up, all_pieces, piece);
 }
 
 
-void slide_down(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&down, all_pieces, moves, piece);
+B64 slide_down(const B64 all_pieces, B64 piece) {
+    return slide(&down, all_pieces, piece);
 }
 
 
-void slide_left(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&left, all_pieces, moves, piece);
+B64 slide_left(const B64 all_pieces, B64 piece) {
+    return slide(&left, all_pieces, piece);
 }
 
 
-void slide_right(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&right, all_pieces, moves, piece);
+B64 slide_right(const B64 all_pieces, B64 piece) {
+    return slide(&right, all_pieces, piece);
 }
 
 
-void slide_up_left(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&up_left, all_pieces, moves, piece);
+B64 slide_up_left(const B64 all_pieces, B64 piece) {
+    return slide(&up_left, all_pieces, piece);
 }
 
 
-void slide_up_right(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&up_right, all_pieces, moves, piece);
+B64 slide_up_right(const B64 all_pieces, B64 piece) {
+    return slide(&up_right, all_pieces, piece);
 }
 
 
-void slide_down_left(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&down_left, all_pieces, moves, piece);
+B64 slide_down_left(const B64 all_pieces, B64 piece) {
+    return slide(&down_left, all_pieces, piece);
 }
 
 
-void slide_down_right(B64& all_pieces, B64& moves, B64 piece) {
-    slide(&down_right, all_pieces, moves, piece);
+B64 slide_down_right(const B64 all_pieces, B64 piece) {
+    return slide(&down_right, all_pieces, piece);
 }

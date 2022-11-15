@@ -84,40 +84,55 @@ void prepare_pawn_moves() {
     prepare_black_pawn_moves();
 }
 
-void generate_white_pawn_jump(B64& all_pieces, B64& moves, B64 piece) {
+B64 generate_white_pawn_jump(const B64 all_pieces, B64 piece) {
+    B64 moves = 0;
     if (!((up(piece) & all_pieces) |
         ((up(up(piece)) & all_pieces)))) {
         moves |= up(up(piece));
     }
+
+    return moves;
 }
 
-void generate_black_pawn_jump(B64& all_pieces, B64& moves, B64 piece) {
+B64 generate_black_pawn_jump(const B64 all_pieces, B64 piece) {
+    B64 moves = 0;
     if (!((down(piece) & all_pieces) |
         ((down(down(piece)) & all_pieces)))) {
         moves |= down(down(piece));
     }
+
+    return moves;
 }
 
-void generate_bishop_moves(B64& all_pieces, B64& moves, B64 piece) {
+B64 generate_bishop_moves(const B64 all_pieces, B64 piece) {
+    B64 moves = 0;
 
-    slide_up_left(all_pieces, moves, piece);
-    slide_up_right(all_pieces, moves, piece);
-    slide_down_left(all_pieces, moves, piece);
-    slide_down_right(all_pieces, moves, piece);
+    moves |= slide_up_left(all_pieces, piece);
+    moves |= slide_up_right(all_pieces, piece);
+    moves |= slide_down_left(all_pieces, piece);
+    moves |= slide_down_right(all_pieces, piece);
+
+    return moves;
 }
 
-void generate_rook_moves(B64& all_pieces, B64& moves, B64 piece) {
+B64 generate_rook_moves(const B64 all_pieces, B64 piece) {
+    B64 moves = 0;
 
-    slide_up(all_pieces, moves, piece);
-    slide_down(all_pieces, moves, piece);
-    slide_left(all_pieces, moves, piece);
-    slide_right(all_pieces, moves, piece);
+    moves |= slide_up(all_pieces, piece);
+    moves |= slide_down(all_pieces, piece);
+    moves |= slide_left(all_pieces, piece);
+    moves |= slide_right(all_pieces, piece);
+
+    return moves;
 }
 
-void generate_queen_moves(B64& all_pieces, B64& moves, B64 piece) {
+B64 generate_queen_moves(const B64 all_pieces, B64 piece) {
+    B64 moves = 0;
 
-    generate_bishop_moves(all_pieces, moves, piece);
-    generate_rook_moves(all_pieces, moves, piece);
+    moves |= generate_bishop_moves(all_pieces, piece);
+    moves |= generate_rook_moves(all_pieces, piece);
+
+    return moves;
 }
 
 void visualize_board(B64 board) {
@@ -153,31 +168,29 @@ int main()
     
     unsigned long bit = 0;
 
-    B64 blank = 0;
+    B64 empty_board = 0;
     B64 piece = 1ULL << (5*8+2);
-    B64 moves = 0;
+    
 
     std::cout << (double)microseconds << std::endl;
-    generate_bishop_moves(blank, moves, piece);
-    visualize_board(moves);
-    moves = 0;
-    generate_rook_moves(blank, moves, piece);
-    visualize_board(moves);
-    moves = 0;
-    generate_queen_moves(blank, moves, piece);
-    visualize_board(moves);
-    moves = 0;
-    generate_white_pawn_jump(blank, moves, piece);
-    generate_black_pawn_jump(blank, moves, piece);
-    visualize_board(moves);
+    
+    visualize_board(generate_bishop_moves(empty_board, piece));
+    visualize_board(generate_rook_moves(empty_board, piece));
+    visualize_board(generate_queen_moves(empty_board, piece));
+    
+    B64 pawn_jumps = 0;
+    pawn_jumps |= generate_white_pawn_jump(empty_board, piece);
+    pawn_jumps |= generate_black_pawn_jump(empty_board, piece);
+    visualize_board(pawn_jumps);
 
+    B64 moves = 0;
     piece = 1;
     for (size_t i = 0; i < 64 * 2; i++) {
         moves = pawn_moves[i] | pawn_attacks[i];
         if (i % 2 == 0) {
-            generate_white_pawn_jump(blank, moves, piece);
+            moves |= generate_white_pawn_jump(empty_board, piece);
         } else {
-            generate_black_pawn_jump(blank, moves, piece);
+            moves |= generate_black_pawn_jump(empty_board, piece);
             piece = piece << 1;
         }
 
