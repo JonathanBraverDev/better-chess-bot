@@ -5,8 +5,6 @@
 #include "Board structure.h"
 
 // big finders
-uint8_t lowestBitIndex(uint32_t v);
-uint8_t lowestBitIndex32_2(uint64_t v);
 uint8_t lowestBitIndex64(uint64_t v);
 inline B64 lowestBitBoard(B64 board) { return (board & -board); }
 
@@ -23,11 +21,11 @@ constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
 // more complex sliding movemnt, each of these returns a board with all possible destinations
 B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece);
 // aliases for the slide function
-B64 slide_up(const B64 all_pieces, B64 piece);
-B64 slide_down(const B64 all_pieces, B64 piece);
-B64 slide_left(const B64 all_pieces, B64 piece);
-B64 slide_right(const B64 all_pieces, B64 piece);
-B64 slide_up_left(const B64 all_pieces, B64 piece);
-B64 slide_up_right(const B64 all_pieces, B64 piece);
-B64 slide_down_left(const B64 all_pieces, B64 piece);
-B64 slide_down_right(const B64 all_pieces, B64 piece);
+inline B64 slide_up(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_down(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_left(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_right(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_up_left(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_up_right(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_down_left(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
+inline B64 slide_down_right(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
