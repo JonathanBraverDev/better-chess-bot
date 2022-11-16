@@ -16,8 +16,7 @@ B64 pawn_attacks[64 * 2]; // further conditional split
 
 void prepare_king_moves() {
     B64 current_board = 1ULL;
-    for (size_t i = 0; i < 64; i++)
-    {
+    for (size_t i = 0; i < 64; i++) {
         king_moves[i] = up(current_board) |
                         down(current_board) |
                         left(current_board) |
@@ -33,12 +32,11 @@ void prepare_king_moves() {
 
 void prepare_knight_moves() {
     B64 current_board = 1ULL;
-    for (size_t i = 0; i < 64; i++)
-    {
+    for (size_t i = 0; i < 64; i++) {
         knight_moves[i] = (((current_board >> 6) | (current_board << 10)) & ~COLUMN_GH) | // when looping around the board on the other side
-            (((current_board >> 10) | (current_board << 6)) & ~COLUMN_AB) |
-            (((current_board >> 15) | (current_board << 17)) & ~COLUMN_H) |
-            (((current_board >> 17) | (current_board << 15)) & ~COLUMN_A);
+                          (((current_board >> 10) | (current_board << 6)) & ~COLUMN_AB) |
+                          (((current_board >> 15) | (current_board << 17)) & ~COLUMN_H) |
+                          (((current_board >> 17) | (current_board << 15)) & ~COLUMN_A);
 
         current_board = current_board << 1;
     }
@@ -46,8 +44,7 @@ void prepare_knight_moves() {
 
 void prepare_white_pawn_moves() {
     B64 current_board = 1ULL;
-    for (size_t i = 0; i < 64 * 2; i += 2)
-    {
+    for (size_t i = 0; i < 64 * 2; i += 2) {
         // missing promotion logic
         pawn_moves[i] = up(current_board);
         // pawn jumps require sliding piece logic wihtout final capture
@@ -62,8 +59,7 @@ void prepare_white_pawn_moves() {
 
 void prepare_black_pawn_moves() {
     B64 current_board = 1ULL;
-    for (size_t i = 1; i < 64 * 2; i += 2)
-    {
+    for (size_t i = 1; i < 64 * 2; i += 2) {
         // missing promotion logic
         pawn_moves[i] = down(current_board);
         // pawn jumps require sliding piece logic wihtout final capture
@@ -78,7 +74,7 @@ void prepare_black_pawn_moves() {
 }
 
 void prepare_pawn_moves() {
-    // promotions and en passant will probably be handled by the actual more proccesing, not in generation
+    // promotions and en passant will probably be handled by the actual move proccesing, not in generation
     // if a pawn has no POTENTIAL moves, he promoted
     prepare_white_pawn_moves();
     prepare_black_pawn_moves();
@@ -135,16 +131,36 @@ B64 generate_queen_moves(const B64 all_pieces, B64 piece) {
     return moves;
 }
 
-void visualize_board(B64 board) {
-    for (int i = 7; i >= 0; i--)
-    {
-        for (int j = 7; j >= 0; j--)
-        {
-            if (get_bit(board, i*8+j))
-            {
-                std::cout << "X ";
+bool check_draw(GameState& current_state) {
+    GameState& original_state = current_state;
+    bool is_draw = false;
+    int repetion_count = 0;
+
+    // this whole thing feels somewhat combersome
+    if (current_state.draw_timer == DRAW_MOVES) {
+        is_draw = true;
+
+    } else {
+        while (current_state.previous_state != nullptr && !is_draw) {
+
+            current_state = *current_state.previous_state;
+
+            if (original_state.position == current_state.position) {
+                repetion_count++; // yes this can be compressed to one line
+                is_draw = (repetion_count == DRAW_REPETITIONS);
             }
-            else {
+        }
+    }
+
+    return is_draw;
+}
+
+void visualize_board(B64 board) {
+    for (int i = 7; i >= 0; i--) {
+        for (int j = 7; j >= 0; j--) {
+            if (get_bit(board, i * BOARD_SIDE + j)) {
+                std::cout << "X ";
+            } else {
                 std::cout << "_ ";
             }
         }
@@ -169,11 +185,11 @@ int main()
     unsigned long bit = 0;
 
     B64 empty_board = 0;
-    B64 piece = 1ULL << (5*8+2);
+    B64 piece = 1ULL << (5*BOARD_SIDE+2);
     
 
     std::cout << (double)microseconds << std::endl;
-    
+   
     visualize_board(generate_bishop_moves(empty_board, piece));
     visualize_board(generate_rook_moves(empty_board, piece));
     visualize_board(generate_queen_moves(empty_board, piece));

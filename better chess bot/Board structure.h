@@ -14,7 +14,7 @@ struct BoardPosition {
     B64 white_knights;
     B64 white_rooks;
     B64 white_queens;
-    B64 white_king; // no s this time, budget cuts
+    B64 white_king; // no 's' this time, budget cuts
     B64 black;
     B64 black_pawns;
     B64 black_bishops;
@@ -22,7 +22,7 @@ struct BoardPosition {
     B64 black_rooks;
     B64 black_queens;
     B64 black_king;
-    B64 special_move_rigths; // en passant AND caslte right bot both sides, data cant overlap anyway
+    B64 special_move_rigths; // en passant AND castle right bot both sides, data cant overlap anyway
 };
 
 // info on gamestate
@@ -36,6 +36,10 @@ struct GameState { // split off from positiopn to allow memcmp (both the timer a
 inline bool operator==(const BoardPosition& lhs, const BoardPosition& rhs) {
     return memcmp(&lhs, &rhs, sizeof(BoardPosition));
 }
+
+const int BOARD_SIDE = 8;
+const int DRAW_MOVES = 50;
+const int DRAW_REPETITIONS = 3;
 
 // useful for out of bounds detection
 const B64 COLUMN_A = 0x8080808080808080ULL;
@@ -53,9 +57,3 @@ const B64 ROW_2 = 0x00FF000000000000ULL;
 //const B64 ROW_6 = 0x0000000000FF0000ULL;
 const B64 ROW_7 = 0x000000000000FF00ULL;
 const B64 ROW_8 = 0x00000000000000FFULL;
-
-// constexpr save the function call so they're faster than regular function
-// general bit manipulation
-constexpr B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } // shift 1 to position and set to OR
-constexpr bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
-constexpr B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
