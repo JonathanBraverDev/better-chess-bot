@@ -1,8 +1,15 @@
 
-#include <cassert>
 #include <vector>
 
 #include "Board operation.h"
+
+// counts the active bits in a given board
+int count_bits64(B64 board) {
+    int count;
+    for (count = 0; board; count++) // runs untill board is zeroed out, counting up
+        board = removeLowestBit(board); // removes one bit per iteration
+    return count;
+}
 
 // De Bruijn Sequence
 const uint64_t lookUpMultiplier = 0x022fdd63cc95386dU;
@@ -20,7 +27,7 @@ const uint8_t BitPositionLookup[64] = // hash table
 // De Bruijn Sequence
 uint8_t lowestBitIndex64(B64 board) {
     // using the De Bruijn Sequence and checking the lookup table with the last 6 bits
-    return BitPositionLookup[((uint64_t)((board & -board) * lookUpMultiplier)) >> 58];
+    return BitPositionLookup[((uint64_t)(lowestBitBoard(board) * lookUpMultiplier)) >> 58];
 }
 
 // short version of the original, assumes input is ONLY ONE active bit and skips the board inversion
