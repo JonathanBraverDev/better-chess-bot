@@ -18,10 +18,10 @@
     <ClCompile Include="better chess bot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Board movment.cpp">
+    <ClCompile Include="Boad operations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Boad operations.cpp">
+    <ClCompile Include="Evaluation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,10 +29,10 @@
     <ClInclude Include="Board structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Board movment.h">
+    <ClInclude Include="Board operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Board operation.h">
+    <ClInclude Include="Evaluation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

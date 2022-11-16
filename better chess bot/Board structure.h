@@ -38,8 +38,6 @@ inline bool operator==(const BoardPosition& lhs, const BoardPosition& rhs) {
 }
 
 const int BOARD_SIDE = 8;
-const int DRAW_MOVES = 50;
-const int DRAW_REPETITIONS = 3;
 
 // useful for out of bounds detection
 const B64 COLUMN_A = 0x8080808080808080ULL;
