@@ -5,18 +5,19 @@
 #include "Board structure.h"
 
 // big finders
-uint8_t lowestBitIndex64(uint64_t v);
+uint8_t lowestBitIndex64(B64 board);
+uint8_t lowestBitIndex64_s(B64 board);
 inline B64 lowestBitBoard(B64 board) { return (board & -board); }
 
 // piece movment assists, with bound protections
-constexpr B64 up(B64 board) { return board << 8; } // shifts out of the board would just be 0 anyway
-constexpr B64 down(B64 board) { return board >> 8; }
-constexpr B64 left(B64 board) { return (board & ~COLUMN_A) << 1; }
-constexpr B64 right(B64 board) { return (board & ~COLUMN_H) >> 1; }
-constexpr B64 up_left(B64 board) { return (board & ~COLUMN_A) << 9; }
-constexpr B64 up_right(B64 board) { return (board & ~COLUMN_H) << 7; }
-constexpr B64 down_left(B64 board) { return (board & ~COLUMN_A) >> 7; }
-constexpr B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
+inline B64 up(B64 board) { return board << 8; } // shifts out of the board would just be 0 anyway
+inline B64 down(B64 board) { return board >> 8; }
+inline B64 left(B64 board) { return (board & ~COLUMN_A) << 1; }
+inline B64 right(B64 board) { return (board & ~COLUMN_H) >> 1; }
+inline B64 up_left(B64 board) { return (board & ~COLUMN_A) << 9; }
+inline B64 up_right(B64 board) { return (board & ~COLUMN_H) << 7; }
+inline B64 down_left(B64 board) { return (board & ~COLUMN_A) >> 7; }
+inline B64 down_right(B64 board) { return (board & ~COLUMN_H) >> 9; }
 
 // more complex sliding movemnt, each of these returns a board with all possible destinations
 B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece);

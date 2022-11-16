@@ -4,19 +4,28 @@
 
 #include "Board operation.h"
 
+// De Bruijn Sequence
+const uint64_t lookUpMultiplier = 0x022fdd63cc95386dU;
+
+// De Bruijn Sequence lokup table
+const uint8_t BitPositionLookup[64] = // hash table
+{
+  0, 1, 2, 4, 8, 17, 34, 5, 11, 23, 47, 31, 63, 62, 61, 59,
+  55, 46, 29, 58, 53, 43, 22, 44, 24, 49, 35, 7, 15, 30, 60, 57,
+  51, 38, 12, 25, 50, 36, 9, 18, 37, 10, 21, 42, 20, 41, 19, 39,
+  14, 28, 56, 48, 33, 3, 6, 13, 27, 54, 45, 26, 52, 40, 16, 32
+};
+
 // finding the index of the least significant set bit in a 64 bit long word
 // De Bruijn Sequence
-uint8_t lowestBitIndex64(uint64_t v) {
-    static const uint8_t BitPositionLookup[64] = // hash table
-    {
-      0, 1, 2, 4, 8, 17, 34, 5, 11, 23, 47, 31, 63, 62, 61, 59,
-      55, 46, 29, 58, 53, 43, 22, 44, 24, 49, 35, 7, 15, 30, 60, 57,
-      51, 38, 12, 25, 50, 36, 9, 18, 37, 10, 21, 42, 20, 41, 19, 39,
-      14, 28, 56, 48, 33, 3, 6, 13, 27, 54, 45, 26, 52, 40, 16, 32
-    };
-    // assert(v != 0); // the next operation expects a nonzero board BUT ill handle it in the caller
-    // using the De Bruijn Sequence and lookink at the last 6 bits
-    return BitPositionLookup[((uint64_t)((v & -v) * 0x022fdd63cc95386dU)) >> 58];
+uint8_t lowestBitIndex64(B64 board) {
+    // using the De Bruijn Sequence and checking the lookup table with the last 6 bits
+    return BitPositionLookup[((uint64_t)((board & -board) * lookUpMultiplier)) >> 58];
+}
+
+// short version of the original, assumes input is ONLY ONE active bit and skips the board inversion
+uint8_t lowestBitIndex64_s(B64 board) {
+    return BitPositionLookup[((uint64_t)(board * lookUpMultiplier)) >> 58];
 }
 
 // returns a vector of all pieces on the given board
