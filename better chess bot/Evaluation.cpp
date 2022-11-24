@@ -1,5 +1,6 @@
 
 #include "Evaluation.h"
+#include "Board operation.h"
 
 /*
 idea dump :
@@ -23,10 +24,47 @@ bonus/penalty for bishop based on pawn color (white bishop bonus if 12 pawns are
 
 make everything as dynamic and generic as possible to allow for many, MANY playstyles for the bot
 
-forced draw with low insuffishent material, i'm leaning towards USCF over FIDE rules (chess.com style)
+forced draw with insuffishent material, i'm leaning towards USCF over FIDE rules (chess.com style)
 
 allow draw offer and make the bot accept if the accuracy and advantage of the player so far makes him likly to win, but also allow mercy draws sometimes ;)
 */
+
+// low material rulings according to chess.com
+inline bool insufficient_material(BoardPosition position) {
+
+    bool low_material = false;
+
+    int white_knights, white_bishops;
+    int black_knights, black_bishops;
+
+    // potential return guard refactor here
+    if ( !(position.white_pawns || position.black_pawns || // where there's a pawn theres (sometimes) a way
+           position.white_rooks || position.black_rooks || // immidiatly stop cases with rooks and queens
+           position.white_queens || position.black_queens)) { // rook endgames are more likly than queen endgames
+        
+        // saving counts to avoit countign each time, other wise i'd just do a MASSIVE return
+        white_knights = count_bits64(position.white_knights);
+        white_bishops = count_bits64(position.white_bishops);
+
+        black_knights = count_bits64(position.black_knights);
+        black_bishops = count_bits64(position.black_bishops);
+
+
+        // this CAN be rearanged with ifs, cutting off conflicting cases but having SOME readabiliy is prefered
+        low_material = !(white_knights | white_bishops | black_knights | black_bishops) || // quick kings only check
+                       (white_bishops >= 2 || black_bishops >= 2) || // a mate is possible with 2 bishops
+                       (white_knights >= 3 || black_knights >= 3) || // this... is mate. but why? why would you do this to yourself?
+                         ( // seperated for easier order changes ;)
+                             ( white_knights + white_bishops == 1    && !(black_knights | black_bishops)) ||   // white has only bishop or knight
+                             ( !(white_knights | white_bishops)      && black_knights + black_bishops == 1) || // black has only bishop or knight
+                             ( white_knights + white_bishops == 1    && black_knights + black_bishops == 1) || // both have bishop or knight
+                             ( (white_knights = 2 && !white_bishops) && !(black_knights | black_bishops)) ||   // white has only 2 knights
+                             ( !(white_knights | white_bishops)      && (black_knights = 2 && !black_bishops)) // black has only 2 knights
+                         );
+    }
+
+    return low_material;
+}
 
 bool check_draw(GameState& current_state) {
     GameState& original_state = current_state;
@@ -34,18 +72,16 @@ bool check_draw(GameState& current_state) {
     int repetion_count = 0;
 
     // this whole thing feels somewhat combersome
-    if (current_state.draw_timer == DRAW_MOVES) {
-        is_draw = true;
+    is_draw = (current_state.draw_timer == DRAW_MOVES) || // check if draw timer is up
+              insufficient_material(original_state.position); // or the current position is a legal draw
 
-    } else {
-        while (current_state.previous_state != nullptr && !is_draw) {
+    while (current_state.previous_state != nullptr && !is_draw) {
 
-            current_state = *current_state.previous_state;
+        current_state = *current_state.previous_state;
 
-            if (original_state.position == current_state.position) {
-                repetion_count++; // yes this can be compressed to one line
-                is_draw = (repetion_count == DRAW_REPETITIONS);
-            }
+        if (original_state.position == current_state.position) {
+            repetion_count++; // yes this can be compressed to one line
+            is_draw = (repetion_count == DRAW_REPETITIONS);
         }
     }
 
