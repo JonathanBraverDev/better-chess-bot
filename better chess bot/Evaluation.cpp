@@ -58,8 +58,8 @@ inline bool insufficient_material(BoardPosition position) {
                              ( white_knights + white_bishops == 1    && !(black_knights | black_bishops)) ||   // white has only bishop or knight
                              ( !(white_knights | white_bishops)      && black_knights + black_bishops == 1) || // black has only bishop or knight
                              ( white_knights + white_bishops == 1    && black_knights + black_bishops == 1) || // both have bishop or knight
-                             ( (white_knights = 2 && !white_bishops) && !(black_knights | black_bishops)) ||   // white has only 2 knights
-                             ( !(white_knights | white_bishops)      && (black_knights = 2 && !black_bishops)) // black has only 2 knights
+                             ( (white_knights == 2 && !white_bishops) && !(black_knights | black_bishops)) ||   // white has only 2 knights
+                             ( !(white_knights | white_bishops)      && (black_knights == 2 && !black_bishops)) // black has only 2 knights
                          );
     }
 
