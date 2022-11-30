@@ -7,6 +7,7 @@
 #include "Board structure.h"
 #include "Board operation.h"
 #include "Evaluation.h"
+#include "Move generation.h"
 
 B64 king_moves[64];
 B64 knight_moves[64];
@@ -97,37 +98,6 @@ B64 generate_black_pawn_jump(const B64 all_pieces, B64 piece) {
         ((down(down(piece)) & all_pieces)))) {
         moves |= down(down(piece));
     }
-
-    return moves;
-}
-
-B64 generate_bishop_moves(const B64 all_pieces, B64 piece) {
-    B64 moves = 0;
-
-    moves |= slide_up_left(all_pieces, piece);
-    moves |= slide_up_right(all_pieces, piece);
-    moves |= slide_down_left(all_pieces, piece);
-    moves |= slide_down_right(all_pieces, piece);
-
-    return moves;
-}
-
-B64 generate_rook_moves(const B64 all_pieces, B64 piece) {
-    B64 moves = 0;
-
-    moves |= slide_up(all_pieces, piece);
-    moves |= slide_down(all_pieces, piece);
-    moves |= slide_left(all_pieces, piece);
-    moves |= slide_right(all_pieces, piece);
-
-    return moves;
-}
-
-B64 generate_queen_moves(const B64 all_pieces, B64 piece) {
-    B64 moves = 0;
-
-    moves |= generate_bishop_moves(all_pieces, piece);
-    moves |= generate_rook_moves(all_pieces, piece);
 
     return moves;
 }

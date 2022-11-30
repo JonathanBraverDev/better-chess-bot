@@ -1,6 +1,8 @@
 
 #include "Evaluation.h"
+#include "Board structure.h"
 #include "Board operation.h"
+#include "Move generation.h"
 
 /*
 idea dump :
@@ -104,9 +106,37 @@ int material_eval(BoardPosition position) {
     black_knights = count_bits64(position.black_knights);
     black_pawns   = count_bits64(position.black_pawns);
 
-    return (white_queens  - black_queens) * QUEEN_VALUE +
-           (white_rooks   - black_rooks) * ROOK_VALUE +
+    return (white_queens  - black_queens)  * QUEEN_VALUE  +
+           (white_rooks   - black_rooks)   * ROOK_VALUE   +
            (white_bishops - black_bishops) * BISHOP_VALUE +
            (white_knights - black_knights) * KNIGHT_VALUE +
-           (white_pawns   - black_pawns) * PAWN_VALUE;
+           (white_pawns   - black_pawns)   * PAWN_VALUE;
+}
+
+int count_piece_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 blockers, B64 target_board) {
+    std::vector<B64> potential_attackers;
+    B64 attack_board;
+    int attacks = 0;
+
+    extract_pieces(attacking_pieces, potential_attackers);
+
+    while (!potential_attackers.empty()) {
+        attack_board = move_generator(blockers, potential_attackers.back());
+        if (attack_board && target_board) {
+            attacks++;
+        }
+        potential_attackers.pop_back();
+    }
+
+    return attacks;
+}
+
+int count_white_attacks(BoardPosition position, B64 target_board) {
+
+    const B64 blockers = position.white | position.black;
+
+
+    return count_piece_attacks(generate_queen_moves, position.white_queens, blockers, target_board) +
+        count_piece_attacks(generate_rook_moves, position.white_rooks, blockers, target_board) +
+        count_piece_attacks(generate_bishop_moves, position.white_bishops, blockers, target_board); // more here
 }

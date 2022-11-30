@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <vector>
 
 #include "Board structure.h"
 
@@ -16,6 +16,9 @@ inline B64 removeLowestBit(B64 board) { return (board & board - 1); } // AND aft
 uint8_t lowestBitIndex64(B64 board);
 uint8_t lowestBitIndex64_s(B64 board);
 int count_bits64(B64 board);
+
+// piece handling
+void extract_pieces(B64 board, std::vector<B64>& pieces);
 
 // piece movment assists, with bound protections
 inline B64 up(B64 board) { return board << BOARD_SIDE; } // shifts out of the board would just be 0 anyway

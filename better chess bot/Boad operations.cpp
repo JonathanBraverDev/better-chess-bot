@@ -1,6 +1,4 @@
 
-#include <vector>
-
 #include "Board operation.h"
 
 // counts the active bits in a given board
@@ -35,7 +33,7 @@ uint8_t lowestBitIndex64_s(B64 board) {
     return BitPositionLookup[((uint64_t)(board * lookUpMultiplier)) >> 58];
 }
 
-// returns a vector of all pieces on the given board
+// fills a vector with all pieces on the given board
 void extract_pieces(B64 board, std::vector<B64>& pieces) {
         
     B64 piece;

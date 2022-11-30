@@ -14,5 +14,9 @@ const int QUEEN_VALUE = 900;
 const int WIN_VALUE = 100000; // aka 'stupidly large number' that you can't achive even with 64 queens
 const int DRAW_VALUE = 0;
 
+// simple eval
 bool is_draw(GameState& current_state);
 int material_eval(BoardPosition position);
+
+// less simple eval
+int count_piece_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 blockers, B64 target_board);
