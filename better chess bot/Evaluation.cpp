@@ -131,7 +131,7 @@ int count_sliding_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, 
     return attacks;
 }
 
-int count_lumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_board, int index_scale = 1, int first_index = 0) {
+int count_jumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_board, int index_scale = 1, int first_index = 0) {
     std::vector<B64> potential_attackers;
     B64 attack_board;
     int attacks = 0;
@@ -156,9 +156,9 @@ int count_white_attacks(BoardPosition position, B64 target_board) {
     return count_sliding_attacks(generate_queen_moves, position.white_queens, target_board, blockers) +
            count_sliding_attacks(generate_rook_moves, position.white_rooks, target_board, blockers) +
            count_sliding_attacks(generate_bishop_moves, position.white_bishops, target_board, blockers) + 
-           count_lumping_attacks(king_moves, position.white_king, target_board) +
-           count_lumping_attacks(knight_moves, position.white_knights, target_board) +
-           count_lumping_attacks(pawn_attacks, position.white_pawns, target_board, 2);
+           count_jumping_attacks(king_moves, position.white_king, target_board) +
+           count_jumping_attacks(knight_moves, position.white_knights, target_board) +
+           count_jumping_attacks(pawn_attacks, position.white_pawns, target_board, 2);
 }
 
 int count_black_attacks(BoardPosition position, B64 target_board) {
@@ -168,7 +168,7 @@ int count_black_attacks(BoardPosition position, B64 target_board) {
     return count_sliding_attacks(generate_queen_moves, position.black_queens, target_board, blockers) +
            count_sliding_attacks(generate_rook_moves, position.black_rooks, target_board, blockers) +
            count_sliding_attacks(generate_bishop_moves, position.black_bishops, target_board, blockers) +
-           count_lumping_attacks(king_moves, position.black_king, target_board) +
-           count_lumping_attacks(knight_moves, position.black_knights, target_board) +
-           count_lumping_attacks(pawn_attacks, position.black_pawns, target_board, 2, 1);
+           count_jumping_attacks(king_moves, position.black_king, target_board) +
+           count_jumping_attacks(knight_moves, position.black_knights, target_board) +
+           count_jumping_attacks(pawn_attacks, position.black_pawns, target_board, 2, 1);
 }
