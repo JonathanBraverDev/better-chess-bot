@@ -17,7 +17,7 @@ bonus for captues
 bonus to oponents piece weight to encorage 'fair' trades when having material advantage, bonus increasing mildly as advantage/total piece value goes up
 bonus for spicy moves like pins, forks (the more and cheaper the forking piece the better) and revealed attacks
 bonus for total area behind pawns
-bonus for passed pawns
+bonus for passed pawns, especially ones with a promotion tile off color to the enemy bishop(s)
 bonus for outposts (pieces coverd by pawns that can't be kicked out by enemy pawns)
 bonus for total area avalible for pieces to move into and/or standing on center tiles (chould be dangerous in endgames, redundant with good moves?)
 bonus for rooks on open/semi open columns
