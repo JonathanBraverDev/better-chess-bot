@@ -113,7 +113,7 @@ int material_eval(BoardPosition position) {
            (white_pawns   - black_pawns)   * PAWN_VALUE;
 }
 
-int count_piece_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 blockers, B64 target_board) {
+int count_sliding_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 target_board, B64 blockers) {
     std::vector<B64> potential_attackers;
     B64 attack_board;
     int attacks = 0;
@@ -131,12 +131,44 @@ int count_piece_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B6
     return attacks;
 }
 
+int count_lumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_board, int index_scale = 1, int first_index = 0) {
+    std::vector<B64> potential_attackers;
+    B64 attack_board;
+    int attacks = 0;
+
+    extract_pieces(attacking_pieces, potential_attackers);
+
+    while (!potential_attackers.empty()) {
+        attack_board = move_source[first_index + index_scale * lowestBitIndex64(potential_attackers.back())];
+        if (attack_board && target_board) {
+            attacks++;
+        }
+        potential_attackers.pop_back();
+    }
+
+    return attacks;
+}
+
 int count_white_attacks(BoardPosition position, B64 target_board) {
 
     const B64 blockers = position.white | position.black;
 
+    return count_sliding_attacks(generate_queen_moves, position.white_queens, target_board, blockers) +
+           count_sliding_attacks(generate_rook_moves, position.white_rooks, target_board, blockers) +
+           count_sliding_attacks(generate_bishop_moves, position.white_bishops, target_board, blockers) + 
+           count_lumping_attacks(king_moves, position.white_king, target_board) +
+           count_lumping_attacks(knight_moves, position.white_knights, target_board) +
+           count_lumping_attacks(pawn_attacks, position.white_pawns, target_board, 2);
+}
 
-    return count_piece_attacks(generate_queen_moves, position.white_queens, blockers, target_board) +
-        count_piece_attacks(generate_rook_moves, position.white_rooks, blockers, target_board) +
-        count_piece_attacks(generate_bishop_moves, position.white_bishops, blockers, target_board); // more here
+int count_black_attacks(BoardPosition position, B64 target_board) {
+
+    const B64 blockers = position.white | position.black;
+
+    return count_sliding_attacks(generate_queen_moves, position.black_queens, target_board, blockers) +
+           count_sliding_attacks(generate_rook_moves, position.black_rooks, target_board, blockers) +
+           count_sliding_attacks(generate_bishop_moves, position.black_bishops, target_board, blockers) +
+           count_lumping_attacks(king_moves, position.black_king, target_board) +
+           count_lumping_attacks(knight_moves, position.black_knights, target_board) +
+           count_lumping_attacks(pawn_attacks, position.black_pawns, target_board, 2, 1);
 }

@@ -36,7 +36,6 @@ int main()
     auto end = std::chrono::high_resolution_clock::now();
     auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     
-    unsigned long bit = 0;
 
     B64 empty_board = 0;
     B64 piece = 1ULL << (5*BOARD_SIDE+2);

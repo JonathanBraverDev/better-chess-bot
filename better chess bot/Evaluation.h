@@ -19,4 +19,4 @@ bool is_draw(GameState& current_state);
 int material_eval(BoardPosition position);
 
 // less simple eval
-int count_piece_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 blockers, B64 target_board);
+int count_sliding_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 blockers, B64 target_board);

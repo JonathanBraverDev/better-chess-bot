@@ -90,7 +90,7 @@ void prepare_white_pawn_moves() {
         // missing appassant logic
 
         pawn_attacks[i] = up_left(current_board) |
-            up_right(current_board);
+                          up_right(current_board);
 
         current_board = current_board << 1;
     }
@@ -105,7 +105,7 @@ void prepare_black_pawn_moves() {
         // missing appassant logic
 
         pawn_attacks[i] = down_left(current_board) |
-            down_right(current_board);
+                          down_right(current_board);
 
         current_board = current_board << 1;
         // yes, black pawns can't get to the last row, not in a NORMAL game at least

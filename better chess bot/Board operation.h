@@ -10,7 +10,7 @@ inline B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } // s
 inline bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
 inline B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
 inline B64 lowestBitBoard(B64 board) { return (board & -board); } // AND with 2's compliment to get the lowest bit (very cool)
-inline B64 removeLowestBit(B64 board) { return (board & board - 1); } // AND after -1, garantees removal of exactly one lowerst bit
+inline B64 removeLowestBit(B64 board) { return (board & board - 1); } // AND after -1, garantees removal of exactly one lowest bit
 
 // big finders
 uint8_t lowestBitIndex64(B64 board);
