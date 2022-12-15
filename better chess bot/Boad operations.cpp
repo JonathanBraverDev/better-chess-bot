@@ -1,7 +1,7 @@
 
 #include "Board operation.h"
 
-// counts the active bits in a given board
+// counts the active bits in a given board, effective for almost empty boards
 int count_bits64(B64 board) {
     int count;
     for (count = 0; board; count++) // runs untill board is zeroed out, counting up
@@ -36,19 +36,18 @@ uint8_t lowestBitIndex64_s(B64 board) {
 // fills a vector with all pieces on the given board
 void extract_pieces(B64 board, std::vector<B64>& pieces) {
         
-    B64 piece;
+    // GPT suggested a space reservation, this will instead be done in the caller
+    // max piece count of is a practicly unachivable 10 (2 minor and 8 pawns)
 
     while (board != 0) { // check that there are pieces left to exstract
 
-        piece = lowestBitBoard(board);
-        board ^= piece; // using the piece on to flip the bit on the original board
-        pieces.push_back(piece);
+        pieces.push_back(lowestBitBoard(board));
+        board ^= pieces.back(); // using the piece just added to flip the bit on the original board
     }
 }
 
 B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece) {
     B64 moves = 0;
-    bool stop = false;
 
     do {
         piece = direction(piece); // running the passed function and moving the piece
