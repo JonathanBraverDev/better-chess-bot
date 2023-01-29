@@ -1,4 +1,11 @@
 #include "Move handling.h"
+#include "Board operation.h"
+
+Move Invert_move(Move move)
+{
+    std::swap(move.origin, move.destination);
+    return move;
+}
 
 BoardPosition Make_move(BoardPosition position, Move move) {
         
