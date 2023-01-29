@@ -33,16 +33,16 @@ uint8_t lowestBitIndex64_s(B64 board) {
     return BitPositionLookup[((uint64_t)(board * lookUpMultiplier)) >> 58];
 }
 
-// fills a vector with all pieces on the given board
-void extract_pieces(B64 board, std::vector<B64>& pieces) {
+// fills a vector with bitBoards of all the active bits on the given board
+void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
         
     // GPT suggested a space reservation, this will instead be done in the caller
-    // max piece count of is a practicly unachivable 10 (2 minor and 8 pawns)
+    // max piece count is a practicly unachivable 10 (2 minor and 8 pawns)
 
     while (board != 0) { // check that there are pieces left to exstract
 
-        pieces.push_back(lowestBitBoard(board));
-        board ^= pieces.back(); // using the piece just added to flip the bit on the original board
+        bit_boards.push_back(lowestBitBoard(board));
+        board ^= bit_boards.back(); // using the piece just added to flip the bit on the original board
     }
 }
 
