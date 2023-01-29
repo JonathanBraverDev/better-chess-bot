@@ -3,19 +3,20 @@
 #include "Board structure.h"
 #include "Board operation.h"
 #include "Move generation.h"
+#include "MoveProvider.h"
 
 /*
 idea dump :
 
-open king - each attack 'lane' (row,col,diagonal) without cover is + for the otehr side
-bishop supiriority - bonus for having both and discoraging 'equal' trades vs knights (done)
+open king - each attack 'lane' (row,col,diagonal) without cover is + for the other side
+bishop supiriority - bonus for having both and discoraging 'equal' trades vs knights (done, given slightly higher value)
 penatly for stacked pawns - multiple pawns on the same columb = bad bad
 bonus for high queen activity near the enemy king / side of the board
-bonus for attacking more times than the square is defended
+bonus for attacking more times than a square/piece is defended
 bonus for attackign tiles near the enemy king
-bonus for captues
+bonus for captures
 bonus to oponents piece weight to encorage 'fair' trades when having material advantage, bonus increasing mildly as advantage/total piece value goes up
-bonus for spicy moves like pins, forks (the more and cheaper the forking piece the better) and revealed attacks
+bonus for spicy moves like pins, forks (the cheaper the forking piece in relation to the forked the better) and revealed attacks
 bonus for total area behind pawns
 bonus for passed pawns, especially ones with a promotion tile off color to the enemy bishop(s)
 bonus for outposts (pieces coverd by pawns that can't be kicked out by enemy pawns)
@@ -23,6 +24,19 @@ bonus for total area avalible for pieces to move into and/or standing on center 
 bonus for rooks on open/semi open columns
 bonus for knights in closed positions, bonus for bishops in open positions (again, bishiop supiriority)
 bonus/penalty for bishop based on pawn color (white bishop bonus if 12 pawns are on dark somehow)
+
+ideas:
+castling, accounting for side and current adtantage (same in equal, opposite with initiative)
+killing off long range pieces
+long range attacks
+denying infiltration squares with pawn for knights in closed position
+any move with a pawn
+any move with a knight
+any move with a bishop
+any more with a rook
+any move with a queen
+any move with the king (meme)
+
 
 make everything as dynamic and generic as possible to allow for many, MANY playstyles for the bot
 
@@ -118,7 +132,7 @@ int count_sliding_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, 
     B64 attack_board;
     int attacks = 0;
 
-    extract_pieces(attacking_pieces, potential_attackers);
+    seperate_bits(attacking_pieces, potential_attackers);
 
     while (!potential_attackers.empty()) {
         attack_board = move_generator(blockers, potential_attackers.back());
@@ -136,7 +150,7 @@ int count_jumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_boa
     B64 attack_board;
     int attacks = 0;
 
-    extract_pieces(attacking_pieces, potential_attackers);
+    seperate_bits(attacking_pieces, potential_attackers);
 
     while (!potential_attackers.empty()) {
         attack_board = move_source[first_index + index_scale * lowestBitIndex64(potential_attackers.back())];
