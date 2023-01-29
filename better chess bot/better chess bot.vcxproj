@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -143,12 +143,15 @@
     <ClCompile Include="Boad operations.cpp" />
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="Move generation.cpp" />
+    <ClCompile Include="Move handling.cpp" />
+    <ClCompile Include="Move search.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board operation.h" />
     <ClInclude Include="Board structure.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Move generation.h" />
+    <ClInclude Include="Move handling.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
