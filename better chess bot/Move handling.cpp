@@ -1,47 +1,80 @@
 #include "Move handling.h"
 #include "Board operation.h"
 
-Move Invert_move(Move move)
-{
-    std::swap(move.origin, move.destination);
-    return move;
+BoardPosition Make_move(BoardPosition position, Move move) {
+
+	if (move.piece.color == WHITE) {
+		position.white ^= move.origin;
+		position.white |= move.destination;
+	} else {
+		position.black ^= move.origin;
+		position.black |= move.destination;
+	}
+
+	switch (move.piece.type) {
+	case PAWN:
+		if (move.piece.color == WHITE) {
+			position.white_pawns ^= move.origin;
+			position.white_pawns |= move.destination;
+		} else {
+			position.black_pawns ^= move.origin;
+			position.black_pawns |= move.destination;
+		}
+		break;
+	case KNIGHT:
+		if (move.piece.color == WHITE) {
+			position.white_knights ^= move.origin;
+			position.white_knights |= move.destination;
+		} else {
+			position.black_knights ^= move.origin;
+			position.black_knights |= move.destination;
+		}
+		break;
+	case BISHOP:
+		if (move.piece.color == WHITE) {
+			position.white_bishops ^= move.origin;
+			position.white_bishops |= move.destination;
+		} else {
+			position.black_bishops ^= move.origin;
+			position.black_bishops |= move.destination;
+		}
+		break;
+	case ROOK:
+		if (move.piece.color == WHITE) {
+			position.white_rooks ^= move.origin;
+			position.white_rooks |= move.destination;
+		} else {
+			position.black_rooks ^= move.origin;
+			position.black_rooks |= move.destination;
+		}
+		break;
+	case QUEEN:
+		if (move.piece.color == WHITE) {
+			position.white_queens ^= move.origin;
+			position.white_queens |= move.destination;
+		} else {
+			position.black_queens ^= move.origin;
+			position.black_queens |= move.destination;
+		}
+		break;
+	case KING:
+		if (move.piece.color == WHITE) {
+			position.white_queens ^= move.origin;
+			position.white_queens |= move.destination;
+		} else {
+			position.black_queens ^= move.origin;
+			position.black_queens |= move.destination;
+		}
+		break;
+	}
 }
 
-BoardPosition Make_move(BoardPosition position, Move move) {
-        
-    // Clear the origin square
-    position.white &= ~move.origin;
-    position.white_pawns &= ~move.origin;
-    position.white_bishops &= ~move.origin;
-    position.white_knights &= ~move.origin;
-    position.white_rooks &= ~move.origin;
-    position.white_queens &= ~move.origin;
-    position.white_king &= ~move.origin;
-    position.black &= ~move.origin;
-    position.black_pawns &= ~move.origin;
-    position.black_bishops &= ~move.origin;
-    position.black_knights &= ~move.origin;
-    position.black_rooks &= ~move.origin;
-    position.black_queens &= ~move.origin;
-    position.black_king &= ~move.origin;
-
-    // Set the destination square
-    position.white |= move.destination & (~position.black);
-    position.white_pawns |= move.destination & (~position.black_pawns);
-    position.white_bishops |= move.destination & (~position.black_bishops);
-    position.white_knights |= move.destination & (~position.black_knights);
-    position.white_rooks |= move.destination & (~position.black_rooks);
-    position.white_queens |= move.destination & (~position.black_queens);
-    position.white_king |= move.destination & (~position.black_king);
-    position.black |= move.destination & (~position.white);
-    position.black_pawns |= move.destination & (~position.white_pawns);
-    position.black_bishops |= move.destination & (~position.white_bishops);
-    position.black_knights |= move.destination & (~position.white_knights);
-    position.black_rooks |= move.destination & (~position.white_rooks);
-    position.black_queens |= move.destination & (~position.white_queens);
-    position.black_king |= move.destination & (~position.white_king);
+Move Invert_move(Move move)
+{
+	std::swap(move.origin, move.destination);
+	return move;
 }
 
 BoardPosition Undo_move(BoardPosition position, Move move) {
-    return Make_move(position, Invert_move(move));
+	return Make_move(position, Invert_move(move));
 }
