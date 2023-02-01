@@ -4,37 +4,24 @@
 // makes a given move, does not check its validity
 BoardPosition Make_move(BoardPosition position, Move move) {
 
-	switch (move.type) {
-	case CASTLE_SHORT:
-	case CASTLE_LONG:
-		position = Castle(position, move);
-		break;
+	if (Is_castle(move)) {
+		Castle(position, move);
+	} else {
+		Move_piece(position, move);
 
-	case PROMOTION:
-		position = Move_piece(position, move);
-		position = Promote(position, move);
-		break;
+		if (Is_capture(move)) {
+			Delete_captured(position, move);
+		}
 
-	case CAPTURE:
-		position = Move_piece(position, move);
-		position = Delete_captured(position, move);
-		break;
-
-	case PROMOTION_CAPTURE:
-		position = Move_piece(position, move);
-		position = Delete_captured(position, move);
-		position = Promote(position, move);
-		break;
-
-	case NORMAL:
-		position = Move_piece(position, move);
-		break;
+		if (Is_promotion(move)) {
+			Promote(position, move);
+		}
 	}
 
 	return position;
 }
 
-BoardPosition Castle(BoardPosition position, Move move) {
+void Castle(BoardPosition& position, const Move& move) {
 
 	// assume white short castle, just becouse
 	B64 row = ROW_1;
@@ -51,11 +38,12 @@ BoardPosition Castle(BoardPosition position, Move move) {
 
 		position.black ^= move.origin | move.destination; // delete both pieces from thier current locations
 		position.black_rooks ^= move.destination; // rook is saved in destination, both land on predefined spots
-		
+
 		// add back to new locations
 		position.black_king = row & king_col;
 		position.black_rooks |= row & rook_col;
 		position.black |= (row & king_col) | (row & rook_col);
+
 	} else {
 		position.white ^= move.origin | move.destination; // delete both pieces from thier current locations
 		position.white_rooks ^= move.destination; // rook is saved in destination, both land on predefined spots
@@ -65,167 +53,105 @@ BoardPosition Castle(BoardPosition position, Move move) {
 		position.white_rooks |= row & rook_col;
 		position.white |= (row & king_col) | (row & rook_col);
 	}
-
-	if (move.piece.color == WHITE) {
-		position.white ^= move.origin;
-		position.white |= move.destination;
-	} else {
-		position.black ^= move.origin;
-		position.black |= move.destination;
-	}
 }
 
-BoardPosition Move_piece(BoardPosition position, Move move) {
-	// one more if for fewer
-	if (move.piece.color == WHITE) {
-		position.white ^= move.origin;
-		position.white |= move.destination;
-	} else {
-		position.black ^= move.origin;
-		position.black |= move.destination;
-	}
+void Move_piece(BoardPosition& position, const Move& move) {
+	const bool is_white = move.piece.color == WHITE;
+	const B64 origin = move.origin;
+	const B64 destination = move.destination;
 
+	// update the color board
+	(is_white ? position.white : position.black) ^= origin;
+	(is_white ? position.white : position.black) |= destination;
+	
+	// update the piece board
 	switch (move.piece.type) {
 	case PAWN:
-		if (move.piece.color == WHITE) {
-			position.white_pawns ^= move.origin;
-			position.white_pawns |= move.destination;
-		} else {
-			position.black_pawns ^= move.origin;
-			position.black_pawns |= move.destination;
-		}
+		(is_white ? position.white_pawns : position.black_pawns) ^= origin;
+		(is_white ? position.white_pawns : position.black_pawns) |= destination;
 		break;
 
 	case KNIGHT:
-		if (move.piece.color == WHITE) {
-			position.white_knights ^= move.origin;
-			position.white_knights |= move.destination;
-		} else {
-			position.black_knights ^= move.origin;
-			position.black_knights |= move.destination;
-		}
+		(is_white ? position.white_knights : position.black_knights) ^= origin;
+		(is_white ? position.white_knights : position.black_knights) |= destination;
 		break;
 
 	case BISHOP:
-		if (move.piece.color == WHITE) {
-			position.white_bishops ^= move.origin;
-			position.white_bishops |= move.destination;
-		} else {
-			position.black_bishops ^= move.origin;
-			position.black_bishops |= move.destination;
-		}
+		(is_white ? position.white_bishops : position.black_bishops) ^= origin;
+		(is_white ? position.white_bishops : position.black_bishops) |= destination;
 		break;
 
 	case ROOK:
-		if (move.piece.color == WHITE) {
-			position.white_rooks ^= move.origin;
-			position.white_rooks |= move.destination;
-		} else {
-			position.black_rooks ^= move.origin;
-			position.black_rooks |= move.destination;
-		}
+		(is_white ? position.white_rooks : position.black_rooks) ^= origin;
+		(is_white ? position.white_rooks : position.black_rooks) |= destination;
 		break;
 
 	case QUEEN:
-		if (move.piece.color == WHITE) {
-			position.white_queens ^= move.origin;
-			position.white_queens |= move.destination;
-		} else {
-			position.black_queens ^= move.origin;
-			position.black_queens |= move.destination;
-		}
+		(is_white ? position.white_queens : position.black_queens) ^= origin;
+		(is_white ? position.white_queens : position.black_queens) |= destination;
 		break;
 
 	case KING:
-		if (move.piece.color == WHITE) {
-			position.white_queens ^= move.origin;
-			position.white_queens |= move.destination;
-		} else {
-			position.black_queens ^= move.origin;
-			position.black_queens |= move.destination;
-		}
+		(is_white ? position.white_king : position.black_king) ^= origin;
+		(is_white ? position.white_king : position.black_king) |= destination;
 		break;
 	}
 }
 
-BoardPosition Delete_captured(BoardPosition position, Move move) {
-	if (move.piece.color == WHITE) {
-		switch (move.captured_type) {
-		case PAWN:
-			position.black_pawns ^= move.destination;
-		case KNIGHT:
-			position.black_knights ^= move.destination;
-		case BISHOP:
-			position.black_bishops ^= move.destination;
-		case ROOK:
-			position.black_rooks ^= move.destination;
-		case QUEEN:
-			position.black_queens ^= move.destination;
-		}
-	} else {
-		switch (move.captured_type) {
-		case PAWN:
-			position.white_pawns ^= move.destination;
-		case KNIGHT:
-			position.white_knights ^= move.destination;
-		case BISHOP:
-			position.white_bishops ^= move.destination;
-		case ROOK:
-			position.white_rooks ^= move.destination;
-		case QUEEN:
-			position.white_queens ^= move.destination;
-		}
-	}
+void Delete_captured(BoardPosition& position, const Move& move) {
+	const bool is_black = move.piece.color == BLACK;
+	const B64 origin = move.origin;
+	const B64 destination = move.destination;
 
-	return position;
+	switch (move.captured_type) {
+	case PAWN:
+		(is_black ? position.white_pawns : position.black_pawns) ^= destination;
+		break;
+
+	case KNIGHT:
+		(is_black ? position.white_knights : position.black_knights) ^= destination;
+		break;
+
+	case BISHOP:
+		(is_black ? position.white_bishops : position.black_bishops) ^= destination;
+		break;
+
+	case ROOK:
+		(is_black ? position.white_rooks : position.black_rooks) ^= destination;
+		break;
+
+	case QUEEN:
+		(is_black ? position.white_queens : position.black_queens) ^= destination;
+		break;
+	}
 }
 
-BoardPosition Promote(BoardPosition position, Move move) {
-	
-	// not sure this variable is computationally worth it but its readable
-	B64 promoted;
+void Promote(BoardPosition& position, const Move& move) {
+	const bool is_white = move.piece.color == WHITE;
+	const B64 origin = move.origin;
+	const B64 destination = move.destination;
 
-	if (move.piece.color == WHITE) { // fix color if wrong and promote
-		promoted = position.white_pawns & ROW_1;
+	// find the promoted pawn and remove it
+	const B64 promoted = is_white ? (position.white_pawns & ROW_1) : (position.black_pawns & ROW_8);
+	(is_white ? position.white_pawns : position.black_pawns) ^= promoted;
 
-		position.white_pawns ^= promoted; // remove the promoted pawn
+	// add the promoted piece in its place
+	switch (move.promoted_type) {
+	case QUEEN:
+		(is_white ? position.white_queens : position.black_queens) |= promoted;
+		break;
 
-		// replace the pawn with the new piece
-		switch (move.promoted_type) {
-		case QUEEN:
-			position.white_queens |= promoted;
-			break;
-		case ROOK:
-			position.white_rooks |= promoted;
-			break;
-		case BISHOP:
-			position.white_bishops |= promoted;
-			break;
-		case KNIGHT:
-			position.white_knights |= promoted;
-			break;
-		}
+	case ROOK:
+		(is_white ? position.white_rooks : position.black_rooks) |= promoted;
+		break;
 
-	} else {
-		promoted = position.black_pawns & ROW_8;
+	case BISHOP:
+		(is_white ? position.white_bishops : position.black_bishops) |= promoted;
+		break;
 
-		position.black_pawns ^= promoted; // remove the promoted pawn
-
-		// replace the pawn with the new piece
-		switch (move.promoted_type) {
-		case QUEEN:
-			position.white_queens |= promoted;
-			break;
-		case ROOK:
-			position.white_rooks |= promoted;
-			break;
-		case BISHOP:
-			position.black_bishops |= promoted;
-			break;
-		case KNIGHT:
-			position.black_knights |= promoted;
-			break;
-		}
+	case KNIGHT:
+		(is_white ? position.white_knights : position.black_knights) |= promoted;
+		break;
 	}
 }
 
