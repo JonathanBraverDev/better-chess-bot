@@ -16,6 +16,15 @@ enum Color {
     BLACK
 };
 
+enum MoveType {
+    NORMAL,
+    CAPTURE,
+    CASTLE_SHORT,
+    CASTLE_LONG,
+    PROMOTION,
+    PROMOTION_CAPTURE
+};
+
 struct Piece {
     PieceType type;
     Color color;
@@ -23,8 +32,11 @@ struct Piece {
 
 struct Move {
     B64 origin;
-    B64 destination;
-    Piece piece;
+    B64 destination; // castling rook here, offers full compaability with 960 chess, pround of that one
+    Piece piece; // possibly add members directly here
+    MoveType type;
+    PieceType captured_type;
+    PieceType promoted_type;
 };
 
 Move Invert_move(Move move);
