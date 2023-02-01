@@ -3,6 +3,7 @@
 #include "Board structure.h"
 
 enum PieceType {
+    NONE,
     PAWN,
     KNIGHT,
     BISHOP,
@@ -39,7 +40,14 @@ struct Move {
     PieceType promoted_type;
 };
 
-Move Invert_move(Move move);
+inline bool Is_castle(Move move) { return move.type == CASTLE_SHORT || move.type == CASTLE_LONG; };
+inline bool Is_capture(Move move) { return move.type == CAPTURE || move.type == PROMOTION_CAPTURE; };
+
 
 BoardPosition Make_move(BoardPosition position, Move move);
 BoardPosition Undo_move(BoardPosition position, Move move);
+
+BoardPosition Castle(BoardPosition position, Move move);
+BoardPosition Move_piece(BoardPosition position, Move move);
+BoardPosition Delete_captured(BoardPosition position, Move move);
+BoardPosition Promote(BoardPosition position, Move move);
