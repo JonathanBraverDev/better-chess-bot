@@ -128,24 +128,14 @@ int material_eval(BoardPosition position) {
 }
 
 int count_sliding_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 target_board, B64 blockers) {
-    std::vector<B64> potential_attackers;
-    B64 attack_board;
-    int attacks = 0;
-
-    seperate_bits(attacking_pieces, potential_attackers);
-
-    while (!potential_attackers.empty()) {
-        attack_board = move_generator(blockers, potential_attackers.back());
-        if (attack_board && target_board) {
-            attacks++;
-        }
-        potential_attackers.pop_back();
-    }
-
-    return attacks;
+    return count_attacks(attacking_pieces, target_board, move_generator, nullptr, blockers);
 }
 
 int count_jumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_board, int index_scale = 1, int first_index = 0) {
+    return count_attacks(attacking_pieces, target_board, nullptr, move_source, 0, index_scale, first_index);
+}
+
+int count_attacks(B64 attacking_pieces, B64 target_board, B64(*move_generator)(B64, B64) = nullptr, B64* move_source = nullptr, B64 blockers = 0, int index_scale = 1, int first_index = 0) {
     std::vector<B64> potential_attackers;
     B64 attack_board;
     int attacks = 0;
@@ -153,7 +143,12 @@ int count_jumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_boa
     seperate_bits(attacking_pieces, potential_attackers);
 
     while (!potential_attackers.empty()) {
-        attack_board = move_source[first_index + index_scale * lowestBitIndex64(potential_attackers.back())];
+        if (move_generator) {
+            attack_board = move_generator(blockers, potential_attackers.back());
+        } else {
+            attack_board = move_source[first_index + index_scale * lowestBitIndex64(potential_attackers.back())];
+        }
+
         if (attack_board && target_board) {
             attacks++;
         }
@@ -172,7 +167,7 @@ int count_white_attacks(BoardPosition position, B64 target_board) {
            count_sliding_attacks(generate_bishop_moves, position.white_bishops, target_board, blockers) + 
            count_jumping_attacks(king_moves, position.white_king, target_board) +
            count_jumping_attacks(knight_moves, position.white_knights, target_board) +
-           count_jumping_attacks(pawn_attacks, position.white_pawns, target_board, 2);
+           count_jumping_attacks(pawn_attacks, position.white_pawns, target_board, 2); // pawns have 2 moves per tile
 }
 
 int count_black_attacks(BoardPosition position, B64 target_board) {
@@ -184,5 +179,5 @@ int count_black_attacks(BoardPosition position, B64 target_board) {
            count_sliding_attacks(generate_bishop_moves, position.black_bishops, target_board, blockers) +
            count_jumping_attacks(king_moves, position.black_king, target_board) +
            count_jumping_attacks(knight_moves, position.black_knights, target_board) +
-           count_jumping_attacks(pawn_attacks, position.black_pawns, target_board, 2, 1);
+           count_jumping_attacks(pawn_attacks, position.black_pawns, target_board, 2, 1); // offset to blacks moves
 }
