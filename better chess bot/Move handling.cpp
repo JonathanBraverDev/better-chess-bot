@@ -5,23 +5,26 @@
 BoardPosition Make_move(BoardPosition position, Move move) {
 
 	if (Is_castle(move)) {
-		Castle(position, move);
+		Toggle_castle(position, move);
 	} else {
 		Move_piece(position, move);
 
 		if (Is_capture(move)) {
-			Delete_captured(position, move);
+			Toggle_captured(position, move);
 		}
 
 		if (Is_promotion(move)) {
-			Promote(position, move);
+			Toggle_promotion(position, move);
 		}
 	}
 
 	return position;
 }
 
-void Castle(BoardPosition& position, const Move& move) {
+void Toggle_castle(BoardPosition& position, const Move& move) {
+
+	const B64 king = move.origin;
+	const B64 rook = move.destination; // rook is saved in destination, both land on predefined spots
 
 	// assume white short castle, just becouse
 	B64 row = ROW_1;
@@ -36,29 +39,33 @@ void Castle(BoardPosition& position, const Move& move) {
 	if (move.piece.color == BLACK) { // fix color if wrong and castle
 		row = ROW_8;
 
-		position.black ^= move.origin | move.destination; // delete both pieces from thier current locations
-		position.black_rooks ^= move.destination; // rook is saved in destination, both land on predefined spots
+		// toggle uncastled locations
+		position.black ^= king | rook; // toggle both pieces off/on (casle/uncastle)
+		position.black_rooks ^= rook; 
+		position.black_king ^= king; // added to toggle the king back in during UNcastling
 
-		// add back to new locations
-		position.black_king = row & king_col;
-		position.black_rooks |= row & rook_col;
-		position.black |= (row & king_col) | (row & rook_col);
+		// toggle castled locations
+		position.black_king ^= row & king_col;
+		position.black_rooks ^= row & rook_col;
+		position.black ^= (row & king_col) | (row & rook_col);
 
 	} else {
-		position.white ^= move.origin | move.destination; // delete both pieces from thier current locations
-		position.white_rooks ^= move.destination; // rook is saved in destination, both land on predefined spots
+		// toggle uncastled locations
+		position.white ^= king | rook;
+		position.white_rooks ^= rook;
+		position.white_king ^= king;
 
-		// add back to new locations
-		position.white_king = row & king_col;
-		position.white_rooks |= row & rook_col;
-		position.white |= (row & king_col) | (row & rook_col);
+		// toggle castled locations
+		position.white_king ^= row & king_col;
+		position.white_rooks ^= row & rook_col;
+		position.white ^= (row & king_col) | (row & rook_col);
 	}
 }
 
-void Move_piece(BoardPosition& position, const Move& move) {
+void Move_piece(BoardPosition& position, const Move& move, bool reverse = false) {
 	const bool is_white = move.piece.color == WHITE;
-	const B64 origin = move.origin;
-	const B64 destination = move.destination;
+	const B64 origin = (reverse ? move.destination : move.origin);
+	const B64 destination = (reverse ? move.origin : move.destination);
 
 	// update the color board
 	(is_white ? position.white : position.black) ^= origin;
@@ -98,9 +105,8 @@ void Move_piece(BoardPosition& position, const Move& move) {
 	}
 }
 
-void Delete_captured(BoardPosition& position, const Move& move) {
+void Toggle_captured(BoardPosition& position, const Move& move) {
 	const bool is_black = move.piece.color == BLACK;
-	const B64 origin = move.origin;
 	const B64 destination = move.destination;
 
 	switch (move.captured_type) {
@@ -126,10 +132,8 @@ void Delete_captured(BoardPosition& position, const Move& move) {
 	}
 }
 
-void Promote(BoardPosition& position, const Move& move) {
+void Toggle_promotion(BoardPosition& position, const Move& move) {
 	const bool is_white = move.piece.color == WHITE;
-	const B64 origin = move.origin;
-	const B64 destination = move.destination;
 
 	// find the promoted pawn and remove it
 	const B64 promoted = is_white ? (position.white_pawns & ROW_1) : (position.black_pawns & ROW_8);
@@ -138,30 +142,38 @@ void Promote(BoardPosition& position, const Move& move) {
 	// add the promoted piece in its place
 	switch (move.promoted_type) {
 	case QUEEN:
-		(is_white ? position.white_queens : position.black_queens) |= promoted;
+		(is_white ? position.white_queens : position.black_queens) ^= promoted;
 		break;
 
 	case ROOK:
-		(is_white ? position.white_rooks : position.black_rooks) |= promoted;
+		(is_white ? position.white_rooks : position.black_rooks) ^= promoted;
 		break;
 
 	case BISHOP:
-		(is_white ? position.white_bishops : position.black_bishops) |= promoted;
+		(is_white ? position.white_bishops : position.black_bishops) ^= promoted;
 		break;
 
 	case KNIGHT:
-		(is_white ? position.white_knights : position.black_knights) |= promoted;
+		(is_white ? position.white_knights : position.black_knights) ^= promoted;
 		break;
 	}
 }
 
+// returns the board to the position before the move, no validity check
+BoardPosition Undo_move(BoardPosition position, Move move) {
+	if (Is_castle(move)) {
+		Toggle_castle(position, move);
+	} else {
+		if (Is_promotion(move)) {
+			Toggle_promotion(position, move);
+		}
 
-//Move Invert_move(Move move)
-//{
-//	std::swap(move.origin, move.destination);
-//	return move;
-//}
-//
-//BoardPosition Undo_move(BoardPosition position, Move move) {
-//	return Make_move(position, Invert_move(move));
-//}
+		if (Is_capture(move)) {
+			Toggle_captured(position, move);
+		}
+
+		Move_piece(position, move, true);
+	}
+
+	return position;
+}

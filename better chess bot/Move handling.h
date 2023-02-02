@@ -48,7 +48,7 @@ inline bool Is_promotion(Move move) { return move.type == PROMOTION || move.type
 BoardPosition Make_move(BoardPosition position, Move move);
 BoardPosition Undo_move(BoardPosition position, Move move);
 
-void Castle(BoardPosition& position, const Move& move);
-void Move_piece(BoardPosition& position, const Move& move);
-void Delete_captured(BoardPosition& position, const Move& move);
-void Promote(BoardPosition& position, const Move& move);
+void Toggle_castle(BoardPosition& position, const Move& move);
+void Move_piece(BoardPosition& position, const Move& move, bool reverse = false);
+void Toggle_captured(BoardPosition& position, const Move& move);
+void Toggle_promotion(BoardPosition& position, const Move& move);
