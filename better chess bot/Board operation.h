@@ -27,14 +27,14 @@ int count_bits64(B64 board);
 void seperate_bits(B64 board, std::vector<B64>& pieces);
 
 // piece movment assists, with bound protections
-inline B64 up(B64 board) { return board << BOARD_SIDE; } // shifts out of the board would just be 0 anyway
-inline B64 down(B64 board) { return board >> BOARD_SIDE; }
-inline B64 left(B64 board) { return (board & ~COLUMN_A) << 1; }
-inline B64 right(B64 board) { return (board & ~COLUMN_H) >> 1; }
-inline B64 up_left(B64 board) { return (board & ~COLUMN_A) << (BOARD_SIDE + 1); }
-inline B64 up_right(B64 board) { return (board & ~COLUMN_H) << (BOARD_SIDE - 1); }
-inline B64 down_left(B64 board) { return (board & ~COLUMN_A) >> (BOARD_SIDE - 1); }
-inline B64 down_right(B64 board) { return (board & ~COLUMN_H) >> (BOARD_SIDE + 1); }
+inline B64 up(B64 board) { return board << BOARD_SIZE; } // shifts out of the board would just be 0 anyway
+inline B64 down(B64 board) { return board >> BOARD_SIZE; }
+inline B64 left(B64 board) { return (board & COLUMN_A_INV) << 1; }
+inline B64 right(B64 board) { return (board & COLUMN_H_INV) >> 1; }
+inline B64 up_left(B64 board) { return (board & COLUMN_A_INV) << BOARD_SIDE_ADD1; }
+inline B64 up_right(B64 board) { return (board & COLUMN_H_INV) << BOARD_SIDE_SUB1; }
+inline B64 down_left(B64 board) { return (board & COLUMN_A_INV) >> BOARD_SIDE_SUB1; }
+inline B64 down_right(B64 board) { return (board & COLUMN_H_INV) >> BOARD_SIDE_ADD1; }
 
 // more complex sliding movemnt, each of these returns a board with all possible destinations
 B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece);

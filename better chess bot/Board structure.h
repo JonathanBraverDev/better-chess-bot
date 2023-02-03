@@ -37,26 +37,34 @@ inline bool operator==(const BoardPosition& lhs, const BoardPosition& rhs) {
     return memcmp(&lhs, &rhs, sizeof(BoardPosition));
 }
 
-const int BOARD_SIDE = 8;
+// constexpr > const, compiletime vs runtime evaluation, less runtime -> more better.
+constexpr int BOARD_SIZE = 8;
 
 // useful for out of bounds detection
-const B64 COLUMN_A = 0x8080808080808080ULL;
-const B64 COLUMN_B = 0x4040404040404040ULL;
-const B64 COLUMN_AB = COLUMN_A | COLUMN_B;
-const B64 COLUMN_C = 0x2020202020202020ULL;
-const B64 COLUMN_D = 0x1010101010101010ULL;
-const B64 COLUMB_F = 0x0404040404040404ULL;
-const B64 COLUMB_G = 0x0202020202020202ULL;
-const B64 COLUMN_H = 0x0101010101010101ULL;
-const B64 COLUMN_GH = COLUMB_G | COLUMN_H;
+constexpr B64 COLUMN_A = 0x8080808080808080ULL;
+constexpr B64 COLUMN_B = 0x4040404040404040ULL;
+constexpr B64 COLUMN_AB = COLUMN_A | COLUMN_B;
+constexpr B64 COLUMN_C = 0x2020202020202020ULL;
+constexpr B64 COLUMN_D = 0x1010101010101010ULL;
+constexpr B64 COLUMB_F = 0x0404040404040404ULL;
+constexpr B64 COLUMB_G = 0x0202020202020202ULL;
+constexpr B64 COLUMN_H = 0x0101010101010101ULL;
+constexpr B64 COLUMN_GH = COLUMB_G | COLUMN_H;
+
+// used mainly for board slides, defined here for clarity
+constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY stupid but I WAS calculating that every single call so... yeah
+constexpr int BOARD_SIDE_SUB1 = BOARD_SIZE - 1;
+constexpr B64 COLUMN_A_INV = ~COLUMN_A;
+constexpr B64 COLUMN_H_INV = ~COLUMN_H;
+
 // used for pawn first move/promotion
-const B64 ROW_1 = 0xFF00000000000000ULL;
-const B64 ROW_2 = 0x00FF000000000000ULL;
-//const B64 ROW_3 = 0x0000FF0000000000ULL;
-//const B64 ROW_4 = 0x000000FF00000000ULL;
-//const B64 ROW_5 = 0x00000000FF000000ULL;
-//const B64 ROW_6 = 0x0000000000FF0000ULL;
-const B64 ROW_7 = 0x000000000000FF00ULL;
-const B64 ROW_8 = 0x00000000000000FFULL;
-const B64 TILE_BLACK = 0xAAAAAAAAAAAAAAAAULL;
-const B64 TILE_WHITE = 0x5555555555555555ULL;
+constexpr B64 ROW_1 = 0xFF00000000000000ULL;
+constexpr B64 ROW_2 = 0x00FF000000000000ULL;
+//constexpr B64 ROW_3 = 0x0000FF0000000000ULL;
+//constexpr B64 ROW_4 = 0x000000FF00000000ULL;
+//constexpr B64 ROW_5 = 0x00000000FF000000ULL;
+//constexpr B64 ROW_6 = 0x0000000000FF0000ULL;
+constexpr B64 ROW_7 = 0x000000000000FF00ULL;
+constexpr B64 ROW_8 = 0x00000000000000FFULL;
+constexpr B64 TILE_BLACK = 0xAAAAAAAAAAAAAAAAULL;
+constexpr B64 TILE_WHITE = 0x5555555555555555ULL;

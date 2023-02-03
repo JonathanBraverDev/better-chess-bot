@@ -12,7 +12,7 @@
 void visualize_board(B64 board) {
     for (int i = 7; i >= 0; i--) {
         for (int j = 7; j >= 0; j--) {
-            if (get_bit(board, i * BOARD_SIDE + j)) {
+            if (get_bit(board, i * BOARD_SIZE + j)) {
                 std::cout << "X ";
             } else {
                 std::cout << "_ ";
@@ -38,7 +38,7 @@ int main()
     
 
     B64 empty_board = 0;
-    B64 piece = 1ULL << (5*BOARD_SIDE+2);
+    B64 piece = 1ULL << (5 * BOARD_SIZE + 2);
     
 
     std::cout << (double)microseconds << std::endl;
