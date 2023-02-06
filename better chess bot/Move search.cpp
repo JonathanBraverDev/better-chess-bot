@@ -14,8 +14,7 @@ int alphabeta(GameState state, int depth, int alpha, int beta, int eval, std::ve
     if (depth == 0 || state.gameOver())
         return eval;
 
-    for (Move move : moves)
-    {
+    for (Move move : moves) {
         // Apply the current move
         Make_move(position, move);
 

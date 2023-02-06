@@ -15,12 +15,12 @@ inline B64 removeLowestBit(B64 board) { return (board & board - 1); } // AND aft
 // overloads for uniform use
 inline B64 set_bit(B64 board, B64 bit_board) { return (board |= bit_board); }
 inline bool get_bit(B64 board, B64 bit_board) { return (board & bit_board); }
-inline B64 clear_bit(B64 board, B64 bit_board) { return (board &= bit_board); }
+inline B64 clear_bit(B64 board, B64 bit_board) { return (board &= ~bit_board); }
 inline B64 flip_bit(B64 board, B64 bit_board) { return (board ^= bit_board); }
 
 // big finders
-uint8_t lowestBitIndex64(B64 board);
-uint8_t lowestBitIndex64_s(B64 board);
+int lowestBitIndex64(B64 board);
+int lowestBitIndex64_s(B64 board);
 int count_bits64(B64 board);
 
 // piece handling

@@ -23,21 +23,21 @@ const uint8_t BitPositionLookup[64] = // hash table
 
 // finding the index of the least significant set bit in a 64 bit long word
 // De Bruijn Sequence
-uint8_t lowestBitIndex64(const B64 board) {
+int lowestBitIndex64(const B64 board) {
     // using the De Bruijn Sequence and checking the lookup table with the last 6 bits
     return BitPositionLookup[((uint64_t)(lowestBitBoard(board) * lookUpMultiplier)) >> 58];
 }
 
 // short version of the original, assumes input is ONLY ONE active bit and skips the board inversion
-uint8_t lowestBitIndex64_s(const B64 board) {
+int lowestBitIndex64_s(const B64 board) {
     return BitPositionLookup[((uint64_t)(board * lookUpMultiplier)) >> 58];
 }
 
 // fills a vector with bitBoards of all the active bits on the given board
 void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
-        
-    // GPT suggested a space reservation, this will instead be done in the caller
-    // max piece count is a practicly unachivable 10 (2 minor and 8 pawns)
+
+    // counting bits in caller to preserve enough sounds wastful
+    bit_boards.reserve(8); // max piece count is a practicly unachivable 10 (2 minor and 8 pawns)
 
     while (board != 0) { // check that there are pieces left to exstract
 

@@ -88,7 +88,7 @@ bool is_draw(GameState& current_state) {
     int repetion_count = 0;
 
     // this whole thing feels somewhat combersome
-    is_draw = (current_state.draw_timer == DRAW_MOVES) || // check if draw timer is up
+    is_draw = (current_state.draw_timer >= DRAW_MOVE_LIMIT) || // check if draw timer is up
               insufficient_material(original_state.position); // or the current position is a legal draw
 
     while (current_state.previous_state != nullptr && !is_draw) {

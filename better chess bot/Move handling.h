@@ -12,7 +12,7 @@ enum PieceType {
     KING
 };
 
-enum Color {
+enum PlayerColor {
     WHITE,
     BLACK
 };
@@ -28,7 +28,7 @@ enum MoveType {
 
 struct Piece {
     PieceType type;
-    Color color;
+    PlayerColor color;
 };
 
 struct Move {

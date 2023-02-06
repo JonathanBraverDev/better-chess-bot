@@ -2,7 +2,7 @@
 
 #include "Board structure.h"
 
-constexpr int DRAW_MOVES = 50;
+constexpr int DRAW_MOVE_LIMIT = 50;
 constexpr int DRAW_REPETITIONS = 3;
 
 // trying to avoind floats during computation (but also avoid overflow)
