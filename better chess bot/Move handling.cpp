@@ -62,7 +62,7 @@ void Toggle_castle(BoardPosition& position, const Move& move) {
 	}
 }
 
-void Move_piece(BoardPosition& position, const Move& move, bool reverse = false) {
+void Move_piece(BoardPosition& position, const Move& move, bool reverse) {
 	const bool is_white = move.piece.color == WHITE;
 	const B64 origin = (reverse ? move.destination : move.origin);
 	const B64 destination = (reverse ? move.origin : move.destination);

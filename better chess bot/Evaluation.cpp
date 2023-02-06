@@ -127,15 +127,15 @@ int material_eval(BoardPosition position) {
            (white_pawns   - black_pawns)   * PAWN_VALUE;
 }
 
-int count_sliding_attacks(B64(*move_generator)(B64, B64), B64 attacking_pieces, B64 target_board, B64 blockers) {
+int count_sliding_attacks(B64(*move_generator)(B64, B64), const B64 attacking_pieces, const B64 target_board, const B64 blockers) {
     return count_attacks(attacking_pieces, target_board, move_generator, nullptr, blockers);
 }
 
-int count_jumping_attacks(B64* move_source, B64 attacking_pieces, B64 target_board, int index_scale = 1, int first_index = 0) {
+int count_jumping_attacks(const B64* move_source, const B64 attacking_pieces, const B64 target_board, const int index_scale, const int first_index) {
     return count_attacks(attacking_pieces, target_board, nullptr, move_source, 0, index_scale, first_index);
 }
 
-int count_attacks(B64 attacking_pieces, B64 target_board, B64(*move_generator)(B64, B64) = nullptr, B64* move_source = nullptr, B64 blockers = 0, int index_scale = 1, int first_index = 0) {
+int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*move_generator)(B64, B64), const B64* move_source, const B64 blockers, const int index_scale, const int first_index) {
     std::vector<B64> potential_attackers;
     B64 attack_board;
     int attacks = 0;
@@ -158,7 +158,7 @@ int count_attacks(B64 attacking_pieces, B64 target_board, B64(*move_generator)(B
     return attacks;
 }
 
-int count_white_attacks(BoardPosition position, B64 target_board) {
+int count_white_attacks( const BoardPosition position, const B64 target_board) {
 
     const B64 blockers = position.white | position.black;
 
@@ -170,7 +170,7 @@ int count_white_attacks(BoardPosition position, B64 target_board) {
            count_jumping_attacks(pawn_attacks, position.white_pawns, target_board, 2); // pawns have 2 moves per tile
 }
 
-int count_black_attacks(BoardPosition position, B64 target_board) {
+int count_black_attacks(const BoardPosition position, const B64 target_board) {
 
     const B64 blockers = position.white | position.black;
 
