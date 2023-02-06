@@ -38,6 +38,8 @@ struct Move {
     MoveType type;
     PieceType captured_type;
     PieceType promoted_type;
+    B64 special_move_rigths; // avalible BEFORE the move, undoing this is such a headache i just gave up
+    // do i really need to be able to undo moves at all?
 };
 
 inline bool Is_castle(Move move) { return move.type == CASTLE_SHORT || move.type == CASTLE_LONG; };

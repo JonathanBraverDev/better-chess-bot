@@ -74,6 +74,13 @@ void Move_piece(BoardPosition& position, const Move& move, bool reverse) {
 	// update the piece board
 	switch (move.piece.type) {
 	case PAWN:
+		// this is very crude and pointless in undos as im recovering it from the moveitself
+		if ((origin & ROW_2) && (destination | ROW_4)) {
+			position.special_move_rigths ^= up(origin);
+		} else if ((origin & ROW_7) && (destination | ROW_5)) {
+			position.special_move_rigths ^= down(origin);
+		}
+
 		(is_white ? position.white_pawns : position.black_pawns) ^= origin;
 		(is_white ? position.white_pawns : position.black_pawns) |= destination;
 		break;
@@ -89,6 +96,8 @@ void Move_piece(BoardPosition& position, const Move& move, bool reverse) {
 		break;
 
 	case ROOK:
+		clear_bit(position.special_move_rigths, (reverse ? move.destination : move.origin)); // void castling right
+		// king should get voided too if both rooks moved, this is currently NOT done
 		(is_white ? position.white_rooks : position.black_rooks) ^= origin;
 		(is_white ? position.white_rooks : position.black_rooks) |= destination;
 		break;
@@ -99,6 +108,7 @@ void Move_piece(BoardPosition& position, const Move& move, bool reverse) {
 		break;
 
 	case KING:
+		position.special_move_rigths &= (is_white ? VOID_WHITE_CASTLE : VOID_BLACK_CASTLE); // void all castling rights
 		(is_white ? position.white_king : position.black_king) ^= origin;
 		(is_white ? position.white_king : position.black_king) |= destination;
 		break;
