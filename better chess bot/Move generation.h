@@ -19,8 +19,8 @@ constexpr int MAX_QUEEN_MOVES = MAX_ROOK_MOVES + MAX_BISHOP_MOVES;
 B64 generate_bishop_moves(const B64 all_pieces, B64 piece);
 B64 generate_rook_moves(const B64 all_pieces, B64 piece);
 B64 generate_queen_moves(const B64 all_pieces, B64 piece);
-B64 generate_white_pawn_jump(const B64 all_pieces, B64 piece);
-B64 generate_black_pawn_jump(const B64 all_pieces, B64 piece);
+B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*direction)(B64));
+inline B64 generate_pawn_jump(const B64 blockers, B64 piece, PlayerColor color);
 
 void prepare_king_moves();
 void prepare_knight_moves();

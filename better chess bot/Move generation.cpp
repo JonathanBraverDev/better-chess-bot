@@ -1,48 +1,42 @@
 
 #include "Move generation.h"
 
-B64 generate_bishop_moves(const B64 all_pieces, B64 piece) {
+B64 generate_bishop_moves(const B64 blockers, B64 piece) {
 
-    return slide_up_left(all_pieces, piece) |
-           slide_up_right(all_pieces, piece) |
-           slide_down_left(all_pieces, piece) |
-           slide_down_right(all_pieces, piece);
+    return slide_up_left(blockers, piece) |
+           slide_up_right(blockers, piece) |
+           slide_down_left(blockers, piece) |
+           slide_down_right(blockers, piece);
 }
 
-B64 generate_rook_moves(const B64 all_pieces, B64 piece) {
+B64 generate_rook_moves(const B64 blockers, B64 piece) {
 
-    return slide_up(all_pieces, piece) |
-           slide_down(all_pieces, piece) |
-           slide_left(all_pieces, piece) |
-           slide_right(all_pieces, piece);
+    return slide_up(blockers, piece) |
+           slide_down(blockers, piece) |
+           slide_left(blockers, piece) |
+           slide_right(blockers, piece);
 }
 
-B64 generate_queen_moves(const B64 all_pieces, B64 piece) {
+B64 generate_queen_moves(const B64 blockers, B64 piece) {
 
-    return generate_bishop_moves(all_pieces, piece) |
-           generate_rook_moves(all_pieces, piece);
+    return generate_bishop_moves(blockers, piece) |
+           generate_rook_moves(blockers, piece);
 }
 
-B64 generate_white_pawn_jump(const B64 all_pieces, B64 piece) {
+B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*direction)(B64)) {
     B64 moves = 0;
-    if (!((up(piece) & all_pieces) |
-        ((up(up(piece)) & all_pieces)))) {
-        moves |= up(up(piece));
+    if (!((direction(piece) & blockers) |
+        ((direction(direction(piece)) & blockers)))) {
+        moves |= direction(direction(piece));
     }
 
     return moves;
 }
 
-B64 generate_black_pawn_jump(const B64 all_pieces, B64 piece) {
-    B64 moves = 0;
-    if (!((down(piece) & all_pieces) |
-        ((down(down(piece)) & all_pieces)))) {
-        moves |= down(down(piece));
+inline B64 generate_pawn_jump(const B64 blockers, B64 piece, PlayerColor color) {
+    generate_pawn_jump(blockers, piece, (color == WHITE ? &up : &down));
     }
       
-    return moves;
-}
-
 void prepare_king_moves() {
     B64 current_board = 1;
     for (size_t i = 0; i < 64; i++) {
@@ -77,7 +71,7 @@ void prepare_white_pawn_moves() {
         // missing promotion logic
         pawn_moves[i] = up(current_board);
         // pawn jumps require sliding piece logic without final capture
-        // missing appassant logic
+        // missing en passant logic
 
         pawn_attacks[i] = up_left(current_board) |
                           up_right(current_board);
@@ -92,7 +86,7 @@ void prepare_black_pawn_moves() {
         // missing promotion logic
         pawn_moves[i] = down(current_board);
         // pawn jumps require sliding piece logic without final capture
-        // missing appassant logic
+        // missing en passant logic
 
         pawn_attacks[i] = down_left(current_board) |
                           down_right(current_board);
@@ -108,7 +102,6 @@ void prepare_pawn_moves() {
     prepare_white_pawn_moves();
     prepare_black_pawn_moves();
 }
-
 
 void possible_simple_positions(std::vector<BoardPosition> positions, const BoardPosition position, const PlayerColor color, const B64 pieces, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
     std::vector<B64> single_pieces;                                                                                                                                                                   

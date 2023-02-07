@@ -46,13 +46,13 @@ void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
     }
 }
 
-B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece) {
+B64 slide(B64(*direction)(B64), const B64 blockers, B64 piece) {
     B64 moves = 0;
 
     do {
         piece = direction(piece); // running the passed function and moving the piece
         moves |= piece; // adding the move to the move board
-    } while (piece && !(piece & all_pieces)); // stop if piece is 0 (shifted out) or a collision occured on the last move
+    } while (piece && !(piece & blockers)); // stop if piece is 0 (shifted out) or a collision occured on the last move
     // colisions are added to be figured out by the color making the move, this calculation needs to be fast
 
     return moves;
