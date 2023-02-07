@@ -32,3 +32,4 @@ void prepare_black_pawn_moves();
 void prepare_pawn_moves();
 
 void possible_piece_positions(std::vector<BoardPosition> positions, const BoardPosition position, const PlayerColor color, const B64 pieces, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64) = nullptr, const B64* move_source = nullptr, const int index_scale = 1, const int first_index = 0);
+void possible_pawn_promotions(std::vector<BoardPosition>& positions, BoardPosition position, const PlayerColor color);
