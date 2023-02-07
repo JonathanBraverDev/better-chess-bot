@@ -51,12 +51,6 @@ constexpr B64 COLUMB_G = 0x0202020202020202ULL;
 constexpr B64 COLUMN_H = 0x0101010101010101ULL;
 constexpr B64 COLUMN_GH = COLUMB_G | COLUMN_H;
 
-// used mainly for board slides, defined here for clarity
-constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY stupid but I WAS calculating that every single call so... yeah
-constexpr int BOARD_SIDE_SUB1 = BOARD_SIZE - 1;
-constexpr B64 COLUMN_A_INV = ~COLUMN_A;
-constexpr B64 COLUMN_H_INV = ~COLUMN_H;
-
 // used for pawn first move/promotion
 constexpr B64 ROW_1 = 0xFF00000000000000ULL;
 constexpr B64 ROW_2 = 0x00FF000000000000ULL;
@@ -69,5 +63,13 @@ constexpr B64 ROW_8 = 0x00000000000000FFULL;
 constexpr B64 TILE_BLACK = 0xAAAAAAAAAAAAAAAAULL;
 constexpr B64 TILE_WHITE = 0x5555555555555555ULL;
 
+// programmatically needed splits of the board
 constexpr B64 VOID_WHITE_CASTLE = ~ROW_1;
 constexpr B64 VOID_BLACK_CASTLE = ~ROW_8;
+constexpr B64 VOID_EN_PASSANT = ~ROW_3 | ~ROW_6;
+
+// used mainly for board slides, defined here for clarity
+constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY stupid but I WAS calculating that every single call so... yeah
+constexpr int BOARD_SIDE_SUB1 = BOARD_SIZE - 1;
+constexpr B64 COLUMN_A_INV = ~COLUMN_A;
+constexpr B64 COLUMN_H_INV = ~COLUMN_H;

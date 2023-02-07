@@ -12,6 +12,9 @@ static B64 pawn_attacks[64 * 2]; // further conditional split
 constexpr int MAX_ROOK_MOVES = 14;
 constexpr int MAX_BISHOP_MOVES = 13;
 constexpr int MAX_QUEEN_MOVES = MAX_ROOK_MOVES + MAX_BISHOP_MOVES;
+constexpr int MAX_KNIGHT_MOVES = 8;
+constexpr int MAX_PAWN_MOVES = 12; // YES, actually, kill both sides and forward, all being a promotion
+constexpr int EXPECTED_PAWN_MOVES = 3; // a MUCH more reasonable number, even this is too much for the average pawn
 
 // rooks always have 14 potential moves, 7 horizontal and 7 vertical
 // bishops can have as little as 7 moves and up to 13 (corner and center respectivly)
@@ -28,4 +31,4 @@ void prepare_white_pawn_moves();
 void prepare_black_pawn_moves();
 void prepare_pawn_moves();
 
-void possible_simple_positions(std::vector<BoardPosition> positions, const BoardPosition position, const PlayerColor color, const B64 pieces, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64) = nullptr, const B64* move_source = nullptr, const int index_scale = 1, const int first_index = 0);
+void possible_piece_positions(std::vector<BoardPosition> positions, const BoardPosition position, const PlayerColor color, const B64 pieces, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64) = nullptr, const B64* move_source = nullptr, const int index_scale = 1, const int first_index = 0);
