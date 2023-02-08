@@ -3,13 +3,13 @@
 #include "Board structure.h"
 
 enum PieceType {
-    NONE,
     PAWN,
     KNIGHT,
     BISHOP,
     ROOK,
     QUEEN,
-    KING
+    KING,
+    NONE
 };
 
 enum PlayerColor {

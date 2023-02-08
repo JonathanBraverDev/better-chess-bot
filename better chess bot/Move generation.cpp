@@ -104,48 +104,69 @@ void prepare_pawn_moves() {
     prepare_black_pawn_moves();
 }
 
-void possible_piece_positions(std::vector<BoardPosition> positions, const BoardPosition position, const PlayerColor color, const B64 pieces, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
+void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition &new_position, const BoardPosition position, const PlayerColor color, const B64 piece, B64* current_pieces, const B64* enemy_pawns, const B64* enemy_knights, const B64* enemy_bishops, const B64* enemy_rooks, const B64* enemy_queens, const B64* move_source = nullptr) {
+    for (B64 move : single_moves) {
+        *current_pieces ^= move; // add the current piece to its destination
+        // delete any enemy piece in the destination
+        if ((move & position.special_move_rigths) && move_source == pawn_attacks) { // is en passant is used, remove the pawn
+            clear_bit(*enemy_pawns, (color == WHITE ? down(piece) : up(piece))); // a white captures below it, a black above
+        } else {
+            clear_bit(*enemy_pawns, move);
+        }
+        clear_bit(*enemy_knights, move);
+        clear_bit(*enemy_bishops, move);
+        clear_bit(*enemy_rooks, move);
+        clear_bit(*enemy_queens, move);
+        new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant after any (supposed) capture
+        positions.push_back(new_position);
+    }
+}
+
+void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, const BoardPosition position, const PlayerColor color, const B64 piece, const B64 blockers, B64 potential_moves ,B64* current_pieces) {
+    new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant as none of the considered next moves use it
+    *current_pieces ^= potential_moves; // add the current piece to its destination
+    positions.push_back(new_position);
+
+    if (color == WHITE && (piece & ROW_2) || // check if hte pawn is on its innitial row
+        !color == WHITE && (piece & ROW_7)) {
+        *current_pieces ^= potential_moves; // remove the piece before the variable is overwritten
+        potential_moves = generate_pawn_jump(blockers, piece, color);
+
+        if (potential_moves != 0) { // if a jump is legal, add it
+            *current_pieces ^= potential_moves;
+
+            new_position.special_move_rigths ^= (color == WHITE ? up(piece) : down(piece)); // add en passant
+            // maybe only add it when it can be used? but it needs to be deleted each turn regardless
+            positions.push_back(new_position);
+        }
+    }
+}
+
+void possible_piece_positions(std::vector<BoardPosition>& positions, const BoardPosition position, const PlayerColor color, const B64 pieces, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
     std::vector<B64> single_pieces;                                                                                                                                                                   
     std::vector<B64> single_moves;                                                                                                                                                                     
     BoardPosition new_position = {};                                                                                                                                                                  
     B64 potential_moves = 0;    
     const bool is_white = color == WHITE;
 
-    B64* current_pieces = 0;
+    // pointer tables for both colors
+    B64* white_pieces[6] = { &new_position.black_pawns, &new_position.black_knights, &new_position.white_bishops,
+                             &new_position.black_rooks, &new_position.black_queens, &new_position.white_king };
 
-    switch (piece_type) {
-    case QUEEN:
-        current_pieces = (is_white ? &new_position.white_queens : &new_position.black_queens);
-        break;
+    B64* black_pieces[6] = { &new_position.black_pawns, &new_position.black_knights, &new_position.black_bishops,
+                             &new_position.black_rooks, &new_position.black_queens, &new_position.black_king };
 
-    case ROOK:
-        current_pieces = (is_white ? &new_position.white_rooks : &new_position.black_rooks);
-        break;
-
-    case BISHOP:
-        current_pieces = (is_white ? &new_position.white_bishops : &new_position.black_bishops);
-        break;
-
-    case KNIGHT:
-        current_pieces = (is_white ? &new_position.white_knights : &new_position.black_knights);
-        break;
-
-    case PAWN:
-        current_pieces = (is_white ? &new_position.white_knights : &new_position.black_knights);
-        break;
-
-    case KING:
-        current_pieces = (is_white ? &new_position.white_knights : &new_position.black_knights);
-        break;
-    }
+    // current piece board pointer
+    B64* current_pieces = is_white ? white_pieces[piece_type] : black_pieces[piece_type];
 
     // shorthand enemy pieces
-    const B64* enemy_pawns = (is_white ? &new_position.black_pawns : &new_position.white_pawns);
-    const B64* enemy_knights = (is_white ? &new_position.black_knights : &new_position.white_knights);
-    const B64* enemy_bishops = (is_white ? &new_position.black_bishops : &new_position.white_bishops);
-    const B64* enemy_rooks = (is_white ? &new_position.black_rooks : &new_position.white_rooks);
-    const B64* enemy_queens = (is_white ? &new_position.black_queens : &new_position.white_queens);
-    const B64* enemy_king = (is_white ? &new_position.black_king : &new_position.white_king);
+    const B64* enemy_pawns = (is_white ? black_pieces[PAWN] : white_pieces[PAWN]);
+    const B64* enemy_knights = (is_white ? black_pieces[KNIGHT] : white_pieces[KNIGHT]);
+    const B64* enemy_bishops = (is_white ? black_pieces[BISHOP] : white_pieces[BISHOP]);
+    const B64* enemy_rooks = (is_white ? black_pieces[ROOK] : white_pieces[ROOK]);
+    const B64* enemy_queens = (is_white ? black_pieces[QUEEN] : white_pieces[QUEEN]);
+    const B64* enemy_king = (is_white ? black_pieces[KING] : white_pieces[KING]);
+
 
     seperate_bits(pieces, single_pieces); // get a vector of all pieces
     for (B64 piece : single_pieces) {
@@ -159,41 +180,11 @@ void possible_piece_positions(std::vector<BoardPosition> positions, const BoardP
         seperate_bits(potential_moves, single_moves); // seperate the generated moves
         if (move_source != pawn_moves) {
             // handle moves that kill the target
-            for (B64 move : single_moves) {
-                *current_pieces ^= move; // add the current piece to its destination
-                // delete any enemy piece in the destination
-                if ((move & position.special_move_rigths) && move_source == pawn_attacks) { // is en passant is used, remove the pawn
-                    clear_bit(*enemy_pawns, (is_white ? down(piece) : up(piece))); // a white captures below it, a black above
-                } else {
-                    clear_bit(*enemy_pawns, move);
-                }
-                clear_bit(*enemy_knights, move);
-                clear_bit(*enemy_bishops, move);
-                clear_bit(*enemy_rooks, move);
-                clear_bit(*enemy_queens, move);
-                new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant after any (supposed) capture
-                positions.push_back(new_position);
-            }
-        } else { 
+            possible_capture_positions(positions, single_moves, new_position, position, color, piece, current_pieces, enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens, move_source);
+        } else {
             // only one regular move is avalible to pawns, it is added if legal and a jump is considered
             if (potential_moves != 0) {
-                new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant as none of the considered next moves use it
-                *current_pieces ^= potential_moves; // add the current piece to its destination
-                positions.push_back(new_position);
-
-                if (is_white && (piece & ROW_2) || // check if hte pawn is on its innitial row
-                    !is_white && (piece & ROW_7)) {
-                    *current_pieces ^= potential_moves; // remove the piece before the variable is overwritten
-                    potential_moves = generate_pawn_jump(blockers, piece, color);
-
-                    if (potential_moves != 0) { // if a jump is legal, add it
-                        *current_pieces ^= potential_moves;
-                        
-                        new_position.special_move_rigths ^= (is_white ? up(piece) : down(piece)); // add en passant
-                        // maybe only add it when it can be used? but it needs to be deleted each turn regardless
-                        positions.push_back(new_position);
-                    }
-                }
+                possible_pawn_move_positions(positions, new_position, position, color, piece, blockers, potential_moves, current_pieces);
             }
         }
     }
