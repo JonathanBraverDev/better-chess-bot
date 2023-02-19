@@ -5,9 +5,9 @@
 #include <chrono>
 
 #include "Board structure.h"
-#include "Board operation.h"
+#include "Board operations.h"
 #include "Evaluation.h"
-#include "Move generation.h"
+#include "Board generation.h"
 
 void visualize_board(B64 board) {
     for (int i = 7; i >= 0; i--) {

@@ -1,5 +1,5 @@
 
-#include "Move generation.h"
+#include "Board generation.h"
 
 B64 generate_bishop_moves(const B64 blockers, B64 piece) {
 
@@ -129,7 +129,7 @@ void possible_pawn_promotions(std::vector<BoardPosition>& positions, BoardPositi
 	positions.push_back(position); // add knight
 }
 
-void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition &new_position, const BoardPosition position, const PlayerColor color, const B64 piece, B64* current_pieces, const B64* enemy_pawns, const B64* enemy_knights, const B64* enemy_bishops, const B64* enemy_rooks, const B64* enemy_queens, const B64* move_source = nullptr) {
+void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition &new_position, const BoardPosition position, const PlayerColor color, const B64 piece, B64* current_pieces, const B64* enemy_pawns, const B64* enemy_knights, const B64* enemy_bishops, const B64* enemy_rooks, const B64* enemy_queens, const B64* move_source) {
 	const bool is_white = color == WHITE;
 
 	for (B64 move : single_moves) {

@@ -24,7 +24,13 @@
     <ClCompile Include="Evaluation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Move generation.cpp">
+    <ClCompile Include="Board generation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Move handling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Move search.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,13 +38,19 @@
     <ClInclude Include="Board structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Board operation.h">
+    <ClInclude Include="Board operations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Evaluation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Move generation.h">
+    <ClInclude Include="Board generation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Move handling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Move search.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

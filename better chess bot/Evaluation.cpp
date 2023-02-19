@@ -1,8 +1,8 @@
 
 #include "Evaluation.h"
 #include "Board structure.h"
-#include "Board operation.h"
-#include "Move generation.h"
+#include "Board operations.h"
+#include "Board generation.h"
 #include "MoveProvider.h"
 
 /*

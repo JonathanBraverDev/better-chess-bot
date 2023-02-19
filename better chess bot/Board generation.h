@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Board structure.h"
-#include "Board operation.h"
+#include "Board operations.h"
 #include "Move handling.h"
 
 static B64 king_moves[64];

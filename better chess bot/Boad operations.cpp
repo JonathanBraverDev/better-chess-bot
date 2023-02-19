@@ -1,5 +1,5 @@
 
-#include "Board operation.h"
+#include "Board operations.h"
 
 // counts the active bits in a given board, effective for almost empty boards
 int count_bits64(B64 board) {
