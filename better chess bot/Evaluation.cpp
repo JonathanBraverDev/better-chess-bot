@@ -144,13 +144,40 @@ B64 attacking_pieces(const BoardPosition position, const B64 target_board, const
 }
 
 bool is_checkmate(BoardPosition position, PlayerColor attacker_color) {
-    const bool is_white = attacker_color == WHITE;
-    const B64 attacked_king = (is_white ? position.black_king : position.white_king);
+    const bool is_attacker_white = attacker_color == WHITE;
+    const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
+    const B64 attackers = attacking_pieces(position, attacked_king, attacker_color);
 
+    B64 possible_king_moves;
+    B64 curr_move;
     bool checkmate = false;
 
-    if (attacking_pieces(position, attacked_king, attacker_color)) {
-        // check if can be blocked
+    if (attackers) {
+        if (count_bits64(attacked_king) > 1) {
+            // get possible moves for the poor poor king
+            possible_king_moves = king_moves[lowestBitIndex64_s(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
+
+            // check all moves
+            while (possible_king_moves) {
+                curr_move = lowestBitBoard(possible_king_moves);
+
+                // update the king position
+                (is_attacker_white ? position.black_king = curr_move
+                                   : position.white_king = curr_move);
+
+                if (is_check(position, attacker_color)) {
+                    checkmate = true;
+                    break;
+                }
+
+                possible_king_moves ^= curr_move; // delete the move
+            }
+        }
+        // need the following functions:
+        // kill target at tile X
+        // find attack direction
+        // move to any one of X tiles on a borad
+        // both can use a very similar logic, with the pawn attack/move being toggles
     }
 
     return checkmate;
