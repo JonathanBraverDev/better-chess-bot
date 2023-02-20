@@ -104,6 +104,58 @@ bool is_draw(GameState& current_state) {
     return is_draw;
 }
 
+bool is_check(BoardPosition position, PlayerColor attacker_color) {
+    const bool is_white = attacker_color == WHITE;
+    const B64 attacked_king = (is_white ? position.black_king : position.white_king);
+    const int tile = lowestBitIndex64_s(attacked_king);
+    B64 slide_attackes;
+
+    bool check = false;
+
+    // perform fastest bit check first
+    if ((knight_moves[tile] & (is_white ? position.white_knights : position.black_knights)) ||
+        (pawn_attacks[tile] & (is_white ? position.white_pawns : position.black_pawns))) {
+
+        check = true;
+
+    } else {
+        // can be futher split into multiple checks but this is WAY more readable
+        slide_attackes = generate_queen_moves(position.white | position.black, attacked_king);
+
+        check = ((slide_attackes & (is_white ? position.white_queens : position.black_queens)) ||
+                 (slide_attackes & (is_white ? position.white_rooks : position.black_rooks)) ||
+                 (slide_attackes & (is_white ? position.white_bishops : position.black_bishops)));
+    }
+    
+    return check;
+}
+
+B64 attacking_pieces(const BoardPosition position, const B64 target_board, const PlayerColor attacker_color) {
+    const bool is_white = attacker_color == WHITE;
+    const int tile = lowestBitIndex64_s(target_board);
+    const B64 slide_attackes = generate_queen_moves(position.white | position.black, target_board);
+
+    return (knight_moves[tile] & (is_white ? position.white_knights : position.black_knights)) |
+           (pawn_attacks[tile] & (is_white ? position.white_pawns : position.black_pawns)) |
+           (king_moves[tile] & (is_white ? position.white_king : position.black_king)) | // irrelevent for checks but quick and generic
+           (slide_attackes & (is_white ? position.white_queens : position.black_queens)) |
+           (slide_attackes & (is_white ? position.white_rooks : position.black_rooks)) |
+           (slide_attackes & (is_white ? position.white_bishops : position.black_bishops));
+}
+
+bool is_checkmate(BoardPosition position, PlayerColor attacker_color) {
+    const bool is_white = attacker_color == WHITE;
+    const B64 attacked_king = (is_white ? position.black_king : position.white_king);
+
+    bool checkmate = false;
+
+    if (attacking_pieces(position, attacked_king, attacker_color)) {
+        // check if can be blocked
+    }
+
+    return checkmate;
+}
+
 int material_eval(BoardPosition position) {
     int white_queens, white_rooks, white_bishops, white_knights, white_pawns;
     int black_queens, black_rooks, black_bishops, black_knights, black_pawns;

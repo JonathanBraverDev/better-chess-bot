@@ -25,12 +25,12 @@ const uint8_t BitPositionLookup[64] = // hash table
 // De Bruijn Sequence
 int lowestBitIndex64(const B64 board) {
     // using the De Bruijn Sequence and checking the lookup table with the last 6 bits
-    return BitPositionLookup[((uint64_t)(lowestBitBoard(board) * lookUpMultiplier)) >> 58];
+    return BitPositionLookup[((lowestBitBoard(board) * lookUpMultiplier)) >> 58];
 }
 
 // short version of the original, assumes input is ONLY ONE active bit and skips the board inversion
 int lowestBitIndex64_s(const B64 board) {
-    return BitPositionLookup[((uint64_t)(board * lookUpMultiplier)) >> 58];
+    return BitPositionLookup[((board * lookUpMultiplier)) >> 58];
 }
 
 // fills a vector with bitBoards of all the active bits on the given board

@@ -16,6 +16,9 @@ constexpr int DRAW_VALUE = 0;
 
 // simple eval
 bool is_draw(GameState& current_state);
+bool is_check(BoardPosition position, PlayerColor attacker_color);
+B64 attacking_pieces(const BoardPosition position, const B64 target_board, const PlayerColor attacker_color);
+bool is_checkmate(BoardPosition position, PlayerColor attacker_color);
 int material_eval(BoardPosition position);
 
 // less simple eval
