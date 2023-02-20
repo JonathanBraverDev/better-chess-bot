@@ -191,8 +191,8 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
     const bool is_white = color == WHITE;
 
     // pointer tables for both colors
-    B64* white_pieces[6] = { &new_position.black_pawns, &new_position.black_knights, &new_position.white_bishops,
-                             &new_position.black_rooks, &new_position.black_queens, &new_position.white_king };
+    B64* white_pieces[6] = { &new_position.white_pawns, &new_position.white_knights, &new_position.white_bishops,
+                             &new_position.white_rooks, &new_position.white_queens, &new_position.white_king };
 
     B64* black_pieces[6] = { &new_position.black_pawns, &new_position.black_knights, &new_position.black_bishops,
                              &new_position.black_rooks, &new_position.black_queens, &new_position.black_king };
