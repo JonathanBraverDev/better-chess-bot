@@ -18,6 +18,7 @@ constexpr int DRAW_VALUE = 0;
 bool is_draw(GameState& current_state);
 bool is_check(BoardPosition position, PlayerColor attacker_color);
 B64 attacking_pieces(const BoardPosition position, const B64 target_board, const PlayerColor attacker_color);
+B64 get_connecting_tiles(const B64 sliding_moves, const B64 start, const B64 end);
 bool is_checkmate(BoardPosition position, PlayerColor attacker_color);
 int material_eval(BoardPosition position);
 

@@ -143,35 +143,58 @@ B64 attacking_pieces(const BoardPosition position, const B64 target_board, const
            (slide_attackes & (is_white ? position.white_bishops : position.black_bishops));
 }
 
+bool can_king_run(BoardPosition position, PlayerColor attacker_color, B64 attacked_king) {
+    const bool is_attacker_white = attacker_color == WHITE;
+    B64 possible_king_moves = king_moves[lowestBitIndex64_s(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
+    B64 curr_move;
+    bool can_run = false;
+
+    // check all moves
+    while (possible_king_moves) {
+        curr_move = lowestBitBoard(possible_king_moves);
+
+        // update the king position
+        (is_attacker_white ? position.black_king = curr_move
+            : position.white_king = curr_move);
+
+        if (is_check(position, attacker_color)) {
+            can_run = true;
+            break;
+        }
+
+        possible_king_moves ^= curr_move; // delete the move
+    }
+    
+    return can_run;
+}
+
+// !!! make sure this makes sence !!!
+B64 get_connecting_tiles(const B64 sliding_moves, const B64 start, const B64 end) {
+
+    // Compute the direction and distance between 'start' and 'end'
+    const B64 direction = start ^ end;
+    
+    // Remove file boundaries
+    B64 line = (direction & 0x7E7E7E7E7E7E7E00ULL) >> 1;
+    
+    // Compute the mask for the line between 'start' and 'end'
+    line |= line >> 1;
+    line |= line << 1;
+    line &= sliding_moves;
+
+    return line;
+}
+
 bool is_checkmate(BoardPosition position, PlayerColor attacker_color) {
     const bool is_attacker_white = attacker_color == WHITE;
     const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
     const B64 attackers = attacking_pieces(position, attacked_king, attacker_color);
 
-    B64 possible_king_moves;
-    B64 curr_move;
     bool checkmate = false;
 
     if (attackers) {
         if (count_bits64(attacked_king) > 1) {
-            // get possible moves for the poor poor king
-            possible_king_moves = king_moves[lowestBitIndex64_s(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
-
-            // check all moves
-            while (possible_king_moves) {
-                curr_move = lowestBitBoard(possible_king_moves);
-
-                // update the king position
-                (is_attacker_white ? position.black_king = curr_move
-                                   : position.white_king = curr_move);
-
-                if (is_check(position, attacker_color)) {
-                    checkmate = true;
-                    break;
-                }
-
-                possible_king_moves ^= curr_move; // delete the move
-            }
+            checkmate = can_king_run(position, attacker_color, attacked_king);
         }
         // need the following functions:
         // kill target at tile X

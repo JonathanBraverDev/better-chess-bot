@@ -27,29 +27,32 @@ bool is_piece_taken(const GameState state, const BoardPosition position) {
                      : (count_bits64(state.position.white) == count_bits64(position.white)));
 }
 
-// GPT did a massive goof with this one
 int alphabeta(GameState state, int depth, int alpha, int beta) {
 
+    PlayerColor current_player = determine_player(state);
     std::vector<BoardPosition> positions;
     int eval = 0;
 
     if (depth == 0) {
         eval = material_eval(state.position); // calculate current position // the most basic function is used for now
-    } else if (is_checkmate(state)) {
-        eval = (determine_player(state) == WHITE ? WIN_VALUE : -WIN_VALUE); // set value according to winning player
+    } else if (is_checkmate(state.position, current_player)) {
+        eval = adjust_by_player(current_player, -WIN_VALUE); // set value as losing for the current player
     } else if (is_draw(state)) {
         eval = 0;
     } else {
         positions = possible_positions(state.position, determine_player(state));
+        // move ordering goes here, better first = more pruning
+        // perhaps i can use the "Move" structure to prefer captures, especially with pawns
+        // that might reqire considerable proccesing
     }
 
     for (const BoardPosition& position : positions) {
 
         // Recursively search the resulting position from the perspective of the opposite player
-        eval = std::max(eval, -alphabeta(generate_state(state, position), depth - 1, -beta, -alpha));
+        eval = std::max(eval, -alphabeta(generate_state(state, position), depth - 1, -beta, -alpha)); // alpha and beta are passed inverted
 
         // Update alpha
-        alpha = std::max(alpha, eval);
+        alpha = std::max(alpha, eval, WIN_VALUE - 100 * depth); // last argument to set a clear preference for early wins
 
         // If alpha is greater than or equal to beta, terminate the branch early
         if (beta <= alpha)
