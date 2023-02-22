@@ -38,7 +38,7 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
     } else if (is_checkmate(state.position, current_player)) {
         eval = adjust_by_player(current_player, -WIN_VALUE); // set value as losing for the current player
     } else if (is_draw(state)) {
-        eval = 0;
+        eval = DRAW_VALUE;
     } else {
         positions = possible_positions(state.position, determine_player(state));
         // move ordering goes here, better first = more pruning
