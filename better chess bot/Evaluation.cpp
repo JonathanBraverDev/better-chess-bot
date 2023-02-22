@@ -103,7 +103,7 @@ bool is_draw(GameState& current_state) {
 bool is_check(BoardPosition position, PlayerColor attacker_color) {
     const bool is_white = attacker_color == WHITE;
     const B64 attacked_king = (is_white ? position.black_king : position.white_king);
-    const int tile = lowestBitIndex64_s(attacked_king);
+    const int tile = lowest_single_bit_index(attacked_king);
     B64 slide_attackes;
 
     bool check = false;
@@ -128,7 +128,7 @@ bool is_check(BoardPosition position, PlayerColor attacker_color) {
 
 B64 attacking_pieces(const BoardPosition position, const B64 target_board, const PlayerColor attacker_color) {
     const bool is_white = attacker_color == WHITE;
-    const int tile = lowestBitIndex64_s(target_board);
+    const int tile = lowest_single_bit_index(target_board);
     const B64 slide_attackes = generate_queen_moves(position.white | position.black, target_board);
 
     return (knight_moves[tile] & (is_white ? position.white_knights : position.black_knights)) |
@@ -141,13 +141,13 @@ B64 attacking_pieces(const BoardPosition position, const B64 target_board, const
 
 bool can_king_run(BoardPosition position, PlayerColor attacker_color, B64 attacked_king) {
     const bool is_attacker_white = attacker_color == WHITE;
-    B64 possible_king_moves = king_moves[lowestBitIndex64_s(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
+    B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
     B64 curr_move;
     bool can_run = false;
 
     // check all moves
     while (possible_king_moves) {
-        curr_move = lowestBitBoard(possible_king_moves);
+        curr_move = lowest_bit_board(possible_king_moves);
 
         // update the king position
         (is_attacker_white ? position.black_king = curr_move
@@ -244,7 +244,7 @@ int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*move_
         if (move_generator) {
             attack_board = move_generator(blockers, potential_attackers.back());
         } else {
-            attack_board = move_source[first_index + index_scale * lowestBitIndex64(potential_attackers.back())];
+            attack_board = move_source[first_index + index_scale * lowest_bit_index(potential_attackers.back())];
         }
 
         if (attack_board && target_board) {

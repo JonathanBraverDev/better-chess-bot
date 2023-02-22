@@ -10,8 +10,8 @@ inline B64 set_bit(B64 board, int bit) { return (board |= (1ULL << bit)); } // s
 inline bool get_bit(B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
 inline B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
 inline B64 flip_bit(B64 board, int bit) { return (board ^= (1ULL << bit)); } // shift 1 to position and set to XOR
-inline B64 lowestBitBoard(B64 board) { return (board & -board); } // AND with 2's compliment to get the lowest bit (very cool)
-inline B64 removeLowestBit(B64 board) { return (board & board - 1); } // AND after -1, garantees removal of exactly one lowest bit
+inline B64 lowest_bit_board(B64 board) { return (board & -board); } // AND with 2's compliment to get the lowest bit (very cool)
+inline B64 remove_lowest_bit(B64 board) { return (board & board - 1); } // AND after -1, garantees removal of exactly one lowest bit
 // overloads for uniform use
 inline B64 set_bit(B64 board, B64 bit_board) { return (board |= bit_board); }
 inline bool get_bit(B64 board, B64 bit_board) { return (board & bit_board); }
@@ -19,8 +19,8 @@ inline B64 clear_bit(B64 board, B64 bit_board) { return (board &= ~bit_board); }
 inline B64 flip_bit(B64 board, B64 bit_board) { return (board ^= bit_board); }
 
 // big finders
-int lowestBitIndex64(B64 board);
-int lowestBitIndex64_s(B64 board);
+int lowest_bit_index(B64 board);
+int lowest_single_bit_index(B64 board);
 int count_bits64(B64 board);
 
 // piece handling

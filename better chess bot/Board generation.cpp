@@ -216,7 +216,7 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
         if (move_generator != nullptr) {
             potential_moves = move_generator(blockers, pieces) & valid_destinations; // get the valid moves per piece
         } else {
-            potential_moves = move_source[first_index + index_scale * lowestBitIndex64_s(piece)];
+            potential_moves = move_source[first_index + index_scale * lowest_single_bit_index(piece)];
         }
         seperate_bits(potential_moves, single_moves); // seperate the generated moves
         if (move_source != pawn_moves) {

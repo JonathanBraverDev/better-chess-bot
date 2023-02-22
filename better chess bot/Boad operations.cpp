@@ -5,7 +5,7 @@
 int count_bits64(B64 board) {
     int count;
     for (count = 0; board; count++) // runs untill board is zeroed out, counting up
-        board = removeLowestBit(board); // removes one bit per iteration
+        board = remove_lowest_bit(board); // removes one bit per iteration
     return count;
 }
 
@@ -23,13 +23,13 @@ const uint8_t BitPositionLookup[64] = // hash table
 
 // finding the index of the least significant set bit in a 64 bit long word
 // De Bruijn Sequence
-int lowestBitIndex64(const B64 board) {
+int lowest_bit_index(const B64 board) {
     // using the De Bruijn Sequence and checking the lookup table with the last 6 bits
-    return BitPositionLookup[((lowestBitBoard(board) * lookUpMultiplier)) >> 58];
+    return BitPositionLookup[((lowest_bit_board(board) * lookUpMultiplier)) >> 58];
 }
 
-// short version of the original, assumes input is ONLY ONE active bit and skips the board inversion
-int lowestBitIndex64_s(const B64 board) {
+// slithly faster version of the original, assumes input is ONLY ONE active bit and skips the board inversion
+int lowest_single_bit_index(const B64 board) {
     return BitPositionLookup[((board * lookUpMultiplier)) >> 58];
 }
 
@@ -41,7 +41,7 @@ void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
 
     while (board != 0) { // check that there are pieces left to exstract
 
-        bit_boards.push_back(lowestBitBoard(board));
+        bit_boards.push_back(lowest_bit_board(board));
         board ^= bit_boards.back(); // using the piece just added to flip the bit on the original board
     }
 }
