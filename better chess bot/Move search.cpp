@@ -40,7 +40,7 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else {
-        positions = possible_positions(state.position, determine_player(state));
+        positions = all_possible_positions(state.position, determine_player(state));
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing

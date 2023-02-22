@@ -100,7 +100,7 @@ bool is_draw(GameState& current_state) {
     return is_draw;
 }
 
-bool is_check(BoardPosition position, PlayerColor attacker_color) {
+bool is_check(BoardPosition position, const PlayerColor attacker_color) {
     const bool is_white = attacker_color == WHITE;
     const B64 attacked_king = (is_white ? position.black_king : position.white_king);
     const int tile = lowest_single_bit_index(attacked_king);
@@ -139,7 +139,7 @@ B64 attacking_pieces(const BoardPosition position, const B64 target_board, const
            (slide_attackes & (is_white ? position.white_bishops : position.black_bishops));
 }
 
-bool can_king_run(BoardPosition position, PlayerColor attacker_color, B64 attacked_king) {
+bool can_king_run(BoardPosition position, const PlayerColor attacker_color, const B64 attacked_king) {
     const bool is_attacker_white = attacker_color == WHITE;
     B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
     B64 curr_move;
@@ -151,7 +151,7 @@ bool can_king_run(BoardPosition position, PlayerColor attacker_color, B64 attack
 
         // update the king position
         (is_attacker_white ? position.black_king = curr_move
-            : position.white_king = curr_move);
+                           : position.white_king = curr_move);
 
         if (is_check(position, attacker_color)) {
             can_run = true;
@@ -160,28 +160,37 @@ bool can_king_run(BoardPosition position, PlayerColor attacker_color, B64 attack
 
         possible_king_moves ^= curr_move; // delete the move
     }
-    
+
     return can_run;
 }
 
-bool is_checkmate(BoardPosition position, PlayerColor attacker_color) {
+// checkmate shouldn't be reached during evaluation
+bool is_checkmate(BoardPosition position, const PlayerColor attacker_color) {
     const bool is_attacker_white = attacker_color == WHITE;
     const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
     const B64 attackers = attacking_pieces(position, attacked_king, attacker_color);
 
+    B64 responce_attempts = 0;
     bool checkmate = false;
     B64 attack_path;
 
-    if (attackers) {
-        if (count_bits64(attacked_king) > 1) { //moving out of check is the only option with multiple threats
-            checkmate = can_king_run(position, attacker_color, attacked_king);
-        } else { // only one attacker exists
+    // write a seprate function that returns only unchecked positions
+
+    // if the king is attacked and can't save himself, the check is shared to all cases so is evaluated first
+    if (attackers && !can_king_run(position, attacker_color, attacked_king)) {
+
+        // moving out of check is the only option with multiple threats, so... he dead, he real, real dead
+        if (count_bits64(attacked_king) > 1) {
+            checkmate = true;
+        } else {
+
+            // a knight's check cannot be blocked, but a single knight can be killed
             if (attackers & (is_attacker_white ? position.white_knights : position.black_knights)) {
-                // a knight check cannot be blocked, but a single knight can be killed
 
                 // needed function:
-                // positions with any kill of target at single tile
-            } else {
+                // positions with any kill of target at single til
+
+            } else { // the attacker is a sliding piece, block it or kill it
                 attack_path = get_connecting_tiles(attackers, attacked_king);
 
                 // needed functions:
