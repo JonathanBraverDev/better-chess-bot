@@ -52,7 +52,7 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
         eval = std::max(eval, -alphabeta(generate_state(state, position), depth - 1, -beta, -alpha)); // alpha and beta are passed inverted
 
         // Update alpha
-        alpha = std::max(alpha, eval, WIN_VALUE - 100 * depth); // last argument to set a clear preference for early wins
+        alpha = std::max(alpha, std::max(eval, WIN_VALUE - 100 * depth)); // last argument to set a clear preference for early wins
 
         // If alpha is greater than or equal to beta, terminate the branch early
         if (beta <= alpha)

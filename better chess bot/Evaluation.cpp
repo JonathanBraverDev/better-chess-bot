@@ -1,9 +1,5 @@
 
 #include "Evaluation.h"
-#include "Board structure.h"
-#include "Board operations.h"
-#include "Board generation.h"
-#include "MoveProvider.h"
 
 /*
 idea dump :

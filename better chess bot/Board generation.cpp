@@ -35,7 +35,7 @@ B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*direction)(B64)) {
 }
 
 inline B64 generate_pawn_jump(const B64 blockers, B64 piece, PlayerColor color) {
-	generate_pawn_jump(blockers, piece, (color == WHITE ? &up : &down));
+	return generate_pawn_jump(blockers, piece, (color == WHITE ? &up : &down));
 }
 
 void prepare_king_moves() {

@@ -1,5 +1,4 @@
 #pragma once
-#include <utility>
 #include <vector>
 #include "Board structure.h"
 #include "Evaluation.h"
