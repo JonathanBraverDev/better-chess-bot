@@ -25,6 +25,7 @@ inline B64 flip_bit(B64 board, B64 bit_board) { return (board ^= bit_board); }
 // big finders
 int lowest_bit_index(B64 board);
 int lowest_single_bit_index(B64 board);
+void lowest_single_cords(const B64 board, int& x, int& y);
 int count_bits64(B64 board);
 inline B64 bit_board_from_index(int index) { return set_bit(0, index); }
 
@@ -53,3 +54,7 @@ inline B64 slide_up_left(const B64 all_pieces, B64 piece) { return slide(&up_lef
 inline B64 slide_up_right(const B64 all_pieces, B64 piece) { return slide(&up_right, all_pieces, piece); };
 inline B64 slide_down_left(const B64 all_pieces, B64 piece) { return slide(&down_left, all_pieces, piece); };
 inline B64 slide_down_right(const B64 all_pieces, B64 piece) { return slide(&down_right, all_pieces, piece); };
+
+// pretty complex functions
+B64(*get_direction(const B64 start, const B64 end)) (B64); // apparantly that's how you write that signatue
+B64 get_connecting_tiles(B64 start, const B64 end);

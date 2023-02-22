@@ -50,6 +50,14 @@ int lowest_single_bit_index(const B64 board) {
     return BitPositionLookup[((board * lookUpMultiplier)) >> 58];
 }
 
+// extract the (x,y) cords of a single bit board
+void lowest_single_cords(const B64 board, int& x, int& y) {
+    const int bit_index = lowest_single_bit_index(board);
+
+    y = bit_index % BOARD_SIZE;
+    x = bit_index / BOARD_SIZE;
+}
+
 // fills a vector with bitBoards of all the active bits on the given board
 void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
 
@@ -73,4 +81,45 @@ B64 slide(B64(*direction)(B64), const B64 blockers, B64 piece) {
     // colisions are added to be figured out by the color making the move, this calculation needs to be fast
 
     return moves;
+}
+
+// return direcion function between 2 boards along a sliding piece move
+B64(*get_direction(const B64 start, const B64 end))(B64) {
+
+    int start_x, start_y, end_x, end_y;
+    lowest_single_cords(start, start_x, start_y);
+    lowest_single_cords(end, end_x, end_y);
+
+    int dir_x = end_x - start_x;
+    int dir_y = end_y - start_y;
+
+    B64(*dir)(B64) = nullptr;
+
+    if (dir_x < 0) {
+        dir = (dir_y < 0) ? &down_left
+                          : (dir_y == 0) ? &left : &up_left;
+    } else if (dir_x == 0) {
+        dir = (dir_y < 0) ? &down
+                          : (dir_y > 0) ? &up : nullptr;
+    } else {
+        dir = (dir_y < 0) ? &down_right
+                          : (dir_y == 0) ? &right : &up_right;
+    }
+
+    return dir;
+}
+
+// returns a board with all tiles between the 2 SINGLE BIT boards
+B64 get_connecting_tiles(B64 start, const B64 end) {
+
+    B64(*direction)(B64) = get_direction(start, end);
+    B64 tiles = 0;
+
+    // skiping the first check, at the very least one run is required
+    do {
+        start = direction(start);
+        tiles |= start;
+    } while (start ^ end); // zero eachother out
+
+    return tiles;
 }

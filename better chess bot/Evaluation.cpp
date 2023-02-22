@@ -164,39 +164,31 @@ bool can_king_run(BoardPosition position, PlayerColor attacker_color, B64 attack
     return can_run;
 }
 
-// !!! make sure this makes sence !!!
-B64 get_connecting_tiles(const B64 sliding_moves, const B64 start, const B64 end) {
-
-    // Compute the direction and distance between 'start' and 'end'
-    const B64 direction = start ^ end;
-    
-    // Remove file boundaries
-    B64 line = (direction & 0x7E7E7E7E7E7E7E00ULL) >> 1;
-    
-    // Compute the mask for the line between 'start' and 'end'
-    line |= line >> 1;
-    line |= line << 1;
-    line &= sliding_moves;
-
-    return line;
-}
-
 bool is_checkmate(BoardPosition position, PlayerColor attacker_color) {
     const bool is_attacker_white = attacker_color == WHITE;
     const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
     const B64 attackers = attacking_pieces(position, attacked_king, attacker_color);
 
     bool checkmate = false;
+    B64 attack_path;
 
     if (attackers) {
-        if (count_bits64(attacked_king) > 1) {
+        if (count_bits64(attacked_king) > 1) { //moving out of check is the only option with multiple threats
             checkmate = can_king_run(position, attacker_color, attacked_king);
+        } else { // only one attacker exists
+            if (attackers & (is_attacker_white ? position.white_knights : position.black_knights)) {
+                // a knight check cannot be blocked, but a single knight can be killed
+
+                // needed function:
+                // positions with any kill of target at single tile
+            } else {
+                attack_path = get_connecting_tiles(attackers, attacked_king);
+
+                // needed functions:
+                // positions with any move to one of X tiles on a borad
+                // positions with any kill of target at single tile
+            }
         }
-        // need the following functions:
-        // kill target at tile X
-        // find attack direction
-        // move to any one of X tiles on a borad
-        // both can use a very similar logic, with the pawn attack/move being toggles
     }
 
     return checkmate;
