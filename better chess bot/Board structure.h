@@ -73,3 +73,11 @@ constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY
 constexpr int BOARD_SIDE_SUB1 = BOARD_SIZE - 1;
 constexpr B64 COLUMN_A_INV = ~COLUMN_A;
 constexpr B64 COLUMN_H_INV = ~COLUMN_H;
+
+// I MIGHTTTT just defien the entire board and use only tile names in all rows
+// but that seems REALLY exstreme and cumbersome in case of black/white tiles for example
+// super readable tho, at least would be if I knew the cords by heart
+constexpr int A1_index = 0;
+constexpr int H8_index = 63;
+constexpr B64 A1 = (1ULL << A1_index); // shift a bit to the index
+constexpr B64 H8 = (1ULL << H8_index); // shift a bit to the index

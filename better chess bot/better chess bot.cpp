@@ -1,7 +1,6 @@
 // better chess bot.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
 #include <chrono>
 
 #include "Board structure.h"
@@ -9,25 +8,7 @@
 #include "Evaluation.h"
 #include "Board generation.h"
 
-void visualize_board(B64 board) {
-    for (int i = 7; i >= 0; i--) {
-        for (int j = 7; j >= 0; j--) {
-            if (get_bit(board, i * BOARD_SIZE + j)) {
-                std::cout << "X ";
-            } else {
-                std::cout << "_ ";
-            }
-        }
-
-        std::cout << '\n';
-    }
-
-    std::cout << '\n';
-}
-
-
-int main()
-{
+int main() {
     auto start = std::chrono::high_resolution_clock::now();
     prepare_king_moves();
     prepare_knight_moves();
@@ -54,4 +35,14 @@ int main()
         visualize_board(piece);
         piece = up(piece);
     }
+
+    visualize_board(2);
+    visualize_board(right(1));
+    visualize_board(up_left(1));
+    visualize_board(up_right(1));
+
+    visualize_board(pow(2, 62));
+    visualize_board(left(pow(2, 63)));
+    visualize_board(down_left(pow(2, 63)));
+    visualize_board(down_right(pow(2, 63)));
 }
