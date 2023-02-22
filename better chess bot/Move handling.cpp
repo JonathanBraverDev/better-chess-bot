@@ -1,5 +1,4 @@
 #include "Move handling.h"
-#include "Board operations.h"
 
 // makes a given move, does not check its validity
 BoardPosition Make_move(BoardPosition position, Move move) {

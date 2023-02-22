@@ -153,6 +153,7 @@
     <ClInclude Include="Board generation.h" />
     <ClInclude Include="Move handling.h" />
     <ClInclude Include="Move search.h" />
+    <ClInclude Include="Move structure.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

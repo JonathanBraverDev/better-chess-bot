@@ -53,5 +53,8 @@
     <ClInclude Include="Move search.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Move structure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
