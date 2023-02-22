@@ -100,32 +100,6 @@ bool is_draw(GameState& current_state) {
     return is_draw;
 }
 
-bool is_check(BoardPosition position, const PlayerColor attacker_color) {
-    const bool is_white = attacker_color == WHITE;
-    const B64 attacked_king = (is_white ? position.black_king : position.white_king);
-    const int tile = lowest_single_bit_index(attacked_king);
-    B64 slide_attackes;
-
-    bool check = false;
-
-    // perform fastest bit check first
-    if ((knight_moves[tile] & (is_white ? position.white_knights : position.black_knights)) ||
-        (pawn_attacks[tile] & (is_white ? position.white_pawns : position.black_pawns))) {
-
-        check = true;
-
-    } else {
-        // can be futher split into multiple checks but this is WAY more readable
-        slide_attackes = generate_queen_moves(position.white | position.black, attacked_king);
-
-        check = ((slide_attackes & (is_white ? position.white_queens : position.black_queens)) ||
-                 (slide_attackes & (is_white ? position.white_rooks : position.black_rooks)) ||
-                 (slide_attackes & (is_white ? position.white_bishops : position.black_bishops)));
-    }
-    
-    return check;
-}
-
 B64 attacking_pieces(const BoardPosition position, const B64 target_board, const PlayerColor attacker_color) {
     const bool is_white = attacker_color == WHITE;
     const int tile = lowest_single_bit_index(target_board);

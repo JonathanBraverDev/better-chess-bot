@@ -2,7 +2,7 @@
 
 #include "Board structure.h"
 #include "Board operations.h"
-#include "Move handling.h"
+#include "Move structure.h"
 
 static B64 king_moves[64];
 static B64 knight_moves[64];
@@ -36,3 +36,4 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
 inline void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, const BoardPosition position, const PlayerColor color, const B64 piece, const B64 blockers, B64 potential_moves, B64& current_pieces);
 inline void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition& new_position, const BoardPosition position, const PlayerColor color, const B64 piece, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const B64* move_source = nullptr);
 void possible_pawn_promotions(std::vector<BoardPosition>& positions, BoardPosition position, const PlayerColor color);
+std::vector<BoardPosition> valid_positions(const GameState state);

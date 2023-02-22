@@ -287,3 +287,44 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 inline std::vector<BoardPosition> all_possible_positions(const GameState state) {
 	return all_possible_positions(state.position, (state.turn % 2 == 0 ? WHITE : BLACK));
 }
+
+bool is_check(BoardPosition position, const PlayerColor attacker_color) {
+	const bool is_white = attacker_color == WHITE;
+	const B64 attacked_king = (is_white ? position.black_king : position.white_king);
+	const int tile = lowest_single_bit_index(attacked_king);
+	B64 slide_attackes;
+
+	bool check = false;
+
+	// perform fastest bit check first
+	if ((knight_moves[tile] & (is_white ? position.white_knights : position.black_knights)) ||
+		(pawn_attacks[tile] & (is_white ? position.white_pawns : position.black_pawns))) {
+
+		check = true;
+
+	} else {
+		// can be futher split into multiple checks but this is WAY more readable
+		slide_attackes = generate_queen_moves(position.white | position.black, attacked_king);
+
+		check = ((slide_attackes & (is_white ? position.white_queens : position.black_queens)) ||
+			(slide_attackes & (is_white ? position.white_rooks : position.black_rooks)) ||
+			(slide_attackes & (is_white ? position.white_bishops : position.black_bishops)));
+	}
+
+	return check;
+}
+
+std::vector<BoardPosition> valid_positions(const GameState state) {
+
+	std::vector<BoardPosition> all_positions = all_possible_positions(state.position, (state.turn % 2 == 0 ? WHITE : BLACK));
+	std::vector<BoardPosition> valid_positions;
+
+	for (const BoardPosition& position : all_positions) {
+		if (!is_check(position, determine_player(state))) {
+			valid_positions.push_back(position);
+		}
+	}
+
+	return valid_positions;
+}
+
