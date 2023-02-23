@@ -33,6 +33,9 @@
     <ClCompile Include="Move search.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Position generation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board structure.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Move structure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Position generation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

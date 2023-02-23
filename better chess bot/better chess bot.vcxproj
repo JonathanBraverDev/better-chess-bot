@@ -145,6 +145,7 @@
     <ClCompile Include="Board generation.cpp" />
     <ClCompile Include="Move handling.cpp" />
     <ClCompile Include="Move search.cpp" />
+    <ClCompile Include="Position generation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board operations.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="Move handling.h" />
     <ClInclude Include="Move search.h" />
     <ClInclude Include="Move structure.h" />
+    <ClInclude Include="Position generation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
