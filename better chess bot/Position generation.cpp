@@ -226,51 +226,68 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 	// note that validation for checks dosent happen here
 }
 
+// !!! WIP !!!
 std::vector<BoardPosition> possible_evade_positions(const BoardPosition position, const PlayerColor attacker_color) {
+
+	std::vector<BoardPosition> positions;
+
 	const bool is_attacker_white = attacker_color == WHITE;
 	const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
 	const B64 attackers = attacking_pieces(position, attacked_king, attacker_color);
 	const B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
 
-	B64 responce_attempts = 0;
-	bool checkmate = false;
 	B64 attack_path;
 
-	// write a seprate function that returns only unchecked positions
+	std::vector<BoardPosition> positions;
+	std::vector<B64> pieces;
+	std::vector<B64> destinations;
+	BoardPosition new_position = position;
+	B64 potential_moves = 0;
+	const B64 blockers = position.white | position.black;
+	const B64 not_own = (is_attacker_white ? ~position.white : ~position.black); // valid destinations
+	const B64 pawn_special = (is_attacker_white ? position.black : position.white) | (position.special_move_rigths & ROW_3 & ROW_6); // pawns, lovem
 
-	// if the king is attacked and can't save himself, the check is shared to all cases so is evaluated first
-	if (attackers && !can_king_run(position, attacker_color, attacked_king)) {
+	// shorthand own pieces
+	const B64 pawns = (is_attacker_white ? position.white_pawns : position.black_pawns);
+	const B64 knights = (is_attacker_white ? position.white_knights : position.black_knights);
+	const B64 bishops = (is_attacker_white ? position.white_bishops : position.black_bishops);
+	const B64 rooks = (is_attacker_white ? position.white_rooks : position.black_rooks);
+	const B64 queens = (is_attacker_white ? position.white_queens : position.black_queens);
+	const B64 king = (is_attacker_white ? position.white_king : position.black_king);
 
-		// moving out of check is the only option with multiple threats, so... he dead, he real, real dead
-		if (count_bits64(attacked_king) > 1) {
-			checkmate = true;
+	// add all king moves
+
+	if (count_bits64(attacked_king) > 1) {
+		// stop addign moves
+	}
+	else {
+
+		// a knight's check cannot be blocked, but a single knight can be killed
+		if (attackers & (is_attacker_white ? position.white_knights : position.black_knights)) {
+
+			// needed function:
+			// positions with any kill of target at single tile
+			// add those kill positions
+
 		}
-		else {
+		else { // the attacker is a sliding piece, block it or kill it
+			attack_path = get_connecting_tiles(attackers, attacked_king);
 
-			// a knight's check cannot be blocked, but a single knight can be killed
-			if (attackers & (is_attacker_white ? position.white_knights : position.black_knights)) {
-
-				// needed function:
-				// positions with any kill of target at single til
-
-			}
-			else { // the attacker is a sliding piece, block it or kill it
-				attack_path = get_connecting_tiles(attackers, attacked_king);
-
-				// needed functions:
-				// positions with any move to one of X tiles on a borad
-				// positions with any kill of target at single tile
-			}
+			// needed functions:
+			// positions with any move to one of X tiles on a borad
+			// add those move positions
+			// positions with any kill of target at single tile
+			// add those kill positions
 		}
 	}
 
-	return checkmate;
+	return positions;
 }
 
 std::vector<BoardPosition> valid_positions(const GameState state) {
 
-	std::vector<BoardPosition> all_positions = (is_check(state) ? all_possible_positions(state.position, (state.turn % 2 == 0 ? WHITE : BLACK))
-		: possible_evade_positions(state.position, (state.turn % 2 == 0 ? WHITE : BLACK)));
+	std::vector<BoardPosition> all_positions = (is_check(state) ? possible_evade_positions(state.position, (state.turn % 2 == 0 ? WHITE : BLACK))
+																: all_possible_positions(state.position, (state.turn % 2 == 0 ? WHITE : BLACK)));
 	std::vector<BoardPosition> valid_positions;
 
 	for (const BoardPosition& position : all_positions) {
