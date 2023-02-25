@@ -34,10 +34,6 @@ B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*direction)(B64)) {
 	return moves;
 }
 
-inline B64 generate_pawn_jump(const B64 blockers, B64 piece, PlayerColor color) {
-	return generate_pawn_jump(blockers, piece, (color == WHITE ? &up : &down));
-}
-
 void prepare_king_moves() {
 	B64 current_board = 1;
 	for (size_t i = 0; i < 64; i++) {
