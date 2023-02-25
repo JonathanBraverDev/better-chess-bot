@@ -36,7 +36,7 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
     if (depth == 0) {
         eval = material_eval(state.position); // calculate current position // the most basic function is used for now
     } else if (is_checkmate(state.position, current_player)) {
-        eval = adjust_by_player(current_player, -WIN_VALUE); // set value as losing for the current player
+        eval = score_by_player(current_player, -WIN_VALUE); // set value as losing for the current player
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else {
