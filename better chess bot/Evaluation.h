@@ -3,6 +3,7 @@
 #include "Board structure.h"
 #include "Board operations.h"
 #include "Board generation.h"
+#include "Position generation.h"
 
 constexpr int DRAW_MOVE_LIMIT = 50;
 constexpr int DRAW_REPETITIONS = 3;
