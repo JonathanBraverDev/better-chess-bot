@@ -27,7 +27,7 @@ int lowest_bit_index(B64 board);
 int lowest_single_bit_index(B64 board);
 void lowest_single_cords(const B64 board, int& x, int& y);
 int count_bits64(B64 board);
-inline B64 bit_board_from_index(int index) { return set_bit(0, index); }
+inline B64 bit_board_from_index(int index) { return (1ULL << index); }
 
 // piece handling
 void seperate_bits(B64 board, std::vector<B64>& pieces);
