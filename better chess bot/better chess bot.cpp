@@ -45,4 +45,7 @@ int main() {
     visualize_board(left(pow(2, 63)));
     visualize_board(down_left(pow(2, 63)));
     visualize_board(down_right(pow(2, 63)));
+
+    std::cout << (((bit_board_from_index(4) * 0x022fdd63cc95386dU)) >> 58) << std::endl;
+    std::cout << lowest_single_bit_index(bit_board_from_index(4));
 }
