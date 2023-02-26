@@ -62,5 +62,11 @@
     <ClInclude Include="Position generation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Tile structure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game innitials.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

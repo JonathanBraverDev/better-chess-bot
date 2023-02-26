@@ -1,35 +1,34 @@
 #pragma once
 
-#include <cstdint>
 #include <vcruntime_string.h>
 
-typedef uint64_t B64; // 64 bit board
+#include "Tile structure.h"
 
 // EVERYTHING needed for quick operations on the position
 struct BoardPosition {
     // everything here is a 'bitmap of...'
-    B64 white;
     B64 white_pawns;
-    B64 white_bishops;
     B64 white_knights;
+    B64 white_bishops;
     B64 white_rooks;
     B64 white_queens;
     B64 white_king; // no 's' this time, budget cuts
-    B64 black;
     B64 black_pawns;
-    B64 black_bishops;
     B64 black_knights;
+    B64 black_bishops;
     B64 black_rooks;
     B64 black_queens;
     B64 black_king;
     B64 special_move_rigths; // en passant AND castle right bot both sides, data cant overlap anyway
+    B64 white;
+    B64 black;
 };
 
 // info on gamestate
 struct GameState { // split off from positiopn to allow memcmp (both the timer and pointer whould interefere)
     int turn; // idk why i need this actually, but why not, it's kinda cute
-    BoardPosition position;
     int draw_timer; // used to count moves untill the forced draw
+    BoardPosition position;
     GameState* previous_state; // used for 3 time repetition checks and move history
 };
 
@@ -41,25 +40,26 @@ inline bool operator==(const BoardPosition& lhs, const BoardPosition& rhs) {
 constexpr int BOARD_SIZE = 8;
 
 // useful for out of bounds detection
-constexpr B64 COLUMN_A = 0x8080808080808080ULL;
-constexpr B64 COLUMN_B = 0x4040404040404040ULL;
+constexpr B64 COLUMN_A = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8;
+constexpr B64 COLUMN_B = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
 constexpr B64 COLUMN_AB = COLUMN_A | COLUMN_B;
-constexpr B64 COLUMN_C = 0x2020202020202020ULL;
-constexpr B64 COLUMN_D = 0x1010101010101010ULL;
-constexpr B64 COLUMB_F = 0x0404040404040404ULL;
-constexpr B64 COLUMB_G = 0x0202020202020202ULL;
-constexpr B64 COLUMN_H = 0x0101010101010101ULL;
+constexpr B64 COLUMN_C = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8;
+constexpr B64 COLUMN_D = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8;
+constexpr B64 COLUMN_E = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8;
+constexpr B64 COLUMB_F = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8;
+constexpr B64 COLUMB_G = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8;
+constexpr B64 COLUMN_H = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8;
 constexpr B64 COLUMN_GH = COLUMB_G | COLUMN_H;
 
 // used for pawn first move/promotion
-constexpr B64 ROW_1 = 0xFF00000000000000ULL;
-constexpr B64 ROW_2 = 0x00FF000000000000ULL;
-constexpr B64 ROW_3 = 0x0000FF0000000000ULL;
-constexpr B64 ROW_4 = 0x000000FF00000000ULL;
-constexpr B64 ROW_5 = 0x00000000FF000000ULL;
-constexpr B64 ROW_6 = 0x0000000000FF0000ULL;
-constexpr B64 ROW_7 = 0x000000000000FF00ULL;
-constexpr B64 ROW_8 = 0x00000000000000FFULL;
+constexpr B64 ROW_8 = A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8;
+constexpr B64 ROW_7 = A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7;
+constexpr B64 ROW_6 = A6 | B6 | C6 | D6 | E6 | F6 | G6 | H6;
+constexpr B64 ROW_5 = A5 | B5 | C5 | D5 | E5 | F5 | G5 | H5;
+constexpr B64 ROW_4 = A4 | B4 | C4 | D4 | E4 | F4 | G4 | H4;
+constexpr B64 ROW_3 = A3 | B3 | C3 | D3 | E3 | F3 | G3 | H3;
+constexpr B64 ROW_2 = A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2;
+constexpr B64 ROW_1 = A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1;
 constexpr B64 TILE_BLACK = 0xAAAAAAAAAAAAAAAAULL;
 constexpr B64 TILE_WHITE = 0x5555555555555555ULL;
 
@@ -73,11 +73,3 @@ constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY
 constexpr int BOARD_SIDE_SUB1 = BOARD_SIZE - 1;
 constexpr B64 COLUMN_A_INV = ~COLUMN_A;
 constexpr B64 COLUMN_H_INV = ~COLUMN_H;
-
-// I MIGHTTTT just defien the entire board and use only tile names in all rows
-// but that seems REALLY exstreme and cumbersome in case of black/white tiles for example
-// super readable tho, at least would be if I knew the cords by heart
-constexpr int A1_index = 0;
-constexpr int H8_index = 63;
-constexpr B64 A1 = (1ULL << A1_index); // shift a bit to the index
-constexpr B64 H8 = (1ULL << H8_index); // shift a bit to the index

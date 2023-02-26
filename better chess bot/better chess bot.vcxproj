@@ -152,10 +152,12 @@
     <ClInclude Include="Board structure.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Board generation.h" />
+    <ClInclude Include="Game innitials.h" />
     <ClInclude Include="Move handling.h" />
     <ClInclude Include="Move search.h" />
     <ClInclude Include="Move structure.h" />
     <ClInclude Include="Position generation.h" />
+    <ClInclude Include="Tile structure.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
