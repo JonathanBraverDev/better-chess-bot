@@ -93,7 +93,7 @@ B64(*get_direction(const B64 start, const B64 end))(B64) {
     int dir_x = end_x - start_x;
     int dir_y = end_y - start_y;
 
-    B64(*dir)(B64) = nullptr;
+    B64(*dir)(B64);
 
     if (dir_x < 0) {
         dir = (dir_y < 0) ? &down_left

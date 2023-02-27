@@ -3,6 +3,7 @@
 #include "Board structure.h"
 #include "Board operations.h"
 #include "Board generation.h"
+#include "Attack detection.h"
 #include "Position generation.h"
 
 constexpr int DRAW_MOVE_LIMIT = 50;
@@ -21,12 +22,3 @@ constexpr int DRAW_VALUE = 0; // possibly set negative to discourage draws
 bool is_draw(GameState& current_state);
 bool is_checkmate(BoardPosition position, bool is_attacker_white);
 int material_eval(BoardPosition position);
-
-// less simple eval
-int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*move_generator)(B64, B64) = nullptr, const B64* move_source = nullptr, const B64 blockers = 0, const int index_scale = 1, const int first_index = 0);
-// sliding attacks alias for count_attacks
-int count_sliding_attacks(B64(*move_generator)(B64, B64), const B64 attacking_pieces, const B64 blockers, const B64 target_board);
-// jumping attacks alias for	count_attacks
-int count_jumping_attacks(const B64* move_source, const B64 attacking_pieces, const B64 target_board, const int index_scale = 1, const int first_index = 0);
-int count_white_attacks(BoardPosition position, B64 target_board);
-int count_black_attacks(BoardPosition position, B64 target_board);
