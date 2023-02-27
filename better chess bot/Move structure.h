@@ -42,4 +42,4 @@ struct Move {
     // do i really need to be able to undo moves at all?
 };
 
-inline PlayerColor determine_player(const GameState& state) { return (state.turn % 2 == 0 ? WHITE : BLACK); };
+inline bool is_white_player(const GameState& state) { return (state.turn % 2 == 0); };

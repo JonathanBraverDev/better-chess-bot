@@ -6,7 +6,7 @@
 #include "Board generation.h"
 #include "Position generation.h"
 
-inline int score_by_player(const PlayerColor color, int score) { return (color == WHITE ? score : -score);  }
+inline int score_by_player(const bool is_white, int score) { return (is_white ? score : -score);  }
 bool is_piece_taken(const GameState state, const BoardPosition position);
 
 int alphabeta(GameState state, int depth, int alpha, int beta);

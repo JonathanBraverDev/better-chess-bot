@@ -21,26 +21,24 @@ GameState generate_state(GameState state, const BoardPosition position) {
 
 bool is_piece_taken(const GameState state, const BoardPosition position) {
 
-    const bool is_white = determine_player(state) == WHITE;
-
-    return (is_white ? (count_bits64(state.position.black) == count_bits64(position.black))
-                     : (count_bits64(state.position.white) == count_bits64(position.white)));
+    return (is_white_player(state) ? (count_bits64(state.position.black) == count_bits64(position.black))
+                                   : (count_bits64(state.position.white) == count_bits64(position.white)));
 }
 
 int alphabeta(GameState state, int depth, int alpha, int beta) {
 
-    PlayerColor current_player = determine_player(state);
+    const bool is_white = is_white_player(state);
     std::vector<BoardPosition> positions;
     int eval = 0;
 
     if (depth == 0) {
         eval = material_eval(state.position); // calculate current position // the most basic function is used for now
-    } else if (is_checkmate(state.position, current_player)) {
-        eval = score_by_player(current_player, -WIN_VALUE); // set value as losing for the current player
+    } else if (is_checkmate(state.position, is_white)) {
+        eval = score_by_player(is_white, -WIN_VALUE); // set value as losing for the current player
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else {
-        positions = all_possible_positions(state.position, determine_player(state));
+        positions = all_possible_positions(state.position, is_white);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing

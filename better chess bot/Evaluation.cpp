@@ -100,8 +100,7 @@ bool is_draw(GameState& current_state) {
     return is_draw;
 }
 
-bool can_king_run(BoardPosition position, const PlayerColor attacker_color, const B64 attacked_king) {
-    const bool is_attacker_white = attacker_color == WHITE;
+bool can_king_run(BoardPosition position, const bool is_attacker_white, const B64 attacked_king) {
     B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
     B64 curr_move;
     bool can_run = false;
@@ -114,7 +113,7 @@ bool can_king_run(BoardPosition position, const PlayerColor attacker_color, cons
         (is_attacker_white ? position.black_king = curr_move
                            : position.white_king = curr_move);
 
-        if (is_check(position, attacker_color)) {
+        if (is_check(position, is_attacker_white)) {
             can_run = true;
             break;
         }
@@ -126,10 +125,9 @@ bool can_king_run(BoardPosition position, const PlayerColor attacker_color, cons
 }
 
 // checkmate shouldn't be reached during evaluation
-bool is_checkmate(BoardPosition position, const PlayerColor attacker_color) {
-    const bool is_attacker_white = attacker_color == WHITE;
+bool is_checkmate(BoardPosition position, const bool is_attacker_white) {
     const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
-    const B64 attackers = attacking_pieces(position, attacked_king, attacker_color);
+    const B64 attackers = attacking_pieces(position, attacked_king, is_attacker_white);
 
     B64 responce_attempts = 0;
     bool checkmate = false;
@@ -138,7 +136,7 @@ bool is_checkmate(BoardPosition position, const PlayerColor attacker_color) {
     // write a seprate function that returns only unchecked positions
 
     // if the king is attacked and can't save himself, the check is shared to all cases so is evaluated first
-    if (attackers && !can_king_run(position, attacker_color, attacked_king)) {
+    if (attackers && !can_king_run(position, is_attacker_white, attacked_king)) {
 
         // moving out of check is the only option with multiple threats, so... he dead, he real, real dead
         if (count_bits64(attacked_king) > 1) {

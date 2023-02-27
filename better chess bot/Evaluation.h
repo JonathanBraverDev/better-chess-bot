@@ -19,7 +19,7 @@ constexpr int DRAW_VALUE = 0; // possibly set negative to discourage draws
 
 // simple eval
 bool is_draw(GameState& current_state);
-bool is_checkmate(BoardPosition position, PlayerColor attacker_color);
+bool is_checkmate(BoardPosition position, bool is_attacker_white);
 int material_eval(BoardPosition position);
 
 // less simple eval
