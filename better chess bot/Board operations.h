@@ -29,6 +29,11 @@ void lowest_single_cords(const B64 board, int& x, int& y);
 int count_bits64(B64 board);
 inline B64 bit_board_from_index(int index) { return (1ULL << index); }
 
+inline B64 lower_than_bit(B64 board) { return (1ULL << lowest_single_bit_index(board)) - 1; }
+inline B64 higher_than_bit(B64 board) { return (-1ULL << lowest_single_bit_index(board)); }
+inline B64 lower_than_bit_index(int index) { return (1ULL << index) - 1; }
+inline B64 higher_than_bit_index(int index) { return (-1ULL << index); }
+
 // piece handling
 void seperate_bits(B64 board, std::vector<B64>& pieces);
 
