@@ -65,7 +65,7 @@
     <ClInclude Include="Tile structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game innitials.h">
+    <ClInclude Include="Game constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

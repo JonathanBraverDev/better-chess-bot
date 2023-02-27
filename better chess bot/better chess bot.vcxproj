@@ -152,7 +152,7 @@
     <ClInclude Include="Board structure.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Board generation.h" />
-    <ClInclude Include="Game innitials.h" />
+    <ClInclude Include="Game constants.h" />
     <ClInclude Include="Move handling.h" />
     <ClInclude Include="Move search.h" />
     <ClInclude Include="Move structure.h" />

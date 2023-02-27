@@ -189,27 +189,22 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 
 	// ordered by number of expected avalible moves (max for queen is 27 vs 28 of 2 roosk but its highly unlikley to mater)
 	// potentially change to a better preservation estimate
+	positions.reserve(EXPECTED_BRANCHING);
 	if (queens) {
-		positions.reserve(count_bits64(queens) * MAX_QUEEN_MOVES); // streach the vector to the worst case
 		possible_piece_positions(positions, position, color, queens, QUEEN, blockers, not_own, &generate_queen_moves);
 	}
 	if (rooks) {
-		positions.reserve(count_bits64(rooks) * MAX_ROOK_MOVES); // streach the vector to the worst case
 		possible_piece_positions(positions, position, color, rooks, ROOK, blockers, not_own, &generate_rook_moves);
 	}
 	if (bishops) {
-		positions.reserve(count_bits64(bishops) * MAX_BISHOP_MOVES);
 		possible_piece_positions(positions, position, color, bishops, BISHOP, blockers, not_own, &generate_bishop_moves);
 	}
 	if (knights) {
-		positions.reserve(count_bits64(knights) * MAX_KNIGHT_MOVES);
 		possible_piece_positions(positions, position, color, knights, KNIGHT, blockers, not_own, nullptr, knight_moves);
 	}
 	if (pawns) { // can I just say that I HATE how complicated this piece type is?
-		positions.reserve(count_bits64(pawns) * EXPECTED_PAWN_MOVES);
 		possible_piece_positions(positions, position, color, pawns, PAWN, blockers, not_own | en_passant, nullptr, knight_moves);
-
-		// check for promoted pawns and spit out 4 boards for each
+		// promotions handled in the general function
 	}
 
 	// king normals, assuming he didn't get brutally murdered (eveluation planned to end on unavaidable check)

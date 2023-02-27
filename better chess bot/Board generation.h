@@ -15,6 +15,7 @@ constexpr int MAX_QUEEN_MOVES = MAX_ROOK_MOVES + MAX_BISHOP_MOVES;
 constexpr int MAX_KNIGHT_MOVES = 8;
 constexpr int MAX_PAWN_MOVES = 12; // YES, actually, kill both sides and forward, all being a promotion
 constexpr int EXPECTED_PAWN_MOVES = 3; // a MUCH more reasonable number, even this is too much for the average pawn
+constexpr int EXPECTED_BRANCHING = 40; // a very hand wavy guestimation
 
 // rooks always have 14 potential moves, 7 horizontal and 7 vertical
 // bishops can have as little as 7 moves and up to 13 (corner and center respectivly)
