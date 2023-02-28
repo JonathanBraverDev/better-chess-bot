@@ -40,25 +40,21 @@ void Toggle_castle(BoardPosition& position, const Move& move) {
 		row = ROW_8;
 
 		// toggle uncastled locations
-		position.black ^= king | rook; // toggle both pieces off/on (casle/uncastle)
 		position.black_rooks ^= rook; 
 		position.black_king ^= king; // added to toggle the king back in during UNcastling
 
 		// toggle castled locations
 		position.black_king ^= row & king_col;
 		position.black_rooks ^= row & rook_col;
-		position.black ^= (row & king_col) | (row & rook_col);
 
 	} else {
 		// toggle uncastled locations
-		position.white ^= king | rook;
 		position.white_rooks ^= rook;
 		position.white_king ^= king;
 
 		// toggle castled locations
 		position.white_king ^= row & king_col;
 		position.white_rooks ^= row & rook_col;
-		position.white ^= (row & king_col) | (row & rook_col);
 	}
 }
 
@@ -66,10 +62,6 @@ void Move_piece(BoardPosition& position, const Move& move, bool reverse) {
 	const bool is_white = move.piece.color == WHITE;
 	const B64 origin = (reverse ? move.destination : move.origin);
 	const B64 destination = (reverse ? move.origin : move.destination);
-
-	// update the color board
-	(is_white ? position.white : position.black) ^= origin;
-	(is_white ? position.white : position.black) |= destination;
 	
 	// update the piece board
 	switch (move.piece.type) {

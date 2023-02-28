@@ -6,7 +6,7 @@ bool is_castle_legal(const BoardPosition position, const bool is_king_white, con
 
 	bool is_legal = false;
 
-	if (king_path & ~(position.white | position.black)) { // check for anything in the king's path
+	if (king_path & ~(all_pieces(position))) { // check for anything in the king's path
 		is_legal = is_attackd_by_color(position, king_path, !is_king_white);
 	}
 
@@ -183,8 +183,8 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 	std::vector<BoardPosition> positions;
 	std::vector<B64> pieces;
 	std::vector<B64> destinations;
-	const B64 blockers = position.white | position.black;
-	const B64 not_own = (is_white ? ~position.white : ~position.black); // valid destinations
+	const B64 blockers = all_pieces(position);
+	const B64 not_own = ~(is_white ? all_white_pieces(position) : all_black_pieces(position)); // valid destinations
 	B64 en_passant; // pawns, lovem
 
 	// shorthand own pieces
@@ -198,7 +198,7 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 	// ordered by number of expected avalible moves
 	positions.reserve(EXPECTED_BRANCHING);
 	if (pawns) { // can I just say that I HATE how complicated this piece type is?
-		en_passant = (is_white ? position.black : position.white) | (position.special_move_rigths & ROW_3 & ROW_6);
+		en_passant = (is_white ? all_black_pieces(position) : all_white_pieces(position)) | (position.special_move_rigths & ROW_3 & ROW_6);
 		possible_piece_positions(positions, position, is_white, pawns, PAWN, blockers, not_own | en_passant, nullptr, knight_moves);
 		// promotions handled in the general function
 	}
@@ -264,7 +264,7 @@ void tile_capture_positions(std::vector<BoardPosition>& positions, BoardPosition
 
 void kills_to_tile(std::vector<BoardPosition>& positions, const BoardPosition position, const B64 target_board_bit, const bool is_white) {
 	const int tile_index = lowest_single_bit_index(target_board_bit);
-	const B64 slide_attackes = generate_queen_moves(position.white | position.black, target_board_bit);
+	const B64 slide_attackes = generate_queen_moves(all_pieces(position), target_board_bit);
 
 	const B64 killing_knights = (knight_moves[tile_index] & (is_white ? position.white_knights : position.black_knights));
 	const B64 killing_bishops = (slide_attackes & (is_white ? position.white_bishops : position.black_bishops));
@@ -340,7 +340,7 @@ std::vector<BoardPosition> possible_evade_positions(const BoardPosition position
 	B64 king = (is_defender_white ? position.white_king : position.black_king); // king starts in check
 
 	const B64 attackers = attacking_pieces(position, king, (is_defender_white ? BLACK : WHITE)); // find attackers of the oposite color
-	const B64 possible_king_moves = king_moves[lowest_single_bit_index(king)] & ~(position.black & position.white); // non kill moves, they are added elsewhere
+	const B64 possible_king_moves = king_moves[lowest_single_bit_index(king)] & ~ all_pieces(position) ; // non kill moves, they are added elsewhere
 
 	B64 attack_path;
 
@@ -349,9 +349,9 @@ std::vector<BoardPosition> possible_evade_positions(const BoardPosition position
 	std::vector<B64> destinations;
 	BoardPosition new_position = position;
 	B64 potential_moves = 0;
-	const B64 blockers = position.white | position.black;
-	const B64 not_own = (is_defender_white ? ~position.white : ~position.black); // valid destinations
-	const B64 pawn_special = (is_defender_white ? position.black : position.white) | (position.special_move_rigths & ROW_3 & ROW_6); // pawns, lovem
+	const B64 blockers = all_pieces(position);
+	const B64 not_own = ~(is_defender_white ? all_white_pieces(position) : all_black_pieces(position)); // valid destinations
+	const B64 pawn_special = (is_defender_white ? all_black_pieces(position) : all_white_pieces(position)) | (position.special_move_rigths & ROW_3 & ROW_6); // pawns, lovem
 
 	// add all king moves
 

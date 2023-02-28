@@ -20,9 +20,18 @@ struct BoardPosition {
     B64 black_queens;
     B64 black_king;
     B64 special_move_rigths; // en passant AND castle right bot both sides, data cant overlap anyway
-    B64 white;
-    B64 black;
 };
+
+inline B64 all_white_pieces(const BoardPosition position) {
+    return (position.white_pawns | position.white_knights | position.white_bishops | position.white_rooks | position.white_queens | position.white_king);
+}
+
+inline B64 all_black_pieces(const BoardPosition position) {
+    return (position.black_pawns | position.black_knights | position.black_bishops | position.black_rooks | position.black_queens | position.black_king);
+}
+
+inline B64 all_pieces(const BoardPosition position) { return (all_white_pieces(position) | all_black_pieces(position)); }
+
 
 // info on gamestate
 struct GameState { // split off from positiopn to allow memcmp (both the timer and pointer whould interefere)
@@ -35,6 +44,10 @@ struct GameState { // split off from positiopn to allow memcmp (both the timer a
 inline bool operator==(const BoardPosition& lhs, const BoardPosition& rhs) {
     return memcmp(&lhs, &rhs, sizeof(BoardPosition));
 }
+
+inline B64 all_white_pieces(const GameState state) { return all_black_pieces(state.position); }
+inline B64 all_black_pieces(const GameState state) { return all_black_pieces(state.position); }
+inline B64 all_pieces(const GameState state) { return all_pieces(state.position); }
 
 // constexpr > const, compiletime vs runtime evaluation, less runtime -> more better.
 constexpr int BOARD_SIZE = 8;

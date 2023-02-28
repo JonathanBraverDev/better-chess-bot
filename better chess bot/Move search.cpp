@@ -21,8 +21,8 @@ GameState generate_state(GameState state, const BoardPosition position) {
 
 bool is_piece_taken(const GameState state, const BoardPosition position) {
 
-    return (is_white_player(state) ? (count_bits64(state.position.black) == count_bits64(position.black))
-                                   : (count_bits64(state.position.white) == count_bits64(position.white)));
+    return (is_white_player(state) ? (count_bits64(all_black_pieces(state)) == count_bits64(all_black_pieces(position)))
+                                   : (count_bits64(all_white_pieces(state)) == count_bits64(all_white_pieces(position))));
 }
 
 int alphabeta(GameState state, int depth, int alpha, int beta) {

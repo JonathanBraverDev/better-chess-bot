@@ -16,7 +16,7 @@ bool is_check(const BoardPosition position, const bool is_attacker_color) {
 
 	} else {
 		// can be futher split into multiple checks but this is WAY more readable
-		slide_attackes = generate_queen_moves(position.white | position.black, attacked_king);
+		slide_attackes = generate_queen_moves(all_pieces(position), attacked_king);
 
 		check = ((slide_attackes & (is_attacker_color ? position.white_queens : position.black_queens)) ||
 			(slide_attackes & (is_attacker_color ? position.white_rooks : position.black_rooks)) ||
@@ -59,7 +59,7 @@ bool is_attacked(const B64 attacking_pieces, const B64 target_board, B64(*move_g
 
 bool is_attackd_by_color(const BoardPosition position, const B64 target_board, const bool is_attacker_white) {
 
-	const B64 blockers = position.white | position.black;
+	const B64 blockers = all_pieces(position);
 
 	return is_slide_attacked(generate_queen_moves, (is_attacker_white ? position.white_queens : position.black_queens), target_board, blockers) ||
 		is_slide_attacked(generate_rook_moves, (is_attacker_white ? position.white_rooks : position.white_rooks), target_board, blockers) ||
@@ -71,7 +71,7 @@ bool is_attackd_by_color(const BoardPosition position, const B64 target_board, c
 
 B64 attacking_pieces(const BoardPosition position, const B64 target_board_bit, const bool is_attacker_white) {
 	const int tile_index = lowest_single_bit_index(target_board_bit);
-	const B64 slide_attackes = generate_queen_moves(position.white | position.black, target_board_bit);
+	const B64 slide_attackes = generate_queen_moves(all_pieces(position), target_board_bit);
 
 	return (knight_moves[tile_index] & (is_attacker_white ? position.white_knights : position.black_knights)) |
 		(pawn_attacks[tile_index * 2 + (is_attacker_white ? 0 : 1)] & (is_attacker_white ? position.white_pawns : position.black_pawns)) |
@@ -114,7 +114,7 @@ int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*move_
 
 int count_white_attacks(const BoardPosition position, const B64 target_board) {
 
-	const B64 blockers = position.white | position.black;
+	const B64 blockers = all_pieces(position);
 
 	return count_sliding_attacks(generate_queen_moves, position.white_queens, target_board, blockers) +
 		count_sliding_attacks(generate_rook_moves, position.white_rooks, target_board, blockers) +
@@ -126,7 +126,7 @@ int count_white_attacks(const BoardPosition position, const B64 target_board) {
 
 int count_black_attacks(const BoardPosition position, const B64 target_board) {
 
-	const B64 blockers = position.white | position.black;
+	const B64 blockers = all_pieces(position);
 
 	return count_sliding_attacks(generate_queen_moves, position.black_queens, target_board, blockers) +
 		count_sliding_attacks(generate_rook_moves, position.black_rooks, target_board, blockers) +

@@ -101,7 +101,7 @@ bool is_draw(GameState& current_state) {
 }
 
 bool can_king_run(BoardPosition position, const bool is_attacker_white, const B64 attacked_king) {
-    B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? position.black : position.white);
+    B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? all_black_pieces(position) : all_white_pieces(position));
     B64 curr_move;
     bool can_run = false;
 
