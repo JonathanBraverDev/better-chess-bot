@@ -59,22 +59,24 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
 		if (potential_moves != 0) {
 			seperate_bits(potential_moves, single_moves); // seperate the generated moves
 			if (move_source != pawn_moves) { // handle moves that kill the target
-				possible_capture_positions(positions, single_moves, new_position, position, is_white, piece, current_pieces, enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens, move_source);
+				possible_capture_positions(positions, single_moves, new_position, is_white, piece, current_pieces, enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens, move_source);
 			} else { // only one regular move is avalible to pawns, it is added if legal and a jump is considered
-				possible_pawn_move_positions(positions, new_position, position, is_white, piece, blockers, potential_moves, current_pieces);
+				possible_pawn_move_positions(positions, new_position, is_white, piece, blockers, potential_moves, current_pieces);
 			}
 		}
 	}
 }
 
-void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, const BoardPosition position, const bool is_white, const B64 piece, const B64 blockers, B64 potential_moves, B64& current_pieces) {
+void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, const bool is_white, const B64 piece, const B64 blockers, B64 potential_moves, B64& current_pieces) {
+
+	const BoardPosition base_position = new_position;
 
 	new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant as none of the considered next moves use it
 	current_pieces ^= potential_moves; // add the current piece to its destination
 
 	if (is_white && (piece & ROW_8) || // check pawn promotion
 		!is_white && (piece & ROW_1)) {
-		possible_pawn_promotions(positions, position, is_white);
+		possible_pawn_promotions(positions, base_position, is_white);
 	} else {
 		positions.push_back(new_position); // push the normal move
 
@@ -94,25 +96,28 @@ void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPo
 	}
 }
 
-void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition& new_position, const BoardPosition position, const bool is_white, const B64 piece, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const B64* move_source) {
+void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition& new_position, const bool is_white, const B64 piece, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const B64* move_source) {
+
+	const BoardPosition base_position = new_position;
 
 	for (B64 move : single_moves) {
 		current_pieces ^= move; // add the current piece to its destination
 		// delete any enemy piece in the destination
-		if ((move & position.special_move_rigths) && move_source == pawn_attacks) { // is en passant is used, remove the pawn
+		if ((move & base_position.special_move_rigths) && move_source == pawn_attacks) { // is en passant is used, remove the pawn
 			clear_bit(enemy_pawns, (is_white ? down(piece) : up(piece))); // a white captures below it, a black above
 		} else {
+			// clear whatever was there if not en passant
 			clear_bit(enemy_pawns, move);
-		}
 		clear_bit(enemy_knights, move);
 		clear_bit(enemy_bishops, move);
 		clear_bit(enemy_rooks, move);
 		clear_bit(enemy_queens, move);
+		}
 		new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant after any (supposed) capture
 
 		if (is_white && (piece & ROW_8) || // check pawn promotion
 			!is_white && (piece & ROW_1)) {
-			possible_pawn_promotions(positions, position, is_white);
+			possible_pawn_promotions(positions, base_position, is_white);
 		} else {
 			positions.push_back(new_position);
 		}
@@ -172,7 +177,6 @@ void possible_castle_positions(std::vector<BoardPosition>& positions, BoardPosit
 	}
 }
 
-// !!! WIP !!! - castle
 std::vector<BoardPosition> all_possible_positions(const BoardPosition position, const bool is_white) {
 	std::vector<BoardPosition> positions;
 	std::vector<B64> pieces;
