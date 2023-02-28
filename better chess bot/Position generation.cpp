@@ -39,6 +39,7 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
 
 	if (move_source == king_moves) { // add king castles if needed
 		new_position = position;
+		new_position.special_move_rigths &= (is_white ? VOID_WHITE_CASTLE : VOID_BLACK_CASTLE); // void all castle rights on any kign move
 		possible_castle_positions(positions, new_position, is_white, pieces);
 	}
 
@@ -48,6 +49,9 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
 		current_pieces ^= piece; // delete the current piece from its origin
 		if (move_generator != nullptr) {
 			potential_moves = move_generator(blockers, pieces) & valid_destinations; // get the valid moves per piece
+			if (piece_type == ROOK) {
+				new_position.special_move_rigths ^= piece & new_position.special_move_rigths & (is_white ? ROW_1 : ROW_8); // void castle right of a moving rook
+			}
 		} else {
 			potential_moves = move_source[first_index + index_scale * lowest_single_bit_index(piece)] & valid_destinations;
 		}
