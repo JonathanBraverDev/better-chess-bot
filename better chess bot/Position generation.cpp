@@ -15,7 +15,6 @@ bool is_castle_legal(const BoardPosition position, const bool is_king_white, con
 
 void possible_piece_positions(std::vector<BoardPosition>& positions, const BoardPosition position, const bool is_white, const B64 pieces, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
 	std::vector<B64> single_pieces;
-	std::vector<B64> single_moves;
 	BoardPosition new_position = {};
 	B64 potential_moves = 0;
 
@@ -57,9 +56,8 @@ void possible_piece_positions(std::vector<BoardPosition>& positions, const Board
 		}
 
 		if (potential_moves != 0) {
-			seperate_bits(potential_moves, single_moves); // seperate the generated moves
 			if (move_source != pawn_moves) { // handle moves that kill the target
-				possible_capture_positions(positions, single_moves, new_position, is_white, piece, current_pieces, enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens, move_source);
+				possible_capture_positions(positions, new_position, potential_moves, is_white, piece, current_pieces, enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens, move_source);
 			} else { // only one regular move is avalible to pawns, it is added if legal and a jump is considered
 				possible_pawn_move_positions(positions, new_position, is_white, piece, blockers, potential_moves, current_pieces);
 			}
@@ -96,11 +94,15 @@ void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPo
 	}
 }
 
-void possible_capture_positions(std::vector<BoardPosition>& positions, std::vector<B64>& single_moves, BoardPosition& new_position, const bool is_white, const B64 piece, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const B64* move_source) {
+void possible_capture_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, B64 potential_moves, const bool is_white, const B64 piece, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const B64* move_source) {
 
 	const BoardPosition base_position = new_position;
 
+	std::vector<B64> single_moves;
+	seperate_bits(potential_moves, single_moves); // seperate the generated moves
+
 	for (B64 move : single_moves) {
+		new_position = base_position;
 		current_pieces ^= move; // add the current piece to its destination
 		// delete any enemy piece in the destination
 		if ((move & base_position.special_move_rigths) && move_source == pawn_attacks) { // is en passant is used, remove the pawn
