@@ -70,12 +70,12 @@ bool is_attackd_by_color(const BoardPosition position, const B64 target_board, c
 }
 
 B64 attacking_pieces(const BoardPosition position, const B64 target_board_bit, const bool is_attacker_white) {
-	const int tile = lowest_single_bit_index(target_board_bit);
+	const int tile_index = lowest_single_bit_index(target_board_bit);
 	const B64 slide_attackes = generate_queen_moves(position.white | position.black, target_board_bit);
 
-	return (knight_moves[tile] & (is_attacker_white ? position.white_knights : position.black_knights)) |
-		(pawn_attacks[tile] & (is_attacker_white ? position.white_pawns : position.black_pawns)) |
-		(king_moves[tile] & (is_attacker_white ? position.white_king : position.black_king)) | // irrelevent for checks but quick and generic
+	return (knight_moves[tile_index] & (is_attacker_white ? position.white_knights : position.black_knights)) |
+		(pawn_attacks[tile_index * 2 + (is_attacker_white ? 0 : 1)] & (is_attacker_white ? position.white_pawns : position.black_pawns)) |
+		(king_moves[tile_index] & (is_attacker_white ? position.white_king : position.black_king)) | // irrelevent for checks but quick and generic
 		(slide_attackes & (is_attacker_white ? position.white_queens : position.black_queens)) |
 		(slide_attackes & (is_attacker_white ? position.white_rooks : position.black_rooks)) |
 		(slide_attackes & (is_attacker_white ? position.white_bishops : position.black_bishops));

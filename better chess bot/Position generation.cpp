@@ -95,7 +95,7 @@ void possible_pawn_move_positions(std::vector<BoardPosition>& positions, BoardPo
 }
 
 void possible_capture_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, B64 potential_moves, const bool is_white, const B64 piece, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const B64* move_source) {
-
+	
 	const BoardPosition base_position = new_position;
 
 	std::vector<B64> single_moves;
@@ -110,10 +110,10 @@ void possible_capture_positions(std::vector<BoardPosition>& positions, BoardPosi
 		} else {
 			// clear whatever was there if not en passant
 			clear_bit(enemy_pawns, move);
-		clear_bit(enemy_knights, move);
-		clear_bit(enemy_bishops, move);
-		clear_bit(enemy_rooks, move);
-		clear_bit(enemy_queens, move);
+			clear_bit(enemy_knights, move);
+			clear_bit(enemy_bishops, move);
+			clear_bit(enemy_rooks, move);
+			clear_bit(enemy_queens, move);
 		}
 		new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant after any (supposed) capture
 
@@ -183,11 +183,9 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 	std::vector<BoardPosition> positions;
 	std::vector<B64> pieces;
 	std::vector<B64> destinations;
-	BoardPosition new_position = position;
-	B64 potential_moves = 0;
 	const B64 blockers = position.white | position.black;
 	const B64 not_own = (is_white ? ~position.white : ~position.black); // valid destinations
-	const B64 en_passant = (is_white ? position.black : position.white) | (position.special_move_rigths & ROW_3 & ROW_6); // pawns, lovem
+	B64 en_passant; // pawns, lovem
 
 	// shorthand own pieces
 	const B64 pawns = (is_white ? position.white_pawns : position.black_pawns);
@@ -197,24 +195,24 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 	const B64 queens = (is_white ? position.white_queens : position.black_queens);
 	const B64 king = (is_white ? position.white_king : position.black_king);
 
-	// ordered by number of expected avalible moves (max for queen is 27 vs 28 of 2 roosk but its highly unlikley to mater)
-	// potentially change to a better preservation estimate
+	// ordered by number of expected avalible moves
 	positions.reserve(EXPECTED_BRANCHING);
-	if (queens) {
-		possible_piece_positions(positions, position, is_white, queens, QUEEN, blockers, not_own, &generate_queen_moves);
-	}
-	if (rooks) {
-		possible_piece_positions(positions, position, is_white, rooks, ROOK, blockers, not_own, &generate_rook_moves);
-	}
-	if (bishops) {
-		possible_piece_positions(positions, position, is_white, bishops, BISHOP, blockers, not_own, &generate_bishop_moves);
+	if (pawns) { // can I just say that I HATE how complicated this piece type is?
+		en_passant = (is_white ? position.black : position.white) | (position.special_move_rigths & ROW_3 & ROW_6);
+		possible_piece_positions(positions, position, is_white, pawns, PAWN, blockers, not_own | en_passant, nullptr, knight_moves);
+		// promotions handled in the general function
 	}
 	if (knights) {
 		possible_piece_positions(positions, position, is_white, knights, KNIGHT, blockers, not_own, nullptr, knight_moves);
 	}
-	if (pawns) { // can I just say that I HATE how complicated this piece type is?
-		possible_piece_positions(positions, position, is_white, pawns, PAWN, blockers, not_own | en_passant, nullptr, knight_moves);
-		// promotions handled in the general function
+	if (bishops) {
+		possible_piece_positions(positions, position, is_white, bishops, BISHOP, blockers, not_own, &generate_bishop_moves);
+	}
+	if (rooks) {
+		possible_piece_positions(positions, position, is_white, rooks, ROOK, blockers, not_own, &generate_rook_moves);
+	}
+	if (queens) {
+		possible_piece_positions(positions, position, is_white, queens, QUEEN, blockers, not_own, &generate_queen_moves);
 	}
 
 	// king normals, assuming he didn't get brutally murdered (eveluation planned to end on unavaidable check)
@@ -225,40 +223,108 @@ std::vector<BoardPosition> all_possible_positions(const BoardPosition position, 
 	// note that validation for checks dosent happen here
 }
 
-void kills_to_tile(std::vector<BoardPosition>& positions, const BoardPosition position, const B64 target, const bool is_white) {
+// moves that get here are garanteed to be possible, all killing hte target one way or another
+void tile_capture_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, const bool is_white, const B64 target, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const bool is_pawn) {
 
-	// shorthand own pieces
-	const B64 pawns = (is_white ? position.white_pawns : position.black_pawns);
-	const B64 knights = (is_white ? position.white_knights : position.black_knights);
-	const B64 bishops = (is_white ? position.white_bishops : position.black_bishops);
-	const B64 rooks = (is_white ? position.white_rooks : position.black_rooks);
-	const B64 queens = (is_white ? position.white_queens : position.black_queens);
-	const B64 king = (is_white ? position.white_king : position.black_king); // king starts in check
+	std::vector<B64> single_pieces;
+	const BoardPosition base_position = new_position;
+	B64 en_passant_tile;
 
-	const int target_index = lowest_single_bit_index(target);
-	const B64 sliding_attacks = generate_queen_moves(position.white & position.black, target);
+	seperate_bits(current_pieces, single_pieces);
 
-	const B64 blockers = position.white | position.black;
-	const B64 not_own = (is_white ? ~position.white : ~position.black); // valid destinations
-	const B64 en_passant = (is_white ? position.black : position.white) | (position.special_move_rigths & ROW_3 & ROW_6); // pawns, lovem
+	for (B64 piece : single_pieces) {
+		new_position = base_position; // reset position
+		current_pieces ^= piece; // remove piece from its origin
+		// delete any enemy piece in the destination
+		if (is_pawn) {
+			en_passant_tile = (is_white ? up(target) : down(target)); // dark pawns have an enpassant ABOVE them
+			if (en_passant_tile & new_position.special_move_rigths) {
+				clear_bit(enemy_pawns, target);
+				current_pieces ^= en_passant_tile; // add the pawn to the en passant tile
+			}
+		} else {
+			// clear whatever was there if not en passant
+			clear_bit(enemy_pawns, target);
+			clear_bit(enemy_knights, target);
+			clear_bit(enemy_bishops, target);
+			clear_bit(enemy_rooks, target);
+			clear_bit(enemy_queens, target);
+			current_pieces ^= target; // add the pawn to the target square
+		}
+		new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant after any (supposed) capture
 
-
-	if (queens) {
-		possible_piece_positions(positions, position, is_white, queens, QUEEN, blockers, not_own, &generate_queen_moves);
+		if (is_white && (piece & ROW_8) || // check pawn promotion
+			!is_white && (piece & ROW_1)) {
+			possible_pawn_promotions(positions, new_position, is_white);
+		} else {
+			positions.push_back(new_position);
+		}
 	}
-	if (rooks) {
-		possible_piece_positions(positions, position, is_white, rooks, ROOK, blockers, not_own, &generate_rook_moves);
-	}
-	if (bishops) {
-		possible_piece_positions(positions, position, is_white, bishops, BISHOP, blockers, not_own, &generate_bishop_moves);
-	}
-	if (knights) {
-		possible_piece_positions(positions, position, is_white, knights, KNIGHT, blockers, not_own, nullptr, knight_moves);
-	}
-	if (pawns) {
-		possible_piece_positions(positions, position, is_white, knights, PAWN, blockers, not_own, nullptr, knight_moves);
+}
 
-		// check for promoted pawns and spit out 4 boards for each
+void kills_to_tile(std::vector<BoardPosition>& positions, const BoardPosition position, const B64 target_board_bit, const bool is_white) {
+	const int tile_index = lowest_single_bit_index(target_board_bit);
+	const B64 slide_attackes = generate_queen_moves(position.white | position.black, target_board_bit);
+
+	const B64 killing_knights = (knight_moves[tile_index] & (is_white ? position.white_knights : position.black_knights));
+	const B64 killing_bishops = (slide_attackes & (is_white ? position.white_bishops : position.black_bishops));
+	const B64 killing_rooks = (slide_attackes & (is_white ? position.white_rooks : position.black_rooks));
+	const B64 killing_queens = (slide_attackes & (is_white ? position.white_queens : position.black_queens));
+	const B64 killing_king = (king_moves[tile_index] & (is_white ? position.white_king : position.black_king));
+
+	BoardPosition new_position = {};
+
+	// pointer tables for both colors
+	B64* white_pieces[6] = { &new_position.white_pawns, &new_position.white_knights, &new_position.white_bishops,
+							 &new_position.white_rooks, &new_position.white_queens, &new_position.white_king };
+
+	B64* black_pieces[6] = { &new_position.black_pawns, &new_position.black_knights, &new_position.black_bishops,
+							 &new_position.black_rooks, &new_position.black_queens, &new_position.black_king };
+
+	// shorthand enemy pieces
+	const B64& enemy_pawns = (is_white ? *black_pieces[PAWN] : *white_pieces[PAWN]);
+	const B64& enemy_knights = (is_white ? *black_pieces[KNIGHT] : *white_pieces[KNIGHT]);
+	const B64& enemy_bishops = (is_white ? *black_pieces[BISHOP] : *white_pieces[BISHOP]);
+	const B64& enemy_rooks = (is_white ? *black_pieces[ROOK] : *white_pieces[ROOK]);
+	const B64& enemy_queens = (is_white ? *black_pieces[QUEEN] : *white_pieces[QUEEN]);
+	const B64& enemy_king = (is_white ? *black_pieces[KING] : *white_pieces[KING]);
+
+	B64& knights = (is_white ? new_position.white_knights : new_position.black_knights);
+	B64& bishops = (is_white ? new_position.white_bishops : new_position.black_bishops);
+	B64& rooks = (is_white ? new_position.white_rooks : new_position.black_rooks);
+	B64& queens = (is_white ? new_position.white_queens : new_position.black_queens);
+	B64& king = (is_white ? new_position.white_king : new_position.black_king);
+
+	// trick here, look for pawns in the attack pattern of the opponent to find tiles from which pawns can attack to the target 
+	// THEN also look for en passant opportunities, I LOVE PAWNS, have I said it enough times already?!?!
+	B64 killing_pawns = (pawn_attacks[tile_index * 2 + (is_white ? 1 : 0)]);
+	B64 en_passant_tile;
+	if (target_board_bit & (is_white ? position.black_pawns : position.white_pawns)) { // check if the target is a pawn
+		en_passant_tile = (is_white ? up(target_board_bit) : down(target_board_bit)); // dark pawns have an enpassant ABOVE them
+		if (en_passant_tile & position.special_move_rigths) { // check if an en passant is possible
+			killing_pawns |= (pawn_attacks[lowest_single_bit_index(en_passant_tile) * 2 + (is_white ? 1 : 0)]);
+		}
+	}
+	// finalize pawn attackers
+	killing_pawns &= (is_white ? position.white_pawns : position.black_pawns);
+
+	if (killing_pawns) {
+		tile_capture_positions(positions, new_position, is_white, target_board_bit, (is_white ? new_position.white_pawns : new_position.black_pawns), enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens);
+	}
+	if (killing_knights) {
+		tile_capture_positions(positions, new_position, is_white, target_board_bit, (is_white ? new_position.white_knights : new_position.black_knights), enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens);
+	}
+	if (killing_bishops) {
+		tile_capture_positions(positions, new_position, is_white, target_board_bit, (is_white ? new_position.white_bishops : new_position.black_bishops), enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens);
+	}
+	if (killing_rooks) {
+		tile_capture_positions(positions, new_position, is_white, target_board_bit, (is_white ? new_position.white_rooks : new_position.black_rooks), enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens);
+	}
+	if (killing_queens) {
+		tile_capture_positions(positions, new_position, is_white, target_board_bit, (is_white ? new_position.white_queens : new_position.black_queens), enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens);
+	}
+	if (killing_king) {
+		tile_capture_positions(positions, new_position, is_white, target_board_bit, (is_white ? new_position.white_king : new_position.black_king), enemy_pawns, enemy_knights, enemy_bishops, enemy_rooks, enemy_queens);
 	}
 }
 
@@ -271,7 +337,7 @@ std::vector<BoardPosition> possible_evade_positions(const BoardPosition position
 	const B64 bishops = (is_defender_white ? position.white_bishops : position.black_bishops);
 	const B64 rooks = (is_defender_white ? position.white_rooks : position.black_rooks);
 	const B64 queens = (is_defender_white ? position.white_queens : position.black_queens);
-	const B64 king = (is_defender_white ? position.white_king : position.black_king); // king starts in check
+	B64 king = (is_defender_white ? position.white_king : position.black_king); // king starts in check
 
 	const B64 attackers = attacking_pieces(position, king, (is_defender_white ? BLACK : WHITE)); // find attackers of the oposite color
 	const B64 possible_king_moves = king_moves[lowest_single_bit_index(king)] & ~(position.black & position.white); // non kill moves, they are added elsewhere
@@ -290,26 +356,21 @@ std::vector<BoardPosition> possible_evade_positions(const BoardPosition position
 	// add all king moves
 
 	if (count_bits64(attackers) > 1) {
-		// add king kills
+		// king kills
 	}
 	else {
 
 		// a knight's check cannot be blocked, but a single knight can be killed
 		if (attackers & (is_defender_white ? position.white_knights : position.black_knights)) {
-
-			// needed function:
-			// positions with any kill of target at single tile
-			// add those kill positions
-
+			kills_to_tile(positions, position, attackers, is_defender_white);
 		}
 		else { // the attacker is a sliding piece, block it or kill it
 			attack_path = get_connecting_tiles(attackers, king); // garanteed to be checked
 
 			// needed functions:
-			// positions with any move to one of X tiles on a borad
+			// positions with any non-king move to one of X tiles on a borad
 			// add those move positions
-			// positions with any kill of target at single tile
-			// add those kill positions
+			kills_to_tile(positions, position, attackers, is_defender_white);
 		}
 	}
 

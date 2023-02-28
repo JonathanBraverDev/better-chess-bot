@@ -15,6 +15,9 @@ void possible_capture_positions(std::vector<BoardPosition>& positions, BoardPosi
 void possible_pawn_promotions(std::vector<BoardPosition>& positions, BoardPosition position, const bool is_white);
 void possible_castle_positions(std::vector<BoardPosition>& positions, BoardPosition& position, const bool is_white, const B64 king);
 
+void tile_capture_positions(std::vector<BoardPosition>& positions, BoardPosition& new_position, const bool is_white, const B64 target, B64& current_pieces, const B64& enemy_pawns, const B64& enemy_knights, const B64& enemy_bishops, const B64& enemy_rooks, const B64& enemy_queens, const bool is_pawn = false);
+void kills_to_tile(std::vector<BoardPosition>&positions, const BoardPosition position, const B64 target_board_bit, const bool is_white);
+
 // final validation of generated boards
 std::vector<BoardPosition> all_possible_positions(const BoardPosition position, const bool is_white);
 std::vector<BoardPosition> possible_evade_positions(const BoardPosition position, const bool is_white);
