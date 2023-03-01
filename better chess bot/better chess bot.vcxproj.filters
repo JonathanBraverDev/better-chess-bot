@@ -74,7 +74,7 @@
     <ClInclude Include="Attack detection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Experimental structure.h">
+    <ClInclude Include="Sided structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

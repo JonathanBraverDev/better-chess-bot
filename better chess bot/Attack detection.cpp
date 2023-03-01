@@ -26,6 +26,30 @@ bool is_check(const BoardPosition position, const bool is_attacker_color) {
 	return check;
 }
 
+bool is_check(const SidedPosition sided_position) {
+	//const B64 attacked_king = (is_attacker_color ? position.black_king : position.white_king);
+	const int attacked_index = lowest_single_bit_index(sided_position.own_king);
+	B64 slide_attackes;
+
+	bool check = false;
+
+	// perform fastest bit check first
+	if ((knight_moves[attacked_index] & sided_position.oppenent_knights) ||
+		(pawn_attacks[attacked_index] & sided_position.oppenent_pawns)) {
+
+		check = true;
+	} else {
+		// can be futher split into multiple checks but this is WAY more readable
+		slide_attackes = generate_queen_moves(all_pieces(sided_position), sided_position.own_king);
+
+		check = ((slide_attackes & sided_position.oppenent_queens) ||
+			(slide_attackes & sided_position.oppenent_rooks) ||
+			(slide_attackes & sided_position.oppenent_bishops));
+	}
+
+	return check;
+}
+
 bool is_slide_attacked(B64(*move_generator)(B64, B64), const B64 attacking_pieces, const B64 target_board, const B64 blockers) {
 	return is_attacked(attacking_pieces, target_board, move_generator, nullptr, blockers);
 }
@@ -57,16 +81,16 @@ bool is_attacked(const B64 attacking_pieces, const B64 target_board, B64(*move_g
 	return attacked;
 }
 
-bool is_attackd_by_color(const BoardPosition position, const B64 target_board, const bool is_attacker_white) {
+bool is_attackd_by_color(const SidedPosition sided_position, const B64 target_board) {
 
-	const B64 blockers = all_pieces(position);
+	const B64 blockers = all_pieces(sided_position);
 
-	return is_slide_attacked(generate_queen_moves, (is_attacker_white ? position.white_queens : position.black_queens), target_board, blockers) ||
-		is_slide_attacked(generate_rook_moves, (is_attacker_white ? position.white_rooks : position.white_rooks), target_board, blockers) ||
-		is_slide_attacked(generate_bishop_moves, (is_attacker_white ? position.white_bishops : position.black_bishops), target_board, blockers) ||
-		is_jump_attacked(king_moves, position.white_king, target_board) ||
-		is_jump_attacked(knight_moves, position.white_knights, target_board) ||
-		is_jump_attacked(pawn_attacks, position.white_pawns, target_board, 2); // pawns have 2 moves per tile
+	return is_slide_attacked(generate_queen_moves, sided_position.oppenent_queens, target_board, blockers) ||
+		is_slide_attacked(generate_rook_moves, sided_position.oppenent_rooks, target_board, blockers) ||
+		is_slide_attacked(generate_bishop_moves, sided_position.oppenent_bishops, target_board, blockers) ||
+		is_jump_attacked(king_moves, sided_position.oppenent_king, target_board) ||
+		is_jump_attacked(knight_moves, sided_position.oppenent_knights, target_board) ||
+		is_jump_attacked(pawn_attacks, sided_position.oppenent_pawns, target_board, 2, (sided_position.is_white ? 1 : 0)); // pawns have 2 moves per tile
 }
 
 B64 attacking_pieces(const BoardPosition position, const B64 target_board_bit, const bool is_attacker_white) {
