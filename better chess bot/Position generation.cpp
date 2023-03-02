@@ -210,7 +210,7 @@ void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPo
 		new_position = sided_position; // reset position
 		current_pieces ^= piece; // remove piece from its origin
 		// delete any enemy piece in the destination
-		if (&current_pieces == &sided_position.own_pawns) { // check the adress' to see if te pieces are pawns
+		if (piece_type == PAWN) {
 			en_passant_tile = (sided_position.is_white ? up(target) : down(target)); // dark pawns have an enpassant ABOVE them
 			if (en_passant_tile & new_position.special_move_rigths) {
 				current_pieces ^= en_passant_tile; // add the pawn to the en passant tile
