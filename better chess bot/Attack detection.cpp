@@ -1,56 +1,31 @@
 
 #include "Attack detection.h"
 
-bool is_check(const BoardPosition position, const bool is_attacker_color) {
-	const B64 attacked_king = (is_attacker_color ? position.black_king : position.white_king);
-	const int tile = lowest_single_bit_index(attacked_king);
-	B64 slide_attackes;
-
-	bool check = false;
-
-	// perform fastest bit check first
-	if ((knight_moves[tile] & (is_attacker_color ? position.white_knights : position.black_knights)) ||
-		(pawn_attacks[tile] & (is_attacker_color ? position.white_pawns : position.black_pawns))) {
-
-		check = true;
-
-	} else {
-		// can be futher split into multiple checks but this is WAY more readable
-		slide_attackes = generate_queen_moves(all_pieces(position), attacked_king);
-
-		check = ((slide_attackes & (is_attacker_color ? position.white_queens : position.black_queens)) ||
-			(slide_attackes & (is_attacker_color ? position.white_rooks : position.black_rooks)) ||
-			(slide_attackes & (is_attacker_color ? position.white_bishops : position.black_bishops)));
-	}
-
-	return check;
-}
-
 bool is_check(const SidedPosition sided_position) {
-	//const B64 attacked_king = (is_attacker_color ? position.black_king : position.white_king);
-	const int attacked_index = lowest_single_bit_index(sided_position.own_king);
+	const int tile = lowest_single_bit_index(sided_position.own_king);
 	B64 slide_attackes;
 
 	bool check = false;
 
 	// perform fastest bit check first
-	if ((knight_moves[attacked_index] & sided_position.oppenent_knights) ||
-		(pawn_attacks[attacked_index] & sided_position.oppenent_pawns)) {
+	if ((knight_moves[tile] & sided_position.opponent_knights) ||
+		(pawn_attacks[tile] & sided_position.opponent_pawns)) {
 
 		check = true;
+
 	} else {
 		// can be futher split into multiple checks but this is WAY more readable
 		slide_attackes = generate_queen_moves(all_pieces(sided_position), sided_position.own_king);
 
-		check = ((slide_attackes & sided_position.oppenent_queens) ||
-			(slide_attackes & sided_position.oppenent_rooks) ||
-			(slide_attackes & sided_position.oppenent_bishops));
+		check = ((slide_attackes & sided_position.opponent_queens) ||
+				 (slide_attackes & sided_position.opponent_rooks) ||
+				 (slide_attackes & sided_position.opponent_bishops));
 	}
 
 	return check;
 }
 
-bool is_slide_attacked(B64(*move_generator)(B64, B64), const B64 attacking_pieces, const B64 target_board, const B64 blockers) {
+bool is_slide_attacked(B64(*const move_generator)(B64, B64), const B64 attacking_pieces, const B64 target_board, const B64 blockers) {
 	return is_attacked(attacking_pieces, target_board, move_generator, nullptr, blockers);
 }
 
@@ -58,7 +33,7 @@ bool is_jump_attacked(const B64* move_source, const B64 attacking_pieces, const 
 	return is_attacked(attacking_pieces, target_board, nullptr, move_source, 0, index_scale, first_index);
 }
 
-bool is_attacked(const B64 attacking_pieces, const B64 target_board, B64(*move_generator)(B64, B64), const B64* move_source, const B64 blockers, const int index_scale, const int first_index) {
+bool is_attacked(const B64 attacking_pieces, const B64 target_board, B64(*const move_generator)(B64, B64), const B64* move_source, const B64 blockers, const int index_scale, const int first_index) {
 	std::vector<B64> potential_attackers;
 	B64 attack_board;
 	bool attacked = false;
@@ -81,31 +56,31 @@ bool is_attacked(const B64 attacking_pieces, const B64 target_board, B64(*move_g
 	return attacked;
 }
 
-bool is_attackd_by_color(const SidedPosition sided_position, const B64 target_board) {
+bool is_attackd_by_side(const SidedPosition sided_position, const B64 target_board) {
 
 	const B64 blockers = all_pieces(sided_position);
 
-	return is_slide_attacked(generate_queen_moves, sided_position.oppenent_queens, target_board, blockers) ||
-		is_slide_attacked(generate_rook_moves, sided_position.oppenent_rooks, target_board, blockers) ||
-		is_slide_attacked(generate_bishop_moves, sided_position.oppenent_bishops, target_board, blockers) ||
-		is_jump_attacked(king_moves, sided_position.oppenent_king, target_board) ||
-		is_jump_attacked(knight_moves, sided_position.oppenent_knights, target_board) ||
-		is_jump_attacked(pawn_attacks, sided_position.oppenent_pawns, target_board, 2, (sided_position.is_white ? 1 : 0)); // pawns have 2 moves per tile
+	return is_slide_attacked(generate_queen_moves, sided_position.opponent_queens, target_board, blockers) ||
+		   is_slide_attacked(generate_rook_moves, sided_position.opponent_rooks, target_board, blockers) ||
+		   is_slide_attacked(generate_bishop_moves, sided_position.opponent_bishops, target_board, blockers) ||
+		   is_jump_attacked(king_moves, sided_position.opponent_king, target_board) ||
+		   is_jump_attacked(knight_moves, sided_position.opponent_knights, target_board) ||
+		   is_jump_attacked(pawn_attacks, sided_position.opponent_pawns, target_board, 2, (sided_position.is_white ? 1 : 0)); // pawns have 2 moves per tile
 }
 
-B64 attacking_pieces(const BoardPosition position, const B64 target_board_bit, const bool is_attacker_white) {
+B64 attacking_pieces(const SidedPosition sided_position, const B64 target_board_bit) {
 	const int tile_index = lowest_single_bit_index(target_board_bit);
-	const B64 slide_attackes = generate_queen_moves(all_pieces(position), target_board_bit);
+	const B64 slide_attackes = generate_queen_moves(all_pieces(sided_position), target_board_bit);
 
-	return (knight_moves[tile_index] & (is_attacker_white ? position.white_knights : position.black_knights)) |
-		(pawn_attacks[tile_index * 2 + (is_attacker_white ? 0 : 1)] & (is_attacker_white ? position.white_pawns : position.black_pawns)) |
-		(king_moves[tile_index] & (is_attacker_white ? position.white_king : position.black_king)) | // irrelevent for checks but quick and generic
-		(slide_attackes & (is_attacker_white ? position.white_queens : position.black_queens)) |
-		(slide_attackes & (is_attacker_white ? position.white_rooks : position.black_rooks)) |
-		(slide_attackes & (is_attacker_white ? position.white_bishops : position.black_bishops));
+	return (knight_moves[tile_index] & sided_position.opponent_knights) |
+		   (pawn_attacks[tile_index * 2 + (sided_position.is_white ? 1 : 0)] & sided_position.opponent_pawns) |
+		   (king_moves[tile_index] & sided_position.opponent_king) | // irrelevent for checks but quick and generic
+		   (slide_attackes & sided_position.opponent_queens) |
+		   (slide_attackes & sided_position.opponent_rooks) |
+		   (slide_attackes & sided_position.opponent_bishops);
 }
 
-int count_sliding_attacks(B64(*move_generator)(B64, B64), const B64 attacking_pieces, const B64 target_board, const B64 blockers) {
+int count_sliding_attacks(B64(*const move_generator)(B64, B64), const B64 attacking_pieces, const B64 target_board, const B64 blockers) {
 	return count_attacks(attacking_pieces, target_board, move_generator, nullptr, blockers);
 }
 
@@ -113,7 +88,7 @@ int count_jumping_attacks(const B64* move_source, const B64 attacking_pieces, co
 	return count_attacks(attacking_pieces, target_board, nullptr, move_source, 0, index_scale, first_index);
 }
 
-int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*move_generator)(B64, B64), const B64* move_source, const B64 blockers, const int index_scale, const int first_index) {
+int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*const move_generator)(B64, B64), const B64* move_source, const B64 blockers, const int index_scale, const int first_index) {
 	std::vector<B64> potential_attackers;
 	B64 attack_board;
 	int attacks = 0;
@@ -136,26 +111,26 @@ int count_attacks(const B64 attacking_pieces, const B64 target_board, B64(*move_
 	return attacks;
 }
 
-int count_white_attacks(const BoardPosition position, const B64 target_board) {
+int count_own_attacks(const SidedPosition sided_position, const B64 target_board) {
 
-	const B64 blockers = all_pieces(position);
+	const B64 blockers = all_pieces(sided_position);
 
-	return count_sliding_attacks(generate_queen_moves, position.white_queens, target_board, blockers) +
-		count_sliding_attacks(generate_rook_moves, position.white_rooks, target_board, blockers) +
-		count_sliding_attacks(generate_bishop_moves, position.white_bishops, target_board, blockers) +
-		count_jumping_attacks(king_moves, position.white_king, target_board) +
-		count_jumping_attacks(knight_moves, position.white_knights, target_board) +
-		count_jumping_attacks(pawn_attacks, position.white_pawns, target_board, 2); // pawns have 2 moves per tile
+	return count_sliding_attacks(generate_queen_moves, sided_position.own_queens, target_board, blockers) +
+		   count_sliding_attacks(generate_rook_moves, sided_position.own_rooks, target_board, blockers) +
+		   count_sliding_attacks(generate_bishop_moves, sided_position.own_bishops, target_board, blockers) +
+		   count_jumping_attacks(king_moves, sided_position.own_king, target_board) +
+		   count_jumping_attacks(knight_moves, sided_position.own_knights, target_board) +
+		   count_jumping_attacks(pawn_attacks, sided_position.own_pawns, target_board, 2); // pawns have 2 moves per tile
 }
 
-int count_black_attacks(const BoardPosition position, const B64 target_board) {
+int count_opponent_attacks(const SidedPosition sided_position, const B64 target_board) {
 
-	const B64 blockers = all_pieces(position);
+	const B64 blockers = all_pieces(sided_position);
 
-	return count_sliding_attacks(generate_queen_moves, position.black_queens, target_board, blockers) +
-		count_sliding_attacks(generate_rook_moves, position.black_rooks, target_board, blockers) +
-		count_sliding_attacks(generate_bishop_moves, position.black_bishops, target_board, blockers) +
-		count_jumping_attacks(king_moves, position.black_king, target_board) +
-		count_jumping_attacks(knight_moves, position.black_knights, target_board) +
-		count_jumping_attacks(pawn_attacks, position.black_pawns, target_board, 2, 1); // offset to blacks moves
+	return count_sliding_attacks(generate_queen_moves, sided_position.opponent_queens, target_board, blockers) +
+		   count_sliding_attacks(generate_rook_moves, sided_position.opponent_rooks, target_board, blockers) +
+		   count_sliding_attacks(generate_bishop_moves, sided_position.opponent_bishops, target_board, blockers) +
+		   count_jumping_attacks(king_moves, sided_position.opponent_king, target_board) +
+		   count_jumping_attacks(knight_moves, sided_position.opponent_knights, target_board) +
+		   count_jumping_attacks(pawn_attacks, sided_position.opponent_pawns, target_board, 2, 1); // offset to blacks moves
 }

@@ -142,25 +142,27 @@
     <ClCompile Include="Attack detection.cpp" />
     <ClCompile Include="better chess bot.cpp" />
     <ClCompile Include="Boad operations.cpp" />
+    <ClCompile Include="Position structure.cpp" />
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="Board generation.cpp" />
     <ClCompile Include="Move handling.cpp" />
     <ClCompile Include="Move search.cpp" />
     <ClCompile Include="Position generation.cpp" />
+    <ClCompile Include="Board structure.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Attack detection.h" />
     <ClInclude Include="Board operations.h" />
-    <ClInclude Include="Board structure.h" />
+    <ClInclude Include="Position structure.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Board generation.h" />
-    <ClInclude Include="Sided structure.h" />
+    <ClInclude Include="Piece structure.h" />
     <ClInclude Include="Game constants.h" />
     <ClInclude Include="Move handling.h" />
     <ClInclude Include="Move search.h" />
     <ClInclude Include="Move structure.h" />
     <ClInclude Include="Position generation.h" />
-    <ClInclude Include="Tile structure.h" />
+    <ClInclude Include="Board structure.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

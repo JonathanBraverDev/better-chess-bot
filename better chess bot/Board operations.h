@@ -49,7 +49,8 @@ inline B64 down_right(B64 board) { return (board & COLUMN_A_INV) >> BOARD_SIDE_S
 // note: all directional names are are according to the output of "visualize_board"
 
 // more complex sliding movemnt, each of these returns a board with all possible destinations
-B64 slide(B64(*direction)(B64), const B64 all_pieces, B64 piece);
+B64 slide(B64(*const direction)(B64), const B64 all_pieces, B64 piece);
+
 // aliases for the slide function
 inline B64 slide_up(const B64 all_pieces, B64 piece) { return slide(&up, all_pieces, piece); };
 inline B64 slide_down(const B64 all_pieces, B64 piece) { return slide(&down, all_pieces, piece); };

@@ -24,7 +24,7 @@ B64 generate_queen_moves(const B64 blockers, B64 piece) {
 }
 
 // assums that the pawn is allowed to jump
-B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*direction)(B64)) {
+B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*const direction)(B64)) {
 	B64 moves = 0;
 	if (!((direction(piece) & blockers) |
 		((direction(direction(piece)) & blockers)))) {

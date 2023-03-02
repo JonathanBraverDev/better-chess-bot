@@ -71,7 +71,7 @@ void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
     }
 }
 
-B64 slide(B64(*direction)(B64), const B64 blockers, B64 piece) {
+B64 slide(B64(*const direction)(B64), const B64 blockers, B64 piece) {
     B64 moves = 0;
 
     do {
@@ -112,7 +112,7 @@ B64(*get_direction(const B64 start, const B64 end))(B64) {
 // returns a board with all tiles between the 2 SINGLE BIT boards
 B64 get_connecting_tiles(B64 start, const B64 end) {
 
-    B64(*direction)(B64) = get_direction(start, end);
+    B64(*const direction)(B64) = get_direction(start, end);
     B64 tiles = 0;
 
     // skiping the first check, at the very least one run is required
