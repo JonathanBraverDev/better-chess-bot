@@ -1,21 +1,8 @@
 #pragma once
 
 #include "Board structure.h"
-
-enum PieceType {
-    PAWN,
-    KNIGHT,
-    BISHOP,
-    ROOK,
-    QUEEN,
-    KING,
-    NONE
-};
-
-enum PlayerColor {
-    WHITE,
-    BLACK
-};
+#include "Position structure.h"
+#include "Piece structure.h"
 
 enum MoveType {
     NORMAL,
@@ -24,11 +11,6 @@ enum MoveType {
     CASTLE_LONG,
     PROMOTION,
     PROMOTION_CAPTURE
-};
-
-struct Piece {
-    PieceType type;
-    PlayerColor color;
 };
 
 struct Move {
@@ -43,3 +25,7 @@ struct Move {
 };
 
 inline bool is_white_player(const GameState& state) { return (state.turn % 2 == 0); };
+inline Move invert_move(Move move) { 
+    swap(move.origin, move.destination);
+    return move; 
+}

@@ -4,6 +4,7 @@
 #include "Board operations.h"
 #include "Board generation.h"
 #include "Attack detection.h"
+#include "Position structure.h"
 #include "Position generation.h"
 
 constexpr int DRAW_MOVE_LIMIT = 50;
@@ -20,5 +21,5 @@ constexpr int DRAW_VALUE = 0; // possibly set negative to discourage draws
 
 // simple eval
 bool is_draw(GameState& current_state);
-bool is_checkmate(BoardPosition position, bool is_attacker_white);
-int material_eval(BoardPosition position);
+bool is_checkmate(SidedPosition sided_position);
+int material_eval(SidedPosition sided_position);

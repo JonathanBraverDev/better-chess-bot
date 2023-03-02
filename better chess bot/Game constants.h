@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Tile structure.h"
 #include "Board structure.h"
 #include "Move structure.h"
 
@@ -21,7 +20,7 @@ constexpr B64 INNITIAL_BLACK_KING = D8;
 
 constexpr B64 INNITIAL_SPECIAL_MOVE_RIGHTS = INNITIAL_WHITE_KING | INNITIAL_WHITE_ROOKS | INNITIAL_BLACK_KING | INNITIAL_BLACK_ROOKS;
 
-constexpr BoardPosition INNITIAL_POSITION = { INNITIAL_WHITE_PAWNS,
+constexpr SidedPosition INNITIAL_POSITION = { INNITIAL_WHITE_PAWNS,
 					                          INNITIAL_WHITE_KNIGHTS,
 											  INNITIAL_WHITE_BISHOPS,
 											  INNITIAL_WHITE_ROOKS,

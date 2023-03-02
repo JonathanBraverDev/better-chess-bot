@@ -42,36 +42,36 @@ allow draw offer and make the bot accept if the accuracy and advantage of the pl
 */
 
 // low material rulings according to chess.com
-inline bool insufficient_material(BoardPosition position) {
+inline bool insufficient_material(SidedPosition sided_position) {
 
     bool low_material = false;
 
-    int white_bishops, white_knights;
-    int black_bishops, black_knights;
+    int own_bishops, own_knights;
+    int opponent_bishops, opponent_knights;
 
     // potential return guard refactor here
-    if ( !(position.white_pawns || position.black_pawns || // where there's a pawn theres (sometimes) a way
-           position.white_rooks || position.black_rooks || // immidiatly stop cases with rooks and queens
-           position.white_queens || position.black_queens)) { // rook endgames are more likly than queen endgames
+    if ( !(sided_position.own_pawns || sided_position.opponent_pawns || // where there's a pawn theres (sometimes) a way
+           sided_position.own_rooks || sided_position.opponent_rooks || // immidiatly stop cases with rooks and queens
+           sided_position.own_queens || sided_position.opponent_queens)) { // rook endgames are more likly than queen endgames
         
         // saving counts to avoit countign each time, other wise i'd just do a MASSIVE return
-        white_bishops = count_bits64(position.white_bishops);
-        white_knights = count_bits64(position.white_knights);
+        own_bishops = count_bits64(sided_position.own_bishops);
+        own_knights = count_bits64(sided_position.own_knights);
 
-        black_bishops = count_bits64(position.black_bishops);
-        black_knights = count_bits64(position.black_knights);
+        opponent_bishops = count_bits64(sided_position.opponent_bishops);
+        opponent_knights = count_bits64(sided_position.opponent_knights);
 
 
         // this CAN be rearanged with ifs, cutting off conflicting cases but having SOME readabiliy is prefered
-        low_material = !(white_knights | white_bishops | black_knights | black_bishops) || // quick kings only check
-                       (white_bishops >= 2 || black_bishops >= 2) || // a mate is possible with 2 bishops
-                       (white_knights >= 3 || black_knights >= 3) || // this... is mate. but why? why would you do this to yourself?
+        low_material = !(own_knights | own_bishops | opponent_knights | opponent_bishops) || // quick kings only check
+                       (own_bishops >= 2 || opponent_bishops >= 2) || // a mate is possible with 2 bishops
+                       (own_knights >= 3 || opponent_knights >= 3) || // this... is mate. but why? why would you do this to yourself?
                          ( // seperated for easier order changes ;)
-                             ( white_knights + white_bishops == 1     && !(black_knights | black_bishops)) ||    // white has only bishop or knight
-                             ( !(white_knights | white_bishops)       && black_knights + black_bishops == 1) ||  // black has only bishop or knight
-                             ( white_knights + white_bishops == 1     && black_knights + black_bishops == 1) ||  // both have bishop or knight
-                             ( (white_knights == 2 && !white_bishops) && !(black_knights | black_bishops)) ||    // white has only 2 knights
-                             ( !(white_knights | white_bishops)       && (black_knights == 2 && !black_bishops)) // black has only 2 knights
+                             ( own_knights + own_bishops == 1     && !(opponent_knights | opponent_bishops)) ||    // white has only bishop or knight
+                             ( !(own_knights | own_bishops)       && opponent_knights + opponent_bishops == 1) ||  // black has only bishop or knight
+                             ( own_knights + own_bishops == 1     && opponent_knights + opponent_bishops == 1) ||  // both have bishop or knight
+                             ( (own_knights == 2 && !own_bishops) && !(opponent_knights | opponent_bishops)) ||    // white has only 2 knights
+                             ( !(own_knights | own_bishops)       && (opponent_knights == 2 && !opponent_bishops)) // black has only 2 knights
                          );
     }
 
@@ -85,13 +85,13 @@ bool is_draw(GameState& current_state) {
 
     // this whole thing feels somewhat combersome
     is_draw = (current_state.draw_timer >= DRAW_MOVE_LIMIT) || // check if draw timer is up
-              insufficient_material(original_state.position); // or the current position is a legal draw
+              insufficient_material(original_state.sided_position); // or the current position is a legal draw
 
     while (current_state.previous_state != nullptr && !is_draw) {
 
         current_state = *current_state.previous_state;
 
-        if (original_state.position == current_state.position) {
+        if (original_state.sided_position == current_state.sided_position) {
             repetion_count++; // yes this can be compressed to one line
             is_draw = (repetion_count == DRAW_REPETITIONS);
         }
@@ -100,8 +100,8 @@ bool is_draw(GameState& current_state) {
     return is_draw;
 }
 
-bool can_king_run(BoardPosition position, const bool is_attacker_white, const B64 attacked_king) {
-    B64 possible_king_moves = king_moves[lowest_single_bit_index(attacked_king)] & ~(is_attacker_white ? all_black_pieces(position) : all_white_pieces(position));
+bool can_king_run(SidedPosition sided_position) {
+    B64 possible_king_moves = king_moves[lowest_single_bit_index(sided_position.own_king)] & ~own_pieces(sided_position);
     B64 curr_move;
     bool can_run = false;
 
@@ -110,10 +110,9 @@ bool can_king_run(BoardPosition position, const bool is_attacker_white, const B6
         curr_move = lowest_bit_board(possible_king_moves);
 
         // update the king position
-        (is_attacker_white ? position.black_king = curr_move
-                           : position.white_king = curr_move);
+        sided_position.own_king = curr_move;
 
-        if (is_check(position, is_attacker_white)) {
+        if (!is_check(sided_position)) {
             can_run = true;
             break;
         }
@@ -125,9 +124,8 @@ bool can_king_run(BoardPosition position, const bool is_attacker_white, const B6
 }
 
 // checkmate shouldn't be reached during evaluation
-bool is_checkmate(BoardPosition position, const bool is_attacker_white) {
-    const B64 attacked_king = (is_attacker_white ? position.black_king : position.white_king);
-    const B64 attackers = attacking_pieces(position, attacked_king, is_attacker_white);
+bool is_checkmate(SidedPosition sided_position) {
+    const B64 attackers = attacking_pieces(sided_position, sided_position.own_king);
 
     B64 responce_attempts = 0;
     bool checkmate = false;
@@ -136,21 +134,21 @@ bool is_checkmate(BoardPosition position, const bool is_attacker_white) {
     // write a seprate function that returns only unchecked positions
 
     // if the king is attacked and can't save himself, the check is shared to all cases so is evaluated first
-    if (attackers && !can_king_run(position, is_attacker_white, attacked_king)) {
+    if (attackers && !can_king_run(sided_position)) {
 
         // moving out of check is the only option with multiple threats, so... he dead, he real, real dead
-        if (count_bits64(attacked_king) > 1) {
+        if (count_bits64(sided_position.own_king) > 1) {
             checkmate = true;
         } else {
 
             // a knight's check cannot be blocked, but a single knight can be killed
-            if (attackers & (is_attacker_white ? position.white_knights : position.black_knights)) {
+            if (attackers & sided_position.opponent_knights) {
 
                 // needed function:
                 // positions with any kill of target at single til
 
             } else { // the attacker is a sliding piece, block it or kill it
-                attack_path = get_connecting_tiles(attackers, attacked_king);
+                attack_path = get_connecting_tiles(attackers, sided_position.own_king);
 
                 // needed functions:
                 // positions with any move to one of X tiles on a borad
@@ -162,25 +160,25 @@ bool is_checkmate(BoardPosition position, const bool is_attacker_white) {
     return checkmate;
 }
 
-int material_eval(BoardPosition position) {
-    int white_queens, white_rooks, white_bishops, white_knights, white_pawns;
-    int black_queens, black_rooks, black_bishops, black_knights, black_pawns;
+int material_eval(SidedPosition sided_position) {
+    int own_queens, own_rooks, own_bishops, own_knights, own_pawns;
+    int opponent_queens, opponent_rooks, opponent_bishops, opponent_knights, opponent_pawns;
 
-    white_queens  = count_bits64(position.white_queens);
-    white_rooks   = count_bits64(position.white_rooks);
-    white_bishops = count_bits64(position.white_bishops);
-    white_knights = count_bits64(position.white_knights);
-    white_pawns   = count_bits64(position.white_pawns);
+    own_queens  = count_bits64(sided_position.own_queens);
+    own_rooks   = count_bits64(sided_position.own_rooks);
+    own_bishops = count_bits64(sided_position.own_bishops);
+    own_knights = count_bits64(sided_position.own_knights);
+    own_pawns   = count_bits64(sided_position.own_pawns);
 
-    black_queens  = count_bits64(position.black_queens);
-    black_rooks   = count_bits64(position.black_rooks);
-    black_bishops = count_bits64(position.black_bishops);
-    black_knights = count_bits64(position.black_knights);
-    black_pawns   = count_bits64(position.black_pawns);
+    opponent_queens  = count_bits64(sided_position.opponent_queens);
+    opponent_rooks   = count_bits64(sided_position.opponent_rooks);
+    opponent_bishops = count_bits64(sided_position.opponent_bishops);
+    opponent_knights = count_bits64(sided_position.opponent_knights);
+    opponent_pawns   = count_bits64(sided_position.opponent_pawns);
 
-    return (white_queens  - black_queens)  * QUEEN_VALUE  +
-           (white_rooks   - black_rooks)   * ROOK_VALUE   +
-           (white_bishops - black_bishops) * BISHOP_VALUE +
-           (white_knights - black_knights) * KNIGHT_VALUE +
-           (white_pawns   - black_pawns)   * PAWN_VALUE;
+    return (own_queens  - opponent_queens)  * QUEEN_VALUE  +
+           (own_rooks   - opponent_rooks)   * ROOK_VALUE   +
+           (own_bishops - opponent_bishops) * BISHOP_VALUE +
+           (own_knights - opponent_knights) * KNIGHT_VALUE +
+           (own_pawns   - opponent_pawns)   * PAWN_VALUE;
 }

@@ -31,5 +31,5 @@ void prepare_pawn_moves();
 B64 generate_bishop_moves(const B64 all_pieces, B64 piece);
 B64 generate_rook_moves(const B64 all_pieces, B64 piece);
 B64 generate_queen_moves(const B64 all_pieces, B64 piece);
-B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*direction)(B64));
+B64 generate_pawn_jump(const B64 blockers, B64 piece, B64(*const direction)(B64));
 inline B64 generate_pawn_jump(const B64 blockers, B64 piece, const bool is_white) { return generate_pawn_jump(blockers, piece, (is_white ? &up : &down)); };

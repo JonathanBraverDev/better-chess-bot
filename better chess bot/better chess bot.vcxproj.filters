@@ -39,9 +39,15 @@
     <ClCompile Include="Attack detection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Position structure.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Board structure.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Board structure.h">
+    <ClInclude Include="Position structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Board operations.h">
@@ -65,7 +71,7 @@
     <ClInclude Include="Position generation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tile structure.h">
+    <ClInclude Include="Board structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Game constants.h">
@@ -74,7 +80,7 @@
     <ClInclude Include="Attack detection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sided structure.h">
+    <ClInclude Include="Piece structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
