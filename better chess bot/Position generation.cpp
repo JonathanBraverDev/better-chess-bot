@@ -171,7 +171,7 @@ std::vector<SidedPosition> all_possible_positions(const SidedPosition sided_posi
 	positions.reserve(EXPECTED_BRANCHING);
 	if (sided_position.own_pawns) { // can I just say that I HATE how complicated this piece type is?
 		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? ROW_6 : ROW_3); // assuming perfect updae of en passant
-		possible_piece_positions(positions, sided_position, PAWN, blockers, not_own | en_passant, nullptr, knight_moves);
+		possible_piece_positions(positions, sided_position, PAWN, blockers, not_own | en_passant, nullptr, pawn_moves);
 		// promotions handled in the general function
 	}
 	if (sided_position.own_knights) {
