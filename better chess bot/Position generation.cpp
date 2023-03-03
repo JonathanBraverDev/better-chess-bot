@@ -9,13 +9,8 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 	const B64 base_pieces = current_pieces;
 	B64 potential_moves;
 
-	if (move_source == king_moves && // add king castles if he didnt move yet
-		sided_position.own_king & sided_position.special_move_rigths) {
-		possible_castle_positions(positions, new_position);
-	}
-
 	seperate_bits(base_pieces, single_pieces); // get a vector of all pieces
-	for (B64 piece : single_pieces) {
+	for (const B64& piece : single_pieces) {
 		new_position = sided_position; // reset the new position
 		current_pieces = base_pieces ^ piece; // delete the current piece from its origin
 		if (move_generator != nullptr) {
@@ -44,16 +39,16 @@ void possible_pawn_move_positions(std::vector<SidedPosition>& positions, const S
 	new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant as none of the considered next moves use it
 	current_pieces ^= potential_moves; // add the current piece to its destination
 
-	if (new_position.own_pawns & (new_position.is_white ? ROW_8 : ROW_1)) { // check pawn promotion
+	if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_PROMOTION : BLACK_PAWN_PROMOTION)) { // check pawn promotion
 		possible_pawn_promotions(positions, sided_position);
 	} else {
 		positions.push_back(new_position); // push the normal move
 
-		if (new_position.own_pawns & (new_position.is_white ? ROW_8 : ROW_1)) { // check if the pawn is on its innitial row
+		if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its innitial row
 			current_pieces ^= potential_moves; // remove the piece before the variable is overwritten
 			potential_moves = generate_pawn_jump(blockers, piece, new_position.is_white);
 
-			if (potential_moves != 0) { // if a jump is legal, add it
+			if (potential_moves) { // if a jump is legal, add it
 				current_pieces ^= potential_moves;
 
 				new_position.special_move_rigths ^= (new_position.is_white ? up(piece) : down(piece)); // add en passant
@@ -71,7 +66,7 @@ void possible_capture_positions(std::vector<SidedPosition>& positions, const Sid
 	std::vector<B64> single_moves;
 	seperate_bits(potential_moves, single_moves); // seperate the generated moves
 
-	for (B64 move : single_moves) {
+	for (const B64& move : single_moves) {
 		new_position = sided_position;
 		current_pieces ^= move; // add the current piece to its destination
 		// delete any enemy piece in the destination
@@ -159,8 +154,7 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 	}
 }
 
-std::vector<SidedPosition> all_possible_positions(const SidedPosition sided_position) {
-	std::vector<SidedPosition> positions;
+std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> positions, SidedPosition sided_position) {
 	std::vector<B64> pieces;
 	std::vector<B64> destinations;
 	const B64 blockers = all_pieces(sided_position);
@@ -168,7 +162,6 @@ std::vector<SidedPosition> all_possible_positions(const SidedPosition sided_posi
 	B64 en_passant; // pawns, lovem
 
 	// ordered by number of expected avalible moves
-	positions.reserve(EXPECTED_BRANCHING);
 	if (sided_position.own_pawns) { // can I just say that I HATE how complicated this piece type is?
 		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? ROW_6 : ROW_3); // assuming perfect updae of en passant
 		possible_piece_positions(positions, sided_position, PAWN, blockers, not_own | en_passant, nullptr, pawn_moves);
@@ -189,6 +182,9 @@ std::vector<SidedPosition> all_possible_positions(const SidedPosition sided_posi
 
 	// king normals, assuming he didn't get brutally murdered (eveluation planned to end on unavaidable check)
 	possible_piece_positions(positions, sided_position, KING, blockers, not_own, nullptr, king_moves);
+	if (sided_position.own_king & sided_position.special_move_rigths) { // add castles is legal
+		possible_castle_positions(positions, sided_position);
+	}
 	// castling handled in the general function
 
 	return positions;
@@ -271,33 +267,46 @@ void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition si
 	if (killing_queens) {
 		tile_capture_positions(positions, sided_position, target_board_bit, killing_queens);
 	}
-	}
-	if (killing_king) {
-		tile_capture_positions(positions, sided_position, target_board_bit, KING);
+}
+
+// !!! WIP !!!
+void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, const B64 slide_moves) {
+	SidedPosition new_position;
+	// finish this
+}
+
+void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board) {
+	std::vector<B64> single_targets;
+	B64 slide_moves;
+
+	seperate_bits(target_board, single_targets);
+
+	for (const B64& target : single_targets) {
+		slide_moves = generate_queen_moves(all_pieces(sided_position), target);
+		tile_move_positions(positions, sided_position, target, QUEEN, slide_moves);
+		tile_move_positions(positions, sided_position, target, ROOK, slide_moves);
+		tile_move_positions(positions, sided_position, target, BISHOP, slide_moves);
+		tile_move_positions(positions, sided_position, target, PAWN); // pawns can also block by en passant
+		tile_move_positions(positions, sided_position, target, KNIGHT);
 	}
 }
 
 // !!! WIP !!! - literly everything
-std::vector<SidedPosition> possible_evade_positions(const SidedPosition sided_position) {
+std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
-	const B64 possible_king_moves = king_moves[lowest_single_bit_index(sided_position.own_king)] & ~own_pieces(sided_position);
-
-	B64 attack_path;
-
-	std::vector<SidedPosition> positions;
-	std::vector<B64> pieces;
-	std::vector<B64> destinations;
-	B64 potential_moves = 0;
 	const B64 blockers = all_pieces(sided_position);
 	const B64 not_own = ~own_pieces(sided_position); // valid destinations
 
-	// add all king moves
+	std::vector<B64> pieces;
+	std::vector<B64> destinations;
+	B64 attack_path;
+	B64 potential_moves = 0;
 
-	if (count_bits64(attackers) > 1) {
-		// king kills
-	}
-	else {
+	// add all king moves besides castles
+	possible_piece_positions(positions, sided_position, KING, blockers, not_own, nullptr, king_moves);
+
+	if (count_bits64(attackers) == 1) { // its either 1 or 2, given that the position starts in a check
 
 		// a knight's check cannot be blocked, but a single knight can be killed
 		if (attackers & sided_position.opponent_knights) {
@@ -308,7 +317,7 @@ std::vector<SidedPosition> possible_evade_positions(const SidedPosition sided_po
 
 			// needed functions:
 			// positions with any non-king move to one of X tiles on a borad
-			// add those move positions
+			// add those move positions, call moves_to_tiles for all piece types
 			kills_to_tile(positions, sided_position, attackers);
 		}
 	}
@@ -317,10 +326,13 @@ std::vector<SidedPosition> possible_evade_positions(const SidedPosition sided_po
 }
 
 std::vector<SidedPosition> valid_positions(const GameState state) {
-
-	std::vector<SidedPosition> all_positions = (is_check(state) ? possible_evade_positions(state.sided_position)
-																: all_possible_positions(state.sided_position));
+	std::vector<SidedPosition> all_positions;
 	std::vector<SidedPosition> valid_positions;
+
+	all_positions.reserve(EXPECTED_BRANCHING);
+
+	(is_check(state) ? possible_evade_positions(all_positions, state.sided_position)
+					 : all_possible_positions(all_positions, state.sided_position));
 
 	for (const SidedPosition& Sided_position : all_positions) {
 		if (!is_check(Sided_position)) {

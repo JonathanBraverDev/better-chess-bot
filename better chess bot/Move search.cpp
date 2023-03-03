@@ -31,7 +31,7 @@ bool was_piece_taken(const SidedPosition original_position, const SidedPosition 
 }
 
 int alphabeta(GameState state, int depth, int alpha, int beta) {
-    std::vector<SidedPosition> positions;
+    std::vector<SidedPosition> next_positions;
     int eval = 0;
 
     // end search conditions
@@ -42,14 +42,14 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else {
-        positions = all_possible_positions(state.sided_position);
+        all_possible_positions(next_positions, state.sided_position);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
     }
 
     // continue search
-    for (const SidedPosition& sided_position : positions) {
+    for (const SidedPosition& sided_position : next_positions) {
 
         // Recursively search the resulting position from the perspective of the opposite player
         eval = std::max(eval, -alphabeta(generate_next_state(state, sided_position), depth - 1, -beta, -alpha)); // alpha and beta are passed inverted
