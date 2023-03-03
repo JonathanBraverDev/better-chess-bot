@@ -15,7 +15,7 @@ void possible_capture_positions(std::vector<SidedPosition>& positions, const Sid
 void possible_pawn_promotions(std::vector<SidedPosition>& positions, SidedPosition sided_position);
 void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition& sided_position);
 
-void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target, const PieceType piece_type);
+void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target, B64 killing_pieces);
 void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit);
 
 // final validation of generated boards

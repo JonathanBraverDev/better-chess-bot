@@ -196,28 +196,26 @@ std::vector<SidedPosition> all_possible_positions(const SidedPosition sided_posi
 }
 
 // moves that get here are garanteed to be possible, all killing hte target one way or another
-void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target, const PieceType piece_type) {
+void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target, B64 killing_pieces) {
 
 	std::vector<B64> single_pieces;
 	SidedPosition new_position;
 	B64 en_passant_tile;
 
-	B64& current_pieces = *own_piece_board(new_position, piece_type);
-
-	seperate_bits(current_pieces, single_pieces);
+	seperate_bits(killing_pieces, single_pieces);
 
 	for (const B64& piece : single_pieces) {
 		new_position = sided_position; // reset position
-		current_pieces ^= piece; // remove piece from its origin
 		// delete any enemy piece in the destination
-		if (piece_type == PAWN) {
+		if (killing_pieces & sided_position.own_pawns) { // if there's overlap, its a pawn
 			en_passant_tile = (sided_position.is_white ? up(target) : down(target)); // dark pawns have an enpassant ABOVE them
 			if (en_passant_tile & new_position.special_move_rigths) {
-				current_pieces ^= en_passant_tile; // add the pawn to the en passant tile
+				killing_pieces ^= en_passant_tile; // add the pawn to the en passant tile
 			}
 		} else {
-			current_pieces ^= target; // add the piece to the target tile
+			killing_pieces ^= target; // add the piece to the target tile
 		}
+		killing_pieces ^= piece; // remove piece from its origin
 
 		// clear the target
 		clear_bit(new_position.opponent_pawns, target);
@@ -244,7 +242,6 @@ void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition si
 	const B64 killing_bishops = (slide_attackes & sided_position.own_bishops);
 	const B64 killing_rooks = (slide_attackes & sided_position.own_rooks);
 	const B64 killing_queens = (slide_attackes & sided_position.own_queens);
-	const B64 killing_king = (king_moves[tile_index] & sided_position.own_king);
 
 	// trick here, look for pawns in the attack pattern of the opponent to find tiles from which pawns can attack to the target 
 	// THEN also look for en passant opportunities, I LOVE PAWNS, have I said it enough times already?!?!
@@ -260,19 +257,20 @@ void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition si
 	killing_pawns &= sided_position.own_pawns;
 
 	if (killing_pawns) {
-		tile_capture_positions(positions, sided_position, target_board_bit, PAWN);
+		tile_capture_positions(positions, sided_position, target_board_bit, killing_pawns);
 	}
 	if (killing_knights) {
-		tile_capture_positions(positions, sided_position, target_board_bit, KNIGHT);
+		tile_capture_positions(positions, sided_position, target_board_bit, killing_knights);
 	}
 	if (killing_bishops) {
-		tile_capture_positions(positions, sided_position, target_board_bit, BISHOP);
+		tile_capture_positions(positions, sided_position, target_board_bit, killing_bishops);
 	}
 	if (killing_rooks) {
-		tile_capture_positions(positions, sided_position, target_board_bit, ROOK);
+		tile_capture_positions(positions, sided_position, target_board_bit, killing_rooks);
 	}
 	if (killing_queens) {
-		tile_capture_positions(positions, sided_position, target_board_bit, QUEEN);
+		tile_capture_positions(positions, sided_position, target_board_bit, killing_queens);
+	}
 	}
 	if (killing_king) {
 		tile_capture_positions(positions, sided_position, target_board_bit, KING);
@@ -283,7 +281,7 @@ void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition si
 std::vector<SidedPosition> possible_evade_positions(const SidedPosition sided_position) {
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
-	const B64 possible_king_moves = king_moves[lowest_single_bit_index(sided_position.own_king)] & ~all_pieces(sided_position) ; // non kill moves, they are added elsewhere
+	const B64 possible_king_moves = king_moves[lowest_single_bit_index(sided_position.own_king)] & ~own_pieces(sided_position);
 
 	B64 attack_path;
 
