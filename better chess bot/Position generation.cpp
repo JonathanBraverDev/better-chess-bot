@@ -5,8 +5,8 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 	std::vector<B64> single_pieces;
 	SidedPosition new_position;
 
-	B64& current_pieces = *own_piece_board(new_position, piece_type);
-	const B64 base_pieces = current_pieces;
+	B64& current_pieces = *own_piece_board_ref(new_position, piece_type);
+	const B64 base_pieces = own_piece_board_copy(sided_position, piece_type);
 	B64 potential_moves;
 
 	seperate_bits(base_pieces, single_pieces); // get a vector of all pieces
@@ -155,8 +155,6 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 }
 
 void all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
-	std::vector<B64> pieces;
-	std::vector<B64> destinations;
 	const B64 blockers = all_pieces(sided_position);
 	const B64 not_own = ~own_pieces(sided_position); // valid destinations
 	B64 en_passant; // pawns, lovem
@@ -275,7 +273,7 @@ void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosit
 	B64 pawn_special;
 	bool add_move;
 
-	B64& current_pieces = *own_piece_board(new_position, piece_type);
+	B64& current_pieces = *own_piece_board_ref(new_position, piece_type);
 	seperate_bits(current_pieces, single_pieces);
 
 	for (const B64& piece : single_pieces) {

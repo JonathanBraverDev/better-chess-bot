@@ -14,7 +14,7 @@ void switch_sides(SidedPosition& sided_position) {
     sided_position.is_white = !sided_position.is_white;
 }
 
-B64* own_piece_board(SidedPosition& sided_position, const PieceType type) {
+B64* own_piece_board_ref(SidedPosition& sided_position, const PieceType type) {
 
     B64* piece_board;
 
@@ -39,6 +39,37 @@ B64* own_piece_board(SidedPosition& sided_position, const PieceType type) {
         break;
     default:
         piece_board = nullptr; // if it gets here, BIG doodoo
+        break;
+    }
+
+    return piece_board;
+}
+
+B64 own_piece_board_copy(const SidedPosition& sided_position, const PieceType type) {
+
+    B64 piece_board;
+
+    switch (type) {
+    case PAWN:
+        piece_board = sided_position.own_pawns;
+        break;
+    case KNIGHT:
+        piece_board = sided_position.own_knights;
+        break;
+    case BISHOP:
+        piece_board = sided_position.own_bishops;
+        break;
+    case ROOK:
+        piece_board = sided_position.own_rooks;
+        break;
+    case QUEEN:
+        piece_board = sided_position.own_queens;
+        break;
+    case KING:
+        piece_board = sided_position.own_king;
+        break;
+    default:
+        piece_board = NULL; // if it gets here, BIG doodoo too
         break;
     }
 

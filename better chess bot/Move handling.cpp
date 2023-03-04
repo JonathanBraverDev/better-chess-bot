@@ -38,7 +38,7 @@ void Toggle_castle(SidedPosition& sided_position, const Move& move) {
 
 void Move_piece(SidedPosition& sided_position, const Move& move) {
 
-	B64& moved_pieces = *own_piece_board(sided_position, move.piece.type);
+	B64& moved_pieces = *own_piece_board_ref(sided_position, move.piece.type);
 
 	moved_pieces ^= (move.origin | move.destination);
 }

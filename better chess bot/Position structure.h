@@ -37,7 +37,8 @@ inline B64 opponent_pieces(const SidedPosition sided_position) {
 inline B64 all_pieces(const SidedPosition sided_position) { return (own_pieces(sided_position) | opponent_pieces(sided_position)); }
 
 void switch_sides(SidedPosition& sided_position);
-B64* own_piece_board(SidedPosition& sided_position, const PieceType type);
+B64* own_piece_board_ref(SidedPosition& sided_position, const PieceType type);
+B64 own_piece_board_copy(const SidedPosition& sided_position, const PieceType type);
 
 // info on gamestate
 struct GameState { // split off from positiopn to allow memcmp (both the timer and pointer whould interefere)

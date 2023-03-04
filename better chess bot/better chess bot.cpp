@@ -16,6 +16,8 @@ int main() {
     eval = alphabeta(INNITIAL_GAMESTATE, 20);
 
     auto end = std::chrono::high_resolution_clock::now();
-    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();    
-    std::cout << (double)microseconds << std::endl;
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();   
+
+    std::cout << "eval:" << eval << std::endl;
+    std::cout << "microseconds:" << (double)microseconds << std::endl;
 }
