@@ -126,7 +126,7 @@ bool is_castle_legal(const SidedPosition sided_position, const B64 king_start, c
 	return is_legal;
 }
 
-void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition& sided_position) {
+void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition sided_position) {
 
 	const B64 short_rook_valid = higher_than_bit(sided_position.own_king) & sided_position.special_move_rigths & sided_position.own_rooks;
 	const B64 long_rook_valid = lower_than_bit(sided_position.own_king) & sided_position.special_move_rigths & sided_position.own_rooks;
@@ -154,7 +154,7 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 	}
 }
 
-std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> positions, SidedPosition sided_position) {
+void all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
 	std::vector<B64> pieces;
 	std::vector<B64> destinations;
 	const B64 blockers = all_pieces(sided_position);
@@ -187,7 +187,6 @@ std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> pos
 	}
 	// castling handled in the general function
 
-	return positions;
 	// note that validation for checks dosent happen here
 }
 
@@ -340,8 +339,7 @@ void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition s
 	}
 }
 
-// !!! WIP !!! - literly everything
-std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
+void possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
 	const B64 blockers = all_pieces(sided_position);
@@ -368,8 +366,6 @@ std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> p
 			kills_to_tile(positions, sided_position, attackers);
 		}
 	}
-
-	return positions;
 }
 
 std::vector<SidedPosition> valid_positions(std::vector<SidedPosition> valid_positions, const GameState state) {

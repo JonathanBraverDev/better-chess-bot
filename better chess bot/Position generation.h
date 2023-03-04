@@ -13,7 +13,7 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 void possible_pawn_move_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const B64 piece, const B64 blockers, B64 potential_moves, B64& current_pieces);
 void possible_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces, const B64* move_source = nullptr);
 void possible_pawn_promotions(std::vector<SidedPosition>& positions, SidedPosition sided_position);
-void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition& sided_position);
+void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition sided_position);
 
 void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target, B64 killing_pieces);
 void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit);
@@ -21,9 +21,9 @@ void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosit
 void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board);
 
 // final validation of generated boards
-std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position);
-std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position);
+void all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position);
+void possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position);
 std::vector<SidedPosition> valid_positions(std::vector<SidedPosition> valid_positions, const GameState state);
 
-inline std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> positions, const GameState state) { return all_possible_positions(positions, state.sided_position); };
-inline std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> positions, const GameState state) { return possible_evade_positions(positions, state.sided_position); };
+inline void all_possible_positions(std::vector<SidedPosition> positions, const GameState state) { all_possible_positions(positions, state.sided_position); };
+inline void possible_evade_positions(std::vector<SidedPosition> positions, const GameState state) { possible_evade_positions(positions, state.sided_position); };
