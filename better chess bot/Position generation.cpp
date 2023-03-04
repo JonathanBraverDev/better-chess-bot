@@ -36,7 +36,7 @@ void possible_pawn_move_positions(std::vector<SidedPosition>& positions, const S
 
 	SidedPosition new_position = sided_position;
 
-	new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant as none of the considered next moves use it
+	new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant as none of the considered next moves use it
 	current_pieces ^= potential_moves; // add the current piece to its destination
 
 	if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_PROMOTION : BLACK_PAWN_PROMOTION)) { // check pawn promotion
@@ -80,7 +80,7 @@ void possible_capture_positions(std::vector<SidedPosition>& positions, const Sid
 			clear_bit(new_position.opponent_rooks, move);
 			clear_bit(new_position.opponent_queens, move);
 		}
-		new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant after any (supposed) capture
+		new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant after any (supposed) capture
 
 		if (new_position.own_pawns & (new_position.is_white ? ROW_8 : ROW_1)) { // check pawn promotion
 			possible_pawn_promotions(positions, sided_position);
@@ -220,7 +220,7 @@ void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPo
 		clear_bit(new_position.opponent_rooks, target);
 		clear_bit(new_position.opponent_queens, target);
 
-		new_position.special_move_rigths &= VOID_EN_PASSANT; // void en passant
+		new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant
 
 		if (new_position.own_pawns & (new_position.is_white ? ROW_8 : ROW_1)) { // check pawn promotion
 			possible_pawn_promotions(positions, new_position);
@@ -269,10 +269,57 @@ void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition si
 	}
 }
 
-// !!! WIP !!!
-void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, const B64 slide_moves) {
+void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
+	
+	std::vector<B64> single_pieces;
 	SidedPosition new_position;
-	// finish this
+	B64 pawn_special;
+	bool add_move;
+
+	B64& current_pieces = *own_piece_board(new_position, piece_type);
+	seperate_bits(current_pieces, single_pieces);
+
+	for (const B64& piece : single_pieces) {
+		add_move = false;
+		new_position = sided_position; // reset position
+		if ((piece_type == PAWN)) { // fun with fawn... "such a simple piece" said no progremmer ever XD
+			pawn_special = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
+			if (target_board_bit & pawn_special) { // check if the target is behind a jumped pawn
+				current_pieces ^= pawn_special; // add the pawn to the target tile
+				new_position.opponent_pawns ^= (sided_position.is_white ? up(target_board_bit) : down(target_board_bit)); // remove the en passanted pawn
+				add_move = true;
+
+			} else if ((piece & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) && // check jump
+					   (target_board_bit & (new_position.is_white ? WHITE_PAWN_JUMP_END : BLACK_PAWN_JUMP_END))) {
+				pawn_special = generate_pawn_jump(all_pieces(sided_position), piece, sided_position.is_white);
+				if (pawn_special) {
+					current_pieces ^= pawn_special;
+					add_move = true;
+				}
+			}
+		} else {
+			if (possible_moves == NULL) { // only 2 piece types get here
+				possible_moves = (piece_type == PAWN ? pawn_moves[lowest_single_bit_index(piece)] : knight_moves[lowest_single_bit_index(piece)]);
+			}
+			
+			if (possible_moves & target_board_bit) {
+				current_pieces ^= target_board_bit; // add the piece to the target tile
+				add_move = true;
+			}
+		}
+
+		if (add_move) {
+			current_pieces ^= piece; // remove piece from its origin
+			new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant
+
+			// check pawn promotion
+			if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_PROMOTION : BLACK_PAWN_PROMOTION)) {
+				possible_pawn_promotions(positions, new_position);
+			} else {
+				positions.push_back(new_position);
+			}
+		}
+	}
 }
 
 void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board) {
@@ -282,11 +329,13 @@ void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition s
 	seperate_bits(target_board, single_targets);
 
 	for (const B64& target : single_targets) {
+		// maybe an approach like with the kills is better, i'm looping everything here, that can't be good.
+		// i'm not sure how to handle multiple origin points at the same time tho, what if a piece can block 2 tiles?
 		slide_moves = generate_queen_moves(all_pieces(sided_position), target);
 		tile_move_positions(positions, sided_position, target, QUEEN, slide_moves);
 		tile_move_positions(positions, sided_position, target, ROOK, slide_moves);
 		tile_move_positions(positions, sided_position, target, BISHOP, slide_moves);
-		tile_move_positions(positions, sided_position, target, PAWN); // pawns can also block by en passant
+		tile_move_positions(positions, sided_position, target, PAWN); // pawns can also block by en passant, SURE they can. WHY NOT.
 		tile_move_positions(positions, sided_position, target, KNIGHT);
 	}
 }
@@ -315,9 +364,7 @@ std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> p
 		else { // the attacker is a sliding piece, block it or kill it
 			attack_path = get_connecting_tiles(attackers, sided_position.own_king); // garanteed to be checked
 
-			// needed functions:
-			// positions with any non-king move to one of X tiles on a borad
-			// add those move positions, call moves_to_tiles for all piece types
+			moves_to_tiles(positions, sided_position, attack_path);
 			kills_to_tile(positions, sided_position, attackers);
 		}
 	}
