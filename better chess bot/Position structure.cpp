@@ -21,18 +21,25 @@ B64* own_piece_board(SidedPosition& sided_position, const PieceType type) {
     switch (type) {
     case PAWN:
         piece_board = &sided_position.own_pawns;
+        break;
     case KNIGHT:
         piece_board = &sided_position.own_knights;
+        break;
     case BISHOP:
         piece_board = &sided_position.own_bishops;
+        break;
     case ROOK:
         piece_board = &sided_position.own_rooks;
+        break;
     case QUEEN:
         piece_board = &sided_position.own_queens;
+        break;
     case KING:
         piece_board = &sided_position.own_king;
+        break;
     default:
-        piece_board = nullptr; // if it gets here, BIG doodoo
+        piece_board = nullptr; // if it gets here, BIG doodoo, it did get here XD
+        break;
     }
 
     return piece_board;
