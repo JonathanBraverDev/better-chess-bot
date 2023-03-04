@@ -10,6 +10,11 @@
 #include "Move search.h"
 
 int main() {
+
+    prepare_king_moves();
+    prepare_knight_moves();
+    prepare_pawn_moves();
+
     int eval;
     auto start = std::chrono::high_resolution_clock::now();
 

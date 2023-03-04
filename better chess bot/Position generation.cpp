@@ -162,7 +162,7 @@ void all_possible_positions(std::vector<SidedPosition> positions, const SidedPos
 	// ordered by number of expected avalible moves
 	if (sided_position.own_pawns) { // can I just say that I HATE how complicated this piece type is?
 		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? ROW_6 : ROW_3); // assuming perfect updae of en passant
-		possible_piece_positions(positions, sided_position, PAWN, blockers, not_own | en_passant, nullptr, pawn_moves);
+		possible_piece_positions(positions, sided_position, PAWN, blockers, not_own | en_passant, nullptr, pawn_moves, 2, (sided_position.is_white ? 0 : 1));
 		// promotions handled in the general function
 	}
 	if (sided_position.own_knights) {

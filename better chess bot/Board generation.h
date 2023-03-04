@@ -4,10 +4,10 @@
 #include "Board operations.h"
 #include "Move structure.h"
 
-static B64 king_moves[64];
-static B64 knight_moves[64];
-static B64 pawn_moves[64 * 2]; // the 2 colors move in opposite direction
-static B64 pawn_attacks[64 * 2]; // further conditional split
+extern B64 king_moves[64];
+extern B64 knight_moves[64];
+extern B64 pawn_moves[64 * 2]; // the 2 colors move in opposite direction
+extern B64 pawn_attacks[64 * 2]; // further conditional split
 
 constexpr int MAX_ROOK_MOVES = 14;
 constexpr int MAX_BISHOP_MOVES = 13;

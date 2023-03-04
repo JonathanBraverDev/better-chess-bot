@@ -1,6 +1,13 @@
 
 #include "Board generation.h"
 
+// defining extern arrays
+B64 king_moves[64];
+B64 knight_moves[64];
+B64 pawn_moves[64 * 2];
+B64 pawn_attacks[64 * 2];
+
+
 B64 generate_bishop_moves(const B64 blockers, B64 piece) {
 
 	return slide_up_left(blockers, piece) |
