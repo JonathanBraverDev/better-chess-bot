@@ -54,8 +54,8 @@ int lowest_single_bit_index(const B64 board) {
 void lowest_single_cords(const B64 board, int& x, int& y) {
     const int bit_index = lowest_single_bit_index(board);
 
-    y = bit_index % BOARD_SIZE;
-    x = bit_index / BOARD_SIZE;
+    y = bit_index / BOARD_SIZE;
+    x = bit_index % BOARD_SIZE;
 }
 
 // fills a vector with bitBoards of all the active bits on the given board

@@ -38,7 +38,7 @@ B64* own_piece_board(SidedPosition& sided_position, const PieceType type) {
         piece_board = &sided_position.own_king;
         break;
     default:
-        piece_board = nullptr; // if it gets here, BIG doodoo, it did get here XD
+        piece_board = nullptr; // if it gets here, BIG doodoo
         break;
     }
 

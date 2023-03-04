@@ -23,7 +23,7 @@ void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition s
 // final validation of generated boards
 std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position);
 std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position);
-std::vector<SidedPosition> valid_positions(const GameState state);
+std::vector<SidedPosition> valid_positions(std::vector<SidedPosition> valid_positions, const GameState state);
 
 inline std::vector<SidedPosition> all_possible_positions(std::vector<SidedPosition> positions, const GameState state) { return all_possible_positions(positions, state.sided_position); };
 inline std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> positions, const GameState state) { return possible_evade_positions(positions, state.sided_position); };

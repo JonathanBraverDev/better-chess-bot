@@ -372,9 +372,8 @@ std::vector<SidedPosition> possible_evade_positions(std::vector<SidedPosition> p
 	return positions;
 }
 
-std::vector<SidedPosition> valid_positions(const GameState state) {
+std::vector<SidedPosition> valid_positions(std::vector<SidedPosition> valid_positions, const GameState state) {
 	std::vector<SidedPosition> all_positions;
-	std::vector<SidedPosition> valid_positions;
 
 	all_positions.reserve(EXPECTED_BRANCHING);
 

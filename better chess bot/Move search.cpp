@@ -42,7 +42,7 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else {
-        all_possible_positions(next_positions, state.sided_position);
+        valid_positions(next_positions, state);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
