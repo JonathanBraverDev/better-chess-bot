@@ -44,7 +44,7 @@ void possible_pawn_move_positions(std::vector<SidedPosition>& positions, const S
 	} else {
 		positions.push_back(new_position); // push the normal move
 
-		if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its innitial row
+		if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its initial row
 			current_pieces ^= potential_moves; // remove the piece before the variable is overwritten
 			potential_moves = generate_pawn_jump(blockers, piece, new_position.is_white);
 
