@@ -105,7 +105,7 @@ void set_special_move_rights(SidedPosition& sided_position, const Move& move) {
 		}
 
 	case ROOK:
-		clear_bit(sided_position.special_move_rigths, move.origin); // void castling right
+		clear_bits(sided_position.special_move_rigths, move.origin); // void castling right
 		break;
 
 	case KING:

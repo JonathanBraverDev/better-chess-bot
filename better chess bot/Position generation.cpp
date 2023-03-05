@@ -13,80 +13,114 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 	for (const B64& piece : single_pieces) {
 		new_position = sided_position; // reset the new position
 		current_pieces = base_pieces ^ piece; // delete the current piece from its origin
-		if (move_generator != nullptr) {
+
+		if (move_generator == nullptr) { // only a knight should get here (pawn have thier own function)
+			potential_moves = knight_moves[lowest_single_bit_index(piece)] & valid_destinations;
+		} else {
 			potential_moves = move_generator(blockers, base_pieces) & valid_destinations; // get the valid moves per piece
 			if (piece_type == ROOK) {
-				new_position.special_move_rigths ^= piece & new_position.special_move_rigths & (sided_position.is_white ? ROW_1 : ROW_8); // void castle right of a moving rook
+				// void castle right of a moving rook
+				new_position.special_move_rigths ^= piece & new_position.special_move_rigths & (sided_position.is_white ? WHITE_CASTLE_ROW : BLACK_CASTLE_ROW);
 			}
-		} else {
-			potential_moves = move_source[first_index + index_scale * lowest_single_bit_index(piece)] & valid_destinations;
 		}
 
+		// add the mvoes if any exist, removing the opponent's piece
 		if (potential_moves) {
-			// handle moves that kill the target
-			possible_capture_positions(positions, new_position, potential_moves, piece, current_pieces, move_source);
-			if (move_source != pawn_moves) { // only one regular move is avalible to pawns, it is added if legal and a jump is considered
-				possible_pawn_move_positions(positions, new_position, piece, blockers, potential_moves, current_pieces);
-			}
+			possible_capture_positions(positions, new_position, potential_moves, piece, current_pieces);
 		}
 	}
 }
 
-void possible_pawn_move_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const B64 piece, const B64 blockers, B64 potential_moves, B64& current_pieces) {
+void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const B64 piece, const B64 free_tiles, const B64 opponent_pieces) {
 
 	SidedPosition new_position = sided_position;
+	const int first_index = (sided_position.is_white ? 0 : 1);
+	const int move_index = first_index + 2 * lowest_single_bit_index(piece);
 
-	new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant as none of the considered next moves use it
-	current_pieces ^= potential_moves; // add the current piece to its destination
+	const B64 normal_move = pawn_moves[move_index] & free_tiles;
+	const B64 en_passant = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
+	const B64 attack_moves = pawn_attacks[move_index] & (opponent_pieces | en_passant);
 
-	if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_PROMOTION : BLACK_PAWN_PROMOTION)) { // check pawn promotion
-		possible_pawn_promotions(positions, sided_position);
-	} else {
-		positions.push_back(new_position); // push the normal move
+	// a pawn can only more towards promotion so any more from the row before is promoting
+	const bool promoting = (new_position.is_white ? WHITE_PAWN_PRE_PROMOTION : BLACK_PAWN_PRE_PROMOTION);
+	
+	std::vector<B64> attacks;
+	B64 jump;
 
-		if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its initial row
-			current_pieces ^= potential_moves; // remove the piece before the variable is overwritten
-			potential_moves = generate_pawn_jump(blockers, piece, new_position.is_white);
+	// add normal move if possible
+	if (normal_move) {
+		new_position.own_pawns ^= (piece | normal_move); // toggle pawn origin and move location
+		if (promoting) { // check pawn promotion
+			possible_pawn_promotions(positions, new_position);
+		} else {
+			new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
+			positions.push_back(new_position); // push the normal move after voiding en passant
 
-			if (potential_moves) { // if a jump is legal, add it
-				current_pieces ^= potential_moves;
+			// then check for jumps
+			if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its initial row
+				// waste no information, only check the jump target tile
+				jump = free_tiles & (sided_position.is_white ? up(normal_move) : down(normal_move));
 
-				new_position.special_move_rigths ^= (new_position.is_white ? up(piece) : down(piece)); // add en passant
-				// maybe only add it when it can be used? but it needs to be deleted each turn regardless
-				positions.push_back(new_position);
+				if (jump) { // if a jump is legal, add it
+					new_position.own_pawns ^= (normal_move | jump); // remove pawn from normal move, add jump
+					new_position.special_move_rigths ^= (new_position.is_white ? up(piece) : down(piece)); // add en passant
+					positions.push_back(new_position); 
+				}
+			}
+		}
+	}
+	
+	// add captures if any are possible
+	if (attack_moves) {
+		seperate_bits(attack_moves, attacks);
+
+		for (const B64 attack : attacks) {
+			new_position = sided_position; // reset position
+			new_position.own_pawns ^= (piece | attack); // toggle pawn origin and attack location
+			if (attack & en_passant) { // check if the current attack is an en passant
+				// white is captured from below, black from above
+				new_position.opponent_pawns ^= (new_position.is_white ? up(attack) : down(attack));
+
+				new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
+				positions.push_back(new_position); // push after voiding en passant
+			} else {
+				if (promoting) { // check pawn promotion
+					possible_pawn_promotions(positions, new_position);
+				} else {
+					// delete any enemy piece in the destination
+					clear_bits(new_position.opponent_pawns, attack);
+					clear_bits(new_position.opponent_knights, attack);
+					clear_bits(new_position.opponent_bishops, attack);
+					clear_bits(new_position.opponent_rooks, attack);
+					clear_bits(new_position.opponent_queens, attack);
+
+					new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
+					positions.push_back(new_position); // push after voiding en passant
+				}
 			}
 		}
 	}
 }
 
-void possible_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces, const B64* move_source) {
+void possible_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
 	
+	std::vector<B64> single_moves;
 	SidedPosition new_position;
 
-	std::vector<B64> single_moves;
 	seperate_bits(potential_moves, single_moves); // seperate the generated moves
+	new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant for all moves
 
 	for (const B64& move : single_moves) {
 		new_position = sided_position;
 		current_pieces ^= move; // add the current piece to its destination
 		// delete any enemy piece in the destination
-		if ((move & sided_position.special_move_rigths) && move_source == pawn_attacks) { // is en passant is used, remove the pawn
-			clear_bit(new_position.opponent_pawns, (new_position.is_white ? up(move) : down(move))); // white is captured from below it, black above
-		} else {
-			// clear whatever was there if not en passant
-			clear_bit(new_position.opponent_pawns, move);
-			clear_bit(new_position.opponent_knights, move);
-			clear_bit(new_position.opponent_bishops, move);
-			clear_bit(new_position.opponent_rooks, move);
-			clear_bit(new_position.opponent_queens, move);
-		}
-		new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant after any (supposed) capture
+		clear_bits(new_position.opponent_pawns, move);
+		clear_bits(new_position.opponent_knights, move);
+		clear_bits(new_position.opponent_bishops, move);
+		clear_bits(new_position.opponent_rooks, move);
+		clear_bits(new_position.opponent_queens, move);
 
-		if (new_position.own_pawns & (new_position.is_white ? ROW_8 : ROW_1)) { // check pawn promotion
-			possible_pawn_promotions(positions, sided_position);
-		} else {
-			positions.push_back(new_position);
-		}
+		positions.push_back(new_position);
 	}
 }
 
@@ -94,6 +128,7 @@ void possible_pawn_promotions(std::vector<SidedPosition>& positions, SidedPositi
 
 	// find the promoted pawn and remove it
 	const B64 promote_tile = (sided_position.own_pawns & (sided_position.is_white ? ROW_8 : ROW_1));
+	sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant for all promotions
 	sided_position.own_pawns ^= promote_tile;
 
 	// add the a position with each possible promotion to the vector and remove the piece after
@@ -155,15 +190,14 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 }
 
 void all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
-	const B64 blockers = all_pieces(sided_position);
-	const B64 not_own = ~own_pieces(sided_position); // valid destinations
-	B64 en_passant; // pawns, lovem
+	const B64 opponent = opponent_pieces(sided_position);
+	const B64 own = own_pieces(sided_position);
+	const B64 blockers = own | opponent; // for collision detection
+	const B64 not_own = ~own; // valid destinations for most pieces
 
-	// ordered by number of expected avalible moves
+	// for every exisintg piece type, add it's moves
 	if (sided_position.own_pawns) { // can I just say that I HATE how complicated this piece type is?
-		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? ROW_6 : ROW_3); // assuming perfect updae of en passant
-		possible_piece_positions(positions, sided_position, PAWN, blockers, not_own | en_passant, nullptr, pawn_moves, 2, (sided_position.is_white ? 0 : 1));
-		// promotions handled in the general function
+		possible_pawn_positions(positions, sided_position, PAWN, ~blockers, opponent);
 	}
 	if (sided_position.own_knights) {
 		possible_piece_positions(positions, sided_position, KNIGHT, blockers, not_own, nullptr, knight_moves);
@@ -183,9 +217,8 @@ void all_possible_positions(std::vector<SidedPosition> positions, const SidedPos
 	if (sided_position.own_king & sided_position.special_move_rigths) { // add castles is legal
 		possible_castle_positions(positions, sided_position);
 	}
-	// castling handled in the general function
 
-	// note that validation for checks dosent happen here
+	// validation for checks dosent happen here
 }
 
 // moves that get here are garanteed to be possible, all killing hte target one way or another
@@ -211,11 +244,11 @@ void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPo
 		killing_pieces ^= piece; // remove piece from its origin
 
 		// clear the target
-		clear_bit(new_position.opponent_pawns, target);
-		clear_bit(new_position.opponent_knights, target);
-		clear_bit(new_position.opponent_bishops, target);
-		clear_bit(new_position.opponent_rooks, target);
-		clear_bit(new_position.opponent_queens, target);
+		clear_bits(new_position.opponent_pawns, target);
+		clear_bits(new_position.opponent_knights, target);
+		clear_bits(new_position.opponent_bishops, target);
+		clear_bits(new_position.opponent_rooks, target);
+		clear_bits(new_position.opponent_queens, target);
 
 		new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant
 
@@ -280,9 +313,9 @@ void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosit
 		new_position = sided_position; // reset position
 		if ((piece_type == PAWN) && // check for pawn jump
 			(piece & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) &&
-					   (target_board_bit & (new_position.is_white ? WHITE_PAWN_JUMP_END : BLACK_PAWN_JUMP_END))) {
+			(target_board_bit & (new_position.is_white ? WHITE_PAWN_JUMP_END : BLACK_PAWN_JUMP_END))) {
 				current_pieces ^= generate_pawn_jump(all_pieces(sided_position), piece, sided_position.is_white);
-					add_move = true;
+				add_move = true;
 		} else {
 			if (possible_moves == NULL) { // only 2 piece types get here
 				possible_moves = (piece_type == PAWN ? pawn_moves[lowest_single_bit_index(piece)] : knight_moves[lowest_single_bit_index(piece)]);

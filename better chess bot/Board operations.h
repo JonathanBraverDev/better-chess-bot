@@ -16,11 +16,11 @@ inline B64 clear_bit(B64 board, int bit) { return (board &= ~(1ULL << bit)); } /
 inline B64 flip_bit(B64 board, int bit) { return (board ^= (1ULL << bit)); } // shift 1 to position and set to XOR
 inline B64 lowest_bit_board(B64 board) { return (board & -board); } // AND with 2's compliment to get the lowest bit (very cool)
 inline B64 remove_lowest_bit(B64 board) { return (board & board - 1); } // AND after -1, garantees removal of exactly one lowest bit
-// overloads for uniform use
-inline B64 set_bit(B64 board, B64 bit_board) { return (board |= bit_board); }
-inline bool get_bit(B64 board, B64 bit_board) { return (board & bit_board); }
-inline B64 clear_bit(B64 board, B64 bit_board) { return (board &= ~bit_board); }
-inline B64 flip_bit(B64 board, B64 bit_board) { return (board ^= bit_board); }
+// alternatives that take 2 boards
+inline B64 set_bits(B64 board, B64 bit_board) { return (board |= bit_board); }
+inline bool get_bits(B64 board, B64 bit_board) { return (board & bit_board); }
+inline B64 clear_bits(B64 board, B64 bit_board) { return (board &= ~bit_board); }
+inline B64 flip_bits(B64 board, B64 bit_board) { return (board ^= bit_board); }
 
 // big finders
 int lowest_bit_index(B64 board);
