@@ -270,7 +270,6 @@ void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosit
 	
 	std::vector<B64> single_pieces;
 	SidedPosition new_position;
-	B64 pawn_special;
 	bool add_move;
 
 	B64& current_pieces = *own_piece_board_ref(new_position, piece_type);
@@ -279,21 +278,11 @@ void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosit
 	for (const B64& piece : single_pieces) {
 		add_move = false;
 		new_position = sided_position; // reset position
-		if ((piece_type == PAWN)) { // fun with fawn... "such a simple piece" said no progremmer ever XD
-			pawn_special = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
-			if (target_board_bit & pawn_special) { // check if the target is behind a jumped pawn
-				current_pieces ^= pawn_special; // add the pawn to the target tile
-				new_position.opponent_pawns ^= (sided_position.is_white ? up(target_board_bit) : down(target_board_bit)); // remove the en passanted pawn
-				add_move = true;
-
-			} else if ((piece & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) && // check jump
+		if ((piece_type == PAWN) && // check for pawn jump
+			(piece & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) &&
 					   (target_board_bit & (new_position.is_white ? WHITE_PAWN_JUMP_END : BLACK_PAWN_JUMP_END))) {
-				pawn_special = generate_pawn_jump(all_pieces(sided_position), piece, sided_position.is_white);
-				if (pawn_special) {
-					current_pieces ^= pawn_special;
+				current_pieces ^= generate_pawn_jump(all_pieces(sided_position), piece, sided_position.is_white);
 					add_move = true;
-				}
-			}
 		} else {
 			if (possible_moves == NULL) { // only 2 piece types get here
 				possible_moves = (piece_type == PAWN ? pawn_moves[lowest_single_bit_index(piece)] : knight_moves[lowest_single_bit_index(piece)]);
@@ -332,7 +321,7 @@ void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition s
 		tile_move_positions(positions, sided_position, target, QUEEN, slide_moves);
 		tile_move_positions(positions, sided_position, target, ROOK, slide_moves);
 		tile_move_positions(positions, sided_position, target, BISHOP, slide_moves);
-		tile_move_positions(positions, sided_position, target, PAWN); // pawns can also block by en passant, SURE they can. WHY NOT.
+		tile_move_positions(positions, sided_position, target, PAWN); // pawns can also block by jumping.
 		tile_move_positions(positions, sided_position, target, KNIGHT);
 	}
 }
