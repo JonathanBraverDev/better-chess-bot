@@ -31,71 +31,84 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 	}
 }
 
-void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const B64 piece, const B64 free_tiles, const B64 opponent_pieces) {
+void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const PieceType piece_type, const B64 free_tiles, const B64 opponent_pieces) {
 
-	SidedPosition new_position = sided_position;
+	std::vector<B64> single_pieces;
+	const B64 base_pieces = own_piece_board_copy(sided_position, piece_type);
 	const int first_index = (sided_position.is_white ? 0 : 1);
-	const int move_index = first_index + 2 * lowest_single_bit_index(piece);
-
-	const B64 normal_move = pawn_moves[move_index] & free_tiles;
-	const B64 en_passant = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
-	const B64 attack_moves = pawn_attacks[move_index] & (opponent_pieces | en_passant);
-
-	// a pawn can only more towards promotion so any more from the row before is promoting
-	const bool promoting = (new_position.is_white ? WHITE_PAWN_PRE_PROMOTION : BLACK_PAWN_PRE_PROMOTION);
 	
-	std::vector<B64> attacks;
+	SidedPosition new_position;
+	B64& current_pieces = *own_piece_board_ref(new_position, piece_type);
+
+	int move_index;
+	B64 normal_move;
+	B64 en_passant;
+	B64 attack_moves;
+	bool promoting; // a pawn can only more towards promotion so any more from the row before is promoting
 	B64 jump;
+	std::vector<B64> attacks;
+	
 
-	// add normal move if possible
-	if (normal_move) {
-		new_position.own_pawns ^= (piece | normal_move); // toggle pawn origin and move location
-		if (promoting) { // check pawn promotion
-			possible_pawn_promotions(positions, new_position);
-		} else {
-			new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
-			positions.push_back(new_position); // push the normal move after voiding en passant
+	seperate_bits(base_pieces, single_pieces); // get a vector of all pieces
+	for (const B64& piece : single_pieces) {
+		// calculate all information needed for the moves
+		move_index = first_index + 2 * lowest_single_bit_index(piece);
+		normal_move = pawn_moves[move_index] & free_tiles;
+		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
+		attack_moves = pawn_attacks[move_index] & (opponent_pieces | en_passant);
+		promoting = piece & (new_position.is_white ? WHITE_PAWN_PRE_PROMOTION : BLACK_PAWN_PRE_PROMOTION);
+		attacks.clear();
 
-			// then check for jumps
-			if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its initial row
-				// waste no information, only check the jump target tile
-				jump = free_tiles & (sided_position.is_white ? up(normal_move) : down(normal_move));
+		// add normal move if possible
+		if (normal_move) {
+			new_position.own_pawns ^= (piece | normal_move); // toggle pawn origin and move location
+			if (promoting) { // check pawn promotion
+				possible_pawn_promotions(positions, new_position);
+			} else {
+				new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
+				positions.push_back(new_position); // push the normal move after voiding en passant
 
-				if (jump) { // if a jump is legal, add it
-					new_position.own_pawns ^= (normal_move | jump); // remove pawn from normal move, add jump
-					new_position.special_move_rigths ^= (new_position.is_white ? up(piece) : down(piece)); // add en passant
-					positions.push_back(new_position); 
+				// then check for jumps
+				if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) { // check if the pawn is on its initial row
+					// waste no information, only check the jump target tile
+					jump = free_tiles & (sided_position.is_white ? up(normal_move) : down(normal_move));
+
+					if (jump) { // if a jump is legal, add it
+						new_position.own_pawns ^= (normal_move | jump); // remove pawn from normal move, add jump
+						new_position.special_move_rigths ^= (new_position.is_white ? up(piece) : down(piece)); // add en passant
+						positions.push_back(new_position); 
+					}
 				}
 			}
 		}
-	}
 	
-	// add captures if any are possible
-	if (attack_moves) {
-		seperate_bits(attack_moves, attacks);
+		// add captures if any are possible
+		if (attack_moves) {
+			seperate_bits(attack_moves, attacks);
 
-		for (const B64 attack : attacks) {
-			new_position = sided_position; // reset position
-			new_position.own_pawns ^= (piece | attack); // toggle pawn origin and attack location
-			if (attack & en_passant) { // check if the current attack is an en passant
-				// white is captured from below, black from above
-				new_position.opponent_pawns ^= (new_position.is_white ? up(attack) : down(attack));
-
-				new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
-				positions.push_back(new_position); // push after voiding en passant
-			} else {
-				if (promoting) { // check pawn promotion
-					possible_pawn_promotions(positions, new_position);
-				} else {
-					// delete any enemy piece in the destination
-					clear_bits(new_position.opponent_pawns, attack);
-					clear_bits(new_position.opponent_knights, attack);
-					clear_bits(new_position.opponent_bishops, attack);
-					clear_bits(new_position.opponent_rooks, attack);
-					clear_bits(new_position.opponent_queens, attack);
+			for (const B64 attack : attacks) {
+				new_position = sided_position; // reset position
+				new_position.own_pawns ^= (piece | attack); // toggle pawn origin and attack location
+				if (attack & en_passant) { // check if the current attack is an en passant
+					// white is captured from below, black from above
+					new_position.opponent_pawns ^= (new_position.is_white ? up(attack) : down(attack));
 
 					new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 					positions.push_back(new_position); // push after voiding en passant
+				} else {
+					if (promoting) { // check pawn promotion
+						possible_pawn_promotions(positions, new_position);
+					} else {
+						// delete any enemy piece in the destination
+						clear_bits(new_position.opponent_pawns, attack);
+						clear_bits(new_position.opponent_knights, attack);
+						clear_bits(new_position.opponent_bishops, attack);
+						clear_bits(new_position.opponent_rooks, attack);
+						clear_bits(new_position.opponent_queens, attack);
+
+						new_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
+						positions.push_back(new_position); // push after voiding en passant
+					}
 				}
 			}
 		}
