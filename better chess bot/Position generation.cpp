@@ -53,6 +53,7 @@ void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedP
 	seperate_bits(base_pieces, single_pieces); // get a vector of all pieces
 	for (const B64& piece : single_pieces) {
 		// calculate all information needed for the moves
+		new_position = sided_position;
 		move_index = first_index + 2 * lowest_single_bit_index(piece);
 		normal_move = pawn_moves[move_index] & free_tiles;
 		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
