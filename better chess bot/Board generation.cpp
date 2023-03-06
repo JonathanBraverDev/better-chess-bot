@@ -59,12 +59,11 @@ void prepare_king_moves() {
 
 void prepare_knight_moves() {
 	B64 current_board = 1;
-	for (size_t i = 0; i < 64; i++) {
-		knight_moves[i] = (((current_board >> 6) | (current_board << 10)) & ~COLUMN_GH) | // when looping around the board on the other side
-			(((current_board >> 10) | (current_board << 6)) & ~COLUMN_AB) |
-			(((current_board >> 15) | (current_board << 17)) & ~COLUMN_H) |
-			(((current_board >> 17) | (current_board << 15)) & ~COLUMN_A);
-
+	for (size_t i = 0; i < 64; i++) { // column inversions delete moves that loop around the board
+		knight_moves[i] = (((current_board << 6)  | (current_board >> 10)) & ~COLUMN_GH) | // long left, delete right band
+						  (((current_board << 10) | (current_board >> 6))  & ~COLUMN_AB) | // long right, delete left band
+						  (((current_board << 15) | (current_board >> 17)) & ~COLUMN_H)  | // tall left, delete right edge
+						  (((current_board << 17) | (current_board >> 15)) & ~COLUMN_A);   // tall right, delete left edge
 		current_board <<= 1;
 	}
 }
