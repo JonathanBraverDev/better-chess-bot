@@ -54,8 +54,8 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
         // Recursively search the resulting position from the perspective of the opposite player
         eval = std::max(eval, -alphabeta(generate_next_state(state, sided_position), depth - 1, -beta, -alpha)); // alpha and beta are passed inverted
 
-        // Update alpha
-        alpha = std::max(alpha, std::max(eval, WIN_VALUE - 100 * depth)); // last argument to set a clear preference for early wins
+        alpha = (state.sided_position.is_white ? std::max(alpha, eval) // min/max by the current player color
+                                               : std::min(alpha, eval));
 
         // If alpha is greater than or equal to beta, terminate the branch early
         if (beta <= alpha)
