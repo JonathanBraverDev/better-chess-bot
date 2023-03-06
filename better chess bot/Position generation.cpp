@@ -203,7 +203,7 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 	}
 }
 
-void all_possible_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
+void all_possible_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position) {
 	const B64 opponent = opponent_pieces(sided_position);
 	const B64 own = own_pieces(sided_position);
 	const B64 blockers = own | opponent; // for collision detection
@@ -373,7 +373,7 @@ void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition s
 	}
 }
 
-void possible_evade_positions(std::vector<SidedPosition> positions, const SidedPosition sided_position) {
+void possible_evade_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position) {
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
 	const B64 blockers = all_pieces(sided_position);
@@ -402,7 +402,7 @@ void possible_evade_positions(std::vector<SidedPosition> positions, const SidedP
 	}
 }
 
-std::vector<SidedPosition> valid_positions(std::vector<SidedPosition> valid_positions, const GameState state) {
+std::vector<SidedPosition> valid_positions(std::vector<SidedPosition>& valid_positions, const GameState state) {
 	std::vector<SidedPosition> all_positions;
 
 	all_positions.reserve(EXPECTED_BRANCHING);
