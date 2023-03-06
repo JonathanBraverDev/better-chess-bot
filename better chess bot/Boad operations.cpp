@@ -2,7 +2,7 @@
 #include "Board operations.h"
 
 // prints a human readable version of the board, is A1 being 1(2^0) and H8 a lot (2^64)
-void visualize_board(B64 board) {
+void visualize_board(const B64 board) {
     for (int i = 7; i >= 0; i--) {
         for (int j = 0; j <= 7; j++) {
             if (get_bit(board, i * BOARD_SIZE + j)) {
