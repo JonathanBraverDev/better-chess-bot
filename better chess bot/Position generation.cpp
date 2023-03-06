@@ -14,8 +14,9 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 		new_position = sided_position; // reset the new position
 		current_pieces = base_pieces ^ piece; // delete the current piece from its origin
 
-		if (move_generator == nullptr) { // only a knight should get here (pawn have thier own function)
-			potential_moves = knight_moves[lowest_single_bit_index(piece)] & valid_destinations;
+		if (move_generator == nullptr) { // the knight and king have precalculaed moves
+			potential_moves = valid_destinations & (piece_type == KNIGHT ? knight_moves[lowest_single_bit_index(piece)]
+																		 : king_moves[lowest_single_bit_index(piece)]);
 		} else {
 			potential_moves = move_generator(blockers, base_pieces) & valid_destinations; // get the valid moves per piece
 			if (piece_type == ROOK) {
