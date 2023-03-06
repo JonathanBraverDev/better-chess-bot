@@ -118,13 +118,14 @@ void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedP
 void possible_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
 	
 	std::vector<B64> single_moves;
+	SidedPosition base_position = sided_position;
+	base_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant for all moves
 	SidedPosition new_position;
 
 	seperate_bits(potential_moves, single_moves); // seperate the generated moves
-	new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant for all moves
 
 	for (const B64& move : single_moves) {
-		new_position = sided_position;
+		new_position = base_position;
 		current_pieces ^= move; // add the current piece to its destination
 		// delete any enemy piece in the destination
 		clear_bits(new_position.opponent_pawns, move);
