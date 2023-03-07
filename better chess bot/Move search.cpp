@@ -37,8 +37,8 @@ int alphabeta(GameState state, int depth) {
     for (int i = 0; i < depth; i++) {
         depth_vectors->all_positions.reserve(EXPECTED_BRANCHING);
         depth_vectors->valid_positions.reserve(EXPECTED_BRANCHING);
-        depth_vectors->single_boards.reserve(EXPECTED_BRANCHING);
-        depth_vectors->pawn_attacks.reserve(4);
+        depth_vectors->single_pieces.reserve(EXPECTED_BRANCHING);
+        depth_vectors->single_moves.reserve(EXPECTED_BRANCHING);
     }
 
     return alphabeta(depth_vectors, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);

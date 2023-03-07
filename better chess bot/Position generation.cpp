@@ -5,7 +5,7 @@ void possible_piece_positions(PreAllocationVectors& allocation, const SidedPosit
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
-	std::vector<B64>& single_pieces = allocation.single_boards;
+	std::vector<B64>& single_pieces = allocation.single_pieces;
 	single_pieces.clear();
 
 	SidedPosition new_position;
@@ -41,8 +41,8 @@ void possible_pawn_positions(PreAllocationVectors& allocation, const SidedPositi
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
-	std::vector<B64>& single_pieces = allocation.single_boards;
-	std::vector<B64>& attacks = allocation.pawn_attacks;
+	std::vector<B64>& single_pieces = allocation.single_pieces;
+	std::vector<B64>& attacks = allocation.single_moves;
 	single_pieces.clear();
 	attacks.clear();
 
@@ -131,7 +131,7 @@ void possible_capture_positions(PreAllocationVectors& allocation, const SidedPos
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
-	std::vector<B64>& single_moves = allocation.single_boards;
+	std::vector<B64>& single_moves = allocation.single_moves;
 	single_moves.clear();
 
 	SidedPosition base_position = sided_position;
@@ -260,7 +260,7 @@ void tile_capture_positions(PreAllocationVectors& allocation, const SidedPositio
 
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
-	std::vector<B64>& single_pieces = allocation.single_boards;
+	std::vector<B64>& single_pieces = allocation.single_pieces;
 	single_pieces.clear();
 
 	SidedPosition new_position;
@@ -345,7 +345,7 @@ void tile_move_positions(PreAllocationVectors& allocation, const SidedPosition s
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
-	std::vector<B64>& single_pieces = allocation.single_boards;
+	std::vector<B64>& single_pieces = allocation.single_pieces;
 	single_pieces.clear();
 
 	SidedPosition new_position;
@@ -391,7 +391,7 @@ void moves_to_tiles(PreAllocationVectors& allocation, const SidedPosition sided_
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
-	std::vector<B64>& single_targets = allocation.single_boards;
+	std::vector<B64>& single_targets = allocation.single_moves;
 	single_targets.clear();
 
 	B64 slide_moves;
@@ -443,7 +443,7 @@ void possible_evade_positions(PreAllocationVectors& allocation, const SidedPosit
 void valid_positions(PreAllocationVectors& allocation, const GameState state) {
 
 	// use preallocated memory, clear out position vectors
-	std::vector<SidedPosition>& valid_positions = allocation.all_positions;
+	std::vector<SidedPosition>& valid_positions = allocation.valid_positions;
 	std::vector<SidedPosition>& positions = allocation.all_positions;
 	valid_positions.clear();
 	positions.clear();
