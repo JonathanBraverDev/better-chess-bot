@@ -30,8 +30,25 @@ bool was_piece_taken(const SidedPosition original_position, const SidedPosition 
                                        : (count_bits64(own_pieces(original_position)) == count_bits64(own_pieces(end_turn_position))));
 }
 
-int alphabeta(GameState state, int depth, int alpha, int beta) {
-    std::vector<SidedPosition> next_positions;
+int alphabeta(GameState state, int depth) {
+    PreAllocationVectors* depth_vectors = new PreAllocationVectors[depth];
+
+    // reserve space for all vectors, if they end up growing the'll keep their size
+    for (int i = 0; i < depth; i++) {
+        depth_vectors->all_positions.reserve(EXPECTED_BRANCHING);
+        depth_vectors->valid_positions.reserve(EXPECTED_BRANCHING);
+        depth_vectors->single_boards.reserve(EXPECTED_BRANCHING);
+        depth_vectors->pawn_attacks.reserve(4);
+    }
+
+    return alphabeta(depth_vectors, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);
+}
+
+int alphabeta(PreAllocationVectors* depth_vectors, GameState state, int depth, int alpha, int beta) {
+
+    // use prealocated vectors, clears happen to relevent vectors in the function that needs them
+    PreAllocationVectors& current_vectors = depth_vectors[depth - 1];
+
     int eval = 0;
 
     // end search conditions
@@ -42,17 +59,17 @@ int alphabeta(GameState state, int depth, int alpha, int beta) {
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else {
-        valid_positions(next_positions, state);
+        valid_positions(current_vectors, state);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
     }
 
     // continue search
-    for (const SidedPosition& sided_position : next_positions) {
+    for (const SidedPosition& sided_position : current_vectors.valid_positions) {
 
-        // Recursively search the resulting position from the perspective of the opposite player
-        eval = std::max(eval, -alphabeta(generate_next_state(state, sided_position), depth - 1, -beta, -alpha)); // alpha and beta are passed inverted
+        // Recursively search the resulting position from the perspective of the opposite player, alpha and beta are passed inverted
+        eval = std::max(eval, -alphabeta(depth_vectors, generate_next_state(state, sided_position), depth - 1, -beta, -alpha));
 
         alpha = (state.sided_position.is_white ? std::max(alpha, eval) // min/max by the current player color
                                                : std::min(alpha, eval));

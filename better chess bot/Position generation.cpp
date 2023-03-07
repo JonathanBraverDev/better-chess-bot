@@ -1,8 +1,13 @@
 
 #include "Position generation.h"
 
-void possible_piece_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
-	std::vector<B64> single_pieces;
+void possible_piece_positions(PreAllocationVectors& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
+	
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<B64>& single_pieces = allocation.single_boards;
+	single_pieces.clear();
+
 	SidedPosition new_position;
 
 	B64& current_pieces = *own_piece_board_ref(new_position, piece_type);
@@ -27,14 +32,20 @@ void possible_piece_positions(std::vector<SidedPosition>& positions, const Sided
 
 		// add the mvoes if any exist, removing the opponent's piece
 		if (potential_moves) {
-			possible_capture_positions(positions, new_position, potential_moves, piece, current_pieces);
+			possible_capture_positions(allocation, new_position, potential_moves, piece, current_pieces);
 		}
 	}
 }
 
-void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, const PieceType piece_type, const B64 free_tiles, const B64 opponent_pieces) {
+void possible_pawn_positions(PreAllocationVectors& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 free_tiles, const B64 opponent_pieces) {
+	
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<B64>& single_pieces = allocation.single_boards;
+	std::vector<B64>& attacks = allocation.pawn_attacks;
+	single_pieces.clear();
+	attacks.clear();
 
-	std::vector<B64> single_pieces;
 	const B64 base_pieces = own_piece_board_copy(sided_position, piece_type);
 	const int first_index = (sided_position.is_white ? 0 : 1);
 	
@@ -47,7 +58,6 @@ void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedP
 	B64 attack_moves;
 	bool promoting; // a pawn can only more towards promotion so any more from the row before is promoting
 	B64 jump;
-	std::vector<B64> attacks;
 	
 
 	seperate_bits(base_pieces, single_pieces); // get a vector of all pieces
@@ -117,9 +127,13 @@ void possible_pawn_positions(std::vector<SidedPosition>& positions, const SidedP
 	}
 }
 
-void possible_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
+void possible_capture_positions(PreAllocationVectors& allocation, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
 	
-	std::vector<B64> single_moves;
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<B64>& single_moves = allocation.single_boards;
+	single_moves.clear();
+
 	SidedPosition base_position = sided_position;
 	base_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant for all moves
 	SidedPosition new_position;
@@ -205,7 +219,11 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 	}
 }
 
-void all_possible_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position) {
+void all_possible_positions(PreAllocationVectors& allocation, const SidedPosition sided_position) {
+
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+
 	const B64 opponent = opponent_pieces(sided_position);
 	const B64 own = own_pieces(sided_position);
 	const B64 blockers = own | opponent; // for collision detection
@@ -213,23 +231,23 @@ void all_possible_positions(std::vector<SidedPosition>& positions, const SidedPo
 
 	// for every exisintg piece type, add it's moves
 	if (sided_position.own_pawns) { // can I just say that I HATE how complicated this piece type is?
-		possible_pawn_positions(positions, sided_position, PAWN, ~blockers, opponent);
+		possible_pawn_positions(allocation, sided_position, PAWN, ~blockers, opponent);
 	}
 	if (sided_position.own_knights) {
-		possible_piece_positions(positions, sided_position, KNIGHT, blockers, not_own, nullptr, knight_moves);
+		possible_piece_positions(allocation, sided_position, KNIGHT, blockers, not_own, nullptr, knight_moves);
 	}
 	if (sided_position.own_bishops) {
-		possible_piece_positions(positions, sided_position, BISHOP, blockers, not_own, &generate_bishop_moves);
+		possible_piece_positions(allocation, sided_position, BISHOP, blockers, not_own, &generate_bishop_moves);
 	}
 	if (sided_position.own_rooks) {
-		possible_piece_positions(positions, sided_position, ROOK, blockers, not_own, &generate_rook_moves);
+		possible_piece_positions(allocation, sided_position, ROOK, blockers, not_own, &generate_rook_moves);
 	}
 	if (sided_position.own_queens) {
-		possible_piece_positions(positions, sided_position, QUEEN, blockers, not_own, &generate_queen_moves);
+		possible_piece_positions(allocation, sided_position, QUEEN, blockers, not_own, &generate_queen_moves);
 	}
 
 	// king normals, assuming he didn't get brutally murdered (eveluation planned to end on unavaidable check)
-	possible_piece_positions(positions, sided_position, KING, blockers, not_own, nullptr, king_moves);
+	possible_piece_positions(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
 	if (sided_position.own_king & sided_position.special_move_rigths) { // add castles is legal
 		possible_castle_positions(positions, sided_position);
 	}
@@ -238,9 +256,13 @@ void all_possible_positions(std::vector<SidedPosition>& positions, const SidedPo
 }
 
 // moves that get here are garanteed to be possible, all killing hte target one way or another
-void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target, B64 killing_pieces) {
+void tile_capture_positions(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target, B64 killing_pieces) {
 
-	std::vector<B64> single_pieces;
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<B64>& single_pieces = allocation.single_boards;
+	single_pieces.clear();
+
 	SidedPosition new_position;
 	B64 en_passant_tile;
 
@@ -276,7 +298,11 @@ void tile_capture_positions(std::vector<SidedPosition>& positions, const SidedPo
 	}
 }
 
-void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit) {
+void kills_to_tile(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target_board_bit) {
+
+	// use preallocated memory
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+
 	const int tile_index = lowest_single_bit_index(target_board_bit);
 	const B64 slide_attackes = generate_queen_moves(all_pieces(sided_position), target_board_bit);
 
@@ -299,25 +325,29 @@ void kills_to_tile(std::vector<SidedPosition>& positions, const SidedPosition si
 	killing_pawns &= sided_position.own_pawns;
 
 	if (killing_pawns) {
-		tile_capture_positions(positions, sided_position, target_board_bit, killing_pawns);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_pawns);
 	}
 	if (killing_knights) {
-		tile_capture_positions(positions, sided_position, target_board_bit, killing_knights);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_knights);
 	}
 	if (killing_bishops) {
-		tile_capture_positions(positions, sided_position, target_board_bit, killing_bishops);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_bishops);
 	}
 	if (killing_rooks) {
-		tile_capture_positions(positions, sided_position, target_board_bit, killing_rooks);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_rooks);
 	}
 	if (killing_queens) {
-		tile_capture_positions(positions, sided_position, target_board_bit, killing_queens);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_queens);
 	}
 }
 
-void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
+void tile_move_positions(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
 	
-	std::vector<B64> single_pieces;
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<B64>& single_pieces = allocation.single_boards;
+	single_pieces.clear();
+
 	SidedPosition new_position;
 	bool add_move;
 
@@ -357,8 +387,13 @@ void tile_move_positions(std::vector<SidedPosition>& positions, const SidedPosit
 	}
 }
 
-void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition sided_position, const B64 target_board) {
-	std::vector<B64> single_targets;
+void moves_to_tiles(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target_board) {
+	
+	// use preallocated memory, clear out everything but the position vector
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<B64>& single_targets = allocation.single_boards;
+	single_targets.clear();
+
 	B64 slide_moves;
 
 	seperate_bits(target_board, single_targets);
@@ -367,56 +402,58 @@ void moves_to_tiles(std::vector<SidedPosition>& positions, const SidedPosition s
 		// maybe an approach like with the kills is better, i'm looping everything here, that can't be good.
 		// i'm not sure how to handle multiple origin points at the same time tho, what if a piece can block 2 tiles?
 		slide_moves = generate_queen_moves(all_pieces(sided_position), target);
-		tile_move_positions(positions, sided_position, target, QUEEN, slide_moves);
-		tile_move_positions(positions, sided_position, target, ROOK, slide_moves);
-		tile_move_positions(positions, sided_position, target, BISHOP, slide_moves);
-		tile_move_positions(positions, sided_position, target, PAWN); // pawns can also block by jumping.
-		tile_move_positions(positions, sided_position, target, KNIGHT);
+		tile_move_positions(allocation, sided_position, target, QUEEN, slide_moves);
+		tile_move_positions(allocation, sided_position, target, ROOK, slide_moves);
+		tile_move_positions(allocation, sided_position, target, BISHOP, slide_moves);
+		tile_move_positions(allocation, sided_position, target, PAWN); // pawns can also block by jumping.
+		tile_move_positions(allocation, sided_position, target, KNIGHT);
 	}
 }
 
-void possible_evade_positions(std::vector<SidedPosition>& positions, const SidedPosition sided_position) {
+void possible_evade_positions(PreAllocationVectors& allocation, const SidedPosition sided_position) {
+
+	// use preallocated memory
+	std::vector<SidedPosition>& positions = allocation.all_positions;
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
 	const B64 blockers = all_pieces(sided_position);
 	const B64 not_own = ~own_pieces(sided_position); // valid destinations
 
-	std::vector<B64> pieces;
-	std::vector<B64> destinations;
 	B64 attack_path;
 	B64 potential_moves = 0;
 
 	// add all king moves besides castles
-	possible_piece_positions(positions, sided_position, KING, blockers, not_own, nullptr, king_moves);
+	possible_piece_positions(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
 
 	if (count_bits64(attackers) == 1) { // its either 1 or 2, given that the position starts in a check
 
 		// a knight's check cannot be blocked, but a single knight can be killed
 		if (attackers & sided_position.opponent_knights) {
-			kills_to_tile(positions, sided_position, attackers);
+			kills_to_tile(allocation, sided_position, attackers);
 		}
 		else { // the attacker is a sliding piece, block it or kill it
 			attack_path = get_connecting_tiles(attackers, sided_position.own_king); // garanteed to be checked
 
-			moves_to_tiles(positions, sided_position, attack_path);
-			kills_to_tile(positions, sided_position, attackers);
+			moves_to_tiles(allocation, sided_position, attack_path);
+			kills_to_tile(allocation, sided_position, attackers);
 		}
 	}
 }
 
-std::vector<SidedPosition> valid_positions(std::vector<SidedPosition>& valid_positions, const GameState state) {
-	std::vector<SidedPosition> all_positions;
+void valid_positions(PreAllocationVectors& allocation, const GameState state) {
 
-	all_positions.reserve(EXPECTED_BRANCHING);
+	// use preallocated memory, clear out position vectors
+	std::vector<SidedPosition>& valid_positions = allocation.all_positions;
+	std::vector<SidedPosition>& positions = allocation.all_positions;
+	valid_positions.clear();
+	positions.clear();
 
-	(is_check(state) ? possible_evade_positions(all_positions, state.sided_position)
-					 : all_possible_positions(all_positions, state.sided_position));
+	(is_check(state) ? possible_evade_positions(allocation, state.sided_position)
+					 : all_possible_positions(allocation, state.sided_position));
 
-	for (const SidedPosition& Sided_position : all_positions) {
+	for (const SidedPosition& Sided_position : positions) {
 		if (!is_check(Sided_position)) {
 			valid_positions.push_back(Sided_position);
 		}
 	}
-
-	return valid_positions;
 }
