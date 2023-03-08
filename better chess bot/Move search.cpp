@@ -58,25 +58,24 @@ int alphabeta(PreAllocationVectors* depth_vectors, GameState state, int depth, i
         eval = score_by_player(state.sided_position.is_white, -WIN_VALUE); // set value as losing for the current player
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
-    } else {
+    } else { // continue search
         valid_positions(current_vectors, state);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
-    }
 
-    // continue search
-    for (const SidedPosition& sided_position : current_vectors.valid_positions) {
+        for (const SidedPosition& sided_position : current_vectors.valid_positions) {
 
-        // Recursively search the resulting position from the perspective of the opposite player, alpha and beta are passed inverted
-        eval = std::max(eval, -alphabeta(depth_vectors, generate_next_state(state, sided_position), depth - 1, -beta, -alpha));
+            // Recursively search the resulting position from the perspective of the opposite player, alpha and beta are passed inverted
+            eval = std::max(eval, -alphabeta(depth_vectors, generate_next_state(state, sided_position), depth - 1, -beta, -alpha));
 
-        alpha = (state.sided_position.is_white ? std::max(alpha, eval) // min/max by the current player color
-                                               : std::min(alpha, eval));
+            alpha = (state.sided_position.is_white ? std::max(alpha, eval) // min/max by the current player color
+                : std::min(alpha, eval));
 
-        // If alpha is greater than or equal to beta, terminate the branch early
-        if (beta <= alpha)
-            break;
+            // If alpha is greater than or equal to beta, terminate the branch early
+            if (beta <= alpha)
+                break;
+        }
     }
 
     // Return the final evaluation
