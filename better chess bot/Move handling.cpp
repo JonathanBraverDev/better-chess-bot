@@ -3,18 +3,20 @@
 #include "Game constants.h"
 
 // makes a given move, does not check its validity
-SidedPosition Make_move(SidedPosition sided_position, Move move) {
+SidedPosition Make_move(SidedPosition& sided_position, BitMove bitmove) {
 
-	if (Is_castle(move)) {
+	Move move = expand_move(sided_position, bitmove);
+
+	if (Is_castle(bitmove)) {
 		Toggle_castle(sided_position, move);
 	} else {
 		Move_piece(sided_position, move);
 
-		if (Is_capture(move)) {
+		if (Is_capture(bitmove)) {
 			Toggle_captured(sided_position, move);
 		}
 
-		if (Is_promotion(move)) {
+		if (Is_promotion(bitmove)) {
 			Toggle_promotion(sided_position, move);
 		}
 	}
@@ -115,15 +117,18 @@ void set_special_move_rights(SidedPosition& sided_position, const Move& move) {
 }
 
 // returns the board to the position before the move, no validity check
-SidedPosition Undo_move(SidedPosition sided_position, Move move) {
-	if (Is_castle(move)) {
+SidedPosition Undo_move(SidedPosition& sided_position, BitMove bitmove) {
+
+	Move move = expand_move(sided_position, bitmove);
+
+	if (Is_castle(bitmove)) {
 		Toggle_castle(sided_position, move);
 	} else {
-		if (Is_promotion(move)) {
+		if (Is_promotion(bitmove)) {
 			Toggle_promotion(sided_position, move);
 		}
 
-		if (Is_capture(move)) {
+		if (Is_capture(bitmove)) {
 			Toggle_captured(sided_position, move);
 		}
 
