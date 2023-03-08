@@ -30,24 +30,26 @@ bool was_piece_taken(const SidedPosition original_position, const SidedPosition 
                                        : (count_bits64(own_pieces(original_position)) == count_bits64(own_pieces(end_turn_position))));
 }
 
-int alphabeta(GameState state, int depth) {
-    PreAllocationVectors* depth_vectors = new PreAllocationVectors[depth];
+int alphabeta_init(GameState state, int depth) {
+    SearchPreallocation allocation;
+    // create the valid move array, each vector is created with EXPECTED_BRANCHING capacity
+    allocation.valid_positions = new std::vector<SidedPosition>[depth] {std::vector<SidedPosition>(EXPECTED_BRANCHING)};
 
     // reserve space for all vectors, if they end up growing the'll keep their size
     for (int i = 0; i < depth; i++) {
-        depth_vectors->all_positions.reserve(EXPECTED_BRANCHING);
-        depth_vectors->valid_positions.reserve(EXPECTED_BRANCHING);
-        depth_vectors->single_pieces.reserve(EXPECTED_BRANCHING);
-        depth_vectors->single_moves.reserve(EXPECTED_BRANCHING);
+        allocation.all_positions.reserve(EXPECTED_BRANCHING);
+        allocation.single_pieces.reserve(EXPECTED_BRANCHING);
+        allocation.single_moves.reserve(EXPECTED_BRANCHING);
     }
 
-    return alphabeta(depth_vectors, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);
+    return alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);
 }
 
-int alphabeta(PreAllocationVectors* depth_vectors, GameState state, int depth, int alpha, int beta) {
+int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int alpha, int beta) {
 
     // use prealocated vectors, clears happen to relevent vectors in the function that needs them
-    PreAllocationVectors& current_vectors = depth_vectors[depth - 1];
+    std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
+    // note that at depth 0, the pointer is INVALID
 
     int eval = 0;
 
@@ -59,18 +61,18 @@ int alphabeta(PreAllocationVectors* depth_vectors, GameState state, int depth, i
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else { // continue search
-        valid_positions(current_vectors, state);
+        valid_positions(allocation, depth, state);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
 
-        for (const SidedPosition& sided_position : current_vectors.valid_positions) {
+        for (const SidedPosition& sided_position : next_positions) {
 
             // Recursively search the resulting position from the perspective of the opposite player, alpha and beta are passed inverted
-            eval = std::max(eval, -alphabeta(depth_vectors, generate_next_state(state, sided_position), depth - 1, -beta, -alpha));
+            eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -beta, -alpha));
 
             alpha = (state.sided_position.is_white ? std::max(alpha, eval) // min/max by the current player color
-                : std::min(alpha, eval));
+                                                   : std::min(alpha, eval));
 
             // If alpha is greater than or equal to beta, terminate the branch early
             if (beta <= alpha)

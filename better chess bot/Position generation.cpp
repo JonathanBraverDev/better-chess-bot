@@ -1,7 +1,7 @@
 
 #include "Position generation.h"
 
-void possible_piece_positions(PreAllocationVectors& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
+void possible_piece_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -37,7 +37,7 @@ void possible_piece_positions(PreAllocationVectors& allocation, const SidedPosit
 	}
 }
 
-void possible_pawn_positions(PreAllocationVectors& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 free_tiles, const B64 opponent_pieces) {
+void possible_pawn_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 free_tiles, const B64 opponent_pieces) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -127,7 +127,7 @@ void possible_pawn_positions(PreAllocationVectors& allocation, const SidedPositi
 	}
 }
 
-void possible_capture_positions(PreAllocationVectors& allocation, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
+void possible_capture_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -219,7 +219,7 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 	}
 }
 
-void all_possible_positions(PreAllocationVectors& allocation, const SidedPosition sided_position) {
+void all_possible_positions(SearchPreallocation& allocation, const SidedPosition sided_position) {
 
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -256,7 +256,7 @@ void all_possible_positions(PreAllocationVectors& allocation, const SidedPositio
 }
 
 // moves that get here are garanteed to be possible, all killing hte target one way or another
-void tile_capture_positions(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target, B64 killing_pieces) {
+void tile_capture_positions(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target, B64 killing_pieces) {
 
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -298,7 +298,7 @@ void tile_capture_positions(PreAllocationVectors& allocation, const SidedPositio
 	}
 }
 
-void kills_to_tile(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target_board_bit) {
+void kills_to_tile(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board_bit) {
 
 	// use preallocated memory
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -341,7 +341,7 @@ void kills_to_tile(PreAllocationVectors& allocation, const SidedPosition sided_p
 	}
 }
 
-void tile_move_positions(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
+void tile_move_positions(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -387,7 +387,7 @@ void tile_move_positions(PreAllocationVectors& allocation, const SidedPosition s
 	}
 }
 
-void moves_to_tiles(PreAllocationVectors& allocation, const SidedPosition sided_position, const B64 target_board) {
+void moves_to_tiles(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -410,7 +410,7 @@ void moves_to_tiles(PreAllocationVectors& allocation, const SidedPosition sided_
 	}
 }
 
-void possible_evade_positions(PreAllocationVectors& allocation, const SidedPosition sided_position) {
+void possible_evade_positions(SearchPreallocation& allocation, const SidedPosition sided_position) {
 
 	// use preallocated memory
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -440,10 +440,10 @@ void possible_evade_positions(PreAllocationVectors& allocation, const SidedPosit
 	}
 }
 
-void valid_positions(PreAllocationVectors& allocation, const GameState state) {
+void valid_positions(SearchPreallocation& allocation, const int current_depth, const GameState state) {
 
 	// use preallocated memory, clear out position vectors
-	std::vector<SidedPosition>& valid_positions = allocation.valid_positions;
+	std::vector<SidedPosition>& valid_positions = allocation.valid_positions[current_depth];
 	std::vector<SidedPosition>& positions = allocation.all_positions;
 	valid_positions.clear();
 	positions.clear();
