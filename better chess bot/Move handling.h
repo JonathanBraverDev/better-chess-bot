@@ -5,9 +5,10 @@
 #include "Board operations.h"
 #include "Position structure.h"
 
-inline bool Is_promotion(BitMove move) { return move & IS_PROMOTE_MASK; };
-inline bool Is_capture(BitMove move) { return move & IS_CAPTURE_MASK; };
-inline bool Is_castle(BitMove move) { return (move & MISC_MOVE_TYPE_MASK) == CASTLE_SHORT || (move & MISC_MOVE_TYPE_MASK) == CASTLE_LONG; };
+inline bool Is_promotion(BitMove move) { return move & IS_PROMOTE_MASK; }
+inline bool Is_capture(BitMove move) { return move & IS_CAPTURE_MASK; }
+inline bool Is_castle(BitMove move) { return (((move & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET) == CASTLE_SHORT ||
+											  ((move & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET) == CASTLE_LONG); }
 
 
 SidedPosition Make_move(SidedPosition& sided_position, BitMove bitmove);

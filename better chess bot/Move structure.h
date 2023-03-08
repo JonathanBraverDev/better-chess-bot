@@ -107,9 +107,9 @@ constexpr BitMove EN_PASSANT_INDEX_MASK = 0b111 << EN_PASSANT_INDEX_OFFSET;
 
 constexpr BitMove MOVE_TYPE_MASK = 0b11111 << MOVE_TYPE_OFFSET; // no mask needed with new MoveType format, compare full int value
 constexpr BitMove IS_PROMOTE_MASK = 0b10000 << MOVE_TYPE_OFFSET;
-constexpr BitMove IS_CAPTURE_MASK = 0b1000 << MOVE_TYPE_OFFSET;
-constexpr BitMove IS_CHECK_MASK = 0b100 << MOVE_TYPE_OFFSET;
-constexpr BitMove MISC_MOVE_TYPE_MASK = 0b11 << MOVE_TYPE_OFFSET;
+constexpr BitMove IS_CAPTURE_MASK = 0b01000 << MOVE_TYPE_OFFSET;
+constexpr BitMove IS_CHECK_MASK = 0b00100 << MOVE_TYPE_OFFSET;
+constexpr BitMove MISC_MOVE_TYPE_MASK = 0b00011 << MOVE_TYPE_OFFSET;
 
 // sanity check
 constexpr BitMove MOVE_TYPE_MASK_CHECK = IS_PROMOTE_MASK | IS_CAPTURE_MASK | IS_CHECK_MASK | MISC_MOVE_TYPE_MASK;
