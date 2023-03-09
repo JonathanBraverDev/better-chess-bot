@@ -3,8 +3,7 @@
 
 void possible_piece_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
 	
-	// use preallocated memory, clear out everything but the position vector
-	std::vector<SidedPosition>& positions = allocation.all_positions;
+	// clear out preallocated memory before use
 	std::vector<B64>& single_pieces = allocation.single_pieces;
 	single_pieces.clear();
 
@@ -221,9 +220,6 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 
 void all_possible_positions(SearchPreallocation& allocation, const SidedPosition sided_position) {
 
-	// use preallocated memory, clear out everything but the position vector
-	std::vector<SidedPosition>& positions = allocation.all_positions;
-
 	const B64 opponent = opponent_pieces(sided_position);
 	const B64 own = own_pieces(sided_position);
 	const B64 blockers = own | opponent; // for collision detection
@@ -249,7 +245,7 @@ void all_possible_positions(SearchPreallocation& allocation, const SidedPosition
 	// king normals, assuming he didn't get brutally murdered (eveluation planned to end on unavaidable check)
 	possible_piece_positions(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
 	if (sided_position.own_king & sided_position.special_move_rigths) { // add castles is legal
-		possible_castle_positions(positions, sided_position);
+		possible_castle_positions(allocation.all_positions, sided_position);
 	}
 
 	// validation for checks dosent happen here
@@ -299,9 +295,6 @@ void tile_capture_positions(SearchPreallocation& allocation, const SidedPosition
 }
 
 void kills_to_tile(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board_bit) {
-
-	// use preallocated memory
-	std::vector<SidedPosition>& positions = allocation.all_positions;
 
 	const int tile_index = lowest_single_bit_index(target_board_bit);
 	const B64 slide_attackes = generate_queen_moves(all_pieces(sided_position), target_board_bit);
@@ -389,8 +382,7 @@ void tile_move_positions(SearchPreallocation& allocation, const SidedPosition si
 
 void moves_to_tiles(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board) {
 	
-	// use preallocated memory, clear out everything but the position vector
-	std::vector<SidedPosition>& positions = allocation.all_positions;
+	// clear out preallocated memory before use
 	std::vector<B64>& single_targets = allocation.single_moves;
 	single_targets.clear();
 
@@ -411,9 +403,6 @@ void moves_to_tiles(SearchPreallocation& allocation, const SidedPosition sided_p
 }
 
 void possible_evade_positions(SearchPreallocation& allocation, const SidedPosition sided_position) {
-
-	// use preallocated memory
-	std::vector<SidedPosition>& positions = allocation.all_positions;
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
 	const B64 blockers = all_pieces(sided_position);
