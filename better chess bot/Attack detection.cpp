@@ -14,13 +14,11 @@ bool is_check(const SidedPosition sided_position) {
 	// then look at generated moves
 	if (!check) {
 		bishop_attackes = generate_bishop_moves(blockers, sided_position.own_king);
-		check = (bishop_attackes & sided_position.opponent_bishops);
 
-		if (!check) {
+		if (!(bishop_attackes & sided_position.opponent_bishops)) {
 			rook_attackes = generate_rook_moves(blockers, sided_position.own_king);
-			check = (rook_attackes & sided_position.opponent_rooks);
 
-			if (!check) {
+			if (!(rook_attackes & sided_position.opponent_rooks)) {
 				check = ((bishop_attackes | rook_attackes) & sided_position.opponent_queens);
 			}
 		}
