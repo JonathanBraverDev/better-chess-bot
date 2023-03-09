@@ -3,23 +3,27 @@
 
 bool is_check(const SidedPosition sided_position) {
 	const int tile = lowest_single_bit_index(sided_position.own_king);
-	B64 slide_attackes;
-
-	bool check = false;
+	const B64 blockers = all_pieces(sided_position);
+	B64 bishop_attackes;
+	B64 rook_attackes;
 
 	// perform fastest bit check first
-	if ((knight_moves[tile] & sided_position.opponent_knights) ||
-		(pawn_attacks[tile] & sided_position.opponent_pawns)) {
+	bool check = ((knight_moves[tile] & sided_position.opponent_knights) ||
+				  (pawn_attacks[tile] & sided_position.opponent_pawns));
 
-		check = true;
+	// then look at generated moves
+	if (!check) {
+		bishop_attackes = generate_bishop_moves(blockers, sided_position.own_king);
+		check = (bishop_attackes & sided_position.opponent_bishops);
 
-	} else {
-		// can be futher split into multiple checks but this is WAY more readable
-		slide_attackes = generate_queen_moves(all_pieces(sided_position), sided_position.own_king);
+		if (!check) {
+			rook_attackes = generate_rook_moves(blockers, sided_position.own_king);
+			check = (rook_attackes & sided_position.opponent_rooks);
 
-		check = ((slide_attackes & sided_position.opponent_queens) ||
-				 (slide_attackes & sided_position.opponent_rooks) ||
-				 (slide_attackes & sided_position.opponent_bishops));
+			if (!check) {
+				check = ((bishop_attackes | rook_attackes) & sided_position.opponent_queens);
+			}
+		}
 	}
 
 	return check;
