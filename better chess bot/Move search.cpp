@@ -32,17 +32,25 @@ bool was_piece_taken(const SidedPosition original_position, const SidedPosition 
 
 int alphabeta_init(GameState state, int depth) {
     SearchPreallocation allocation;
-    // create the valid move array, each vector is created with EXPECTED_BRANCHING capacity
-    allocation.valid_positions = new std::vector<SidedPosition>[depth] {std::vector<SidedPosition>(EXPECTED_BRANCHING)};
+    int final_eval;
+    // create the valid move array
+    allocation.valid_positions = new std::vector<SidedPosition>[depth];
 
-    // reserve space for all vectors, if they end up growing the'll keep their size
-    for (int i = 0; i < depth; i++) {
-        allocation.all_positions.reserve(EXPECTED_BRANCHING);
-        allocation.single_pieces.reserve(EXPECTED_BRANCHING);
-        allocation.single_moves.reserve(EXPECTED_BRANCHING);
+    // reserve space in the dynamic array
+    for (size_t i = 0; i < depth; i++) {
+        allocation.valid_positions[i].reserve(EXPECTED_BRANCHING);
     }
 
-    return alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);
+    // reserve space for the simple vectors, if they end up growing the'll keep their size
+    allocation.all_positions.reserve(EXPECTED_BRANCHING);
+    allocation.single_pieces.reserve(EXPECTED_BRANCHING);
+    allocation.single_moves.reserve(EXPECTED_BRANCHING);
+
+    final_eval = alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);
+
+    delete[] allocation.valid_positions;
+
+    return final_eval;
 }
 
 int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int alpha, int beta) {

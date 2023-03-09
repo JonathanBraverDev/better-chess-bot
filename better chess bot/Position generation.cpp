@@ -443,7 +443,7 @@ void possible_evade_positions(SearchPreallocation& allocation, const SidedPositi
 void valid_positions(SearchPreallocation& allocation, const int current_depth, const GameState state) {
 
 	// use preallocated memory, clear out position vectors
-	std::vector<SidedPosition>& valid_positions = allocation.valid_positions[current_depth];
+	std::vector<SidedPosition>& valid_positions = allocation.valid_positions[current_depth - 1];
 	std::vector<SidedPosition>& positions = allocation.all_positions;
 	valid_positions.clear();
 	positions.clear();
