@@ -30,6 +30,7 @@ enum MoveType {
 // promote bit
 // capture bit
 // check bit
+// 1 unassigned
 // 2 general bits:
 // 00 normal
 // 01, 10 - castle types
@@ -51,17 +52,14 @@ struct Move {
 // new Move encoding:
 // 6 bit origin index - must
 // 6 bit destination index - must
-// 2 bit promoted type - must (one of 4 possible pieces)
+// 1 bit mover color - logic help 
+// 3 bit moving/promoted type - must, logic help. when promote flag is on look as promotion
 // 3 bit captured type - reversability, logic help
-// 3 bit white castle rights - reversability, chess 960 compatible (Lrook, king, Rrook) helped with the sideof king functions
-// 3 bit black castle rights - reversability, chess 960 compatible
+// 3 bit own castle rights - reversability
 // 1 bit valid en passant - reversability, logic help
 // 3 bit en passant index - reversability, logic help
 // 
-// total 27 bits
-// required 14
-// reversability 13
-// complete to int (32) - 5 bit move type for move ordering
+// total 26 bit move, leaving 6 for order hints 
 
 inline bool is_white_player(const GameState& state) { return (state.turn % 2 == 0); };
 inline Move invert_move(Move move) { 
