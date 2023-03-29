@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "Board structure.h"
 
@@ -9,7 +10,6 @@
 //				   all bitshifts are flipped
 void visualize_board(const B64 board);
 
-// constexpr save the function call so they're faster than regular function
 // general bit manipulation
 inline void set_bit(B64& board, int bit) {  (board |= (1ULL << bit)); } // shift 1 to position and set to OR
 inline bool get_bit(const B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit
@@ -22,6 +22,9 @@ inline void set_bits(B64& board, B64 bit_board) { (board |= bit_board); }
 inline B64 copy_bits(B64& board, B64 bit_board) { (board & bit_board); }
 inline void clear_bits(B64& board, B64 bit_board) { (board &= ~bit_board); }
 inline void flip_bits(B64& board, B64 bit_board) { (board ^= bit_board); }
+
+inline float get_distance(const int x1, const int y1, const int x2, const int y2) { return std::hypotf(x1 - x2, y1 - y2); }
+float get_distance(B64& bit_board1, B64& bit_board2);
 
 // big finders
 int lowest_bit_index(const B64 board);

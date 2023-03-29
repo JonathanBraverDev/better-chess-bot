@@ -38,6 +38,13 @@ const int BitPositionLookup[64] = // hash table
   51, 25, 36, 32, 60, 20, 57, 16, 50, 31, 19, 15, 30, 14, 13, 12
 };
 
+float get_distance(B64& bit_board1, B64& bit_board2) {
+    int x1, y1, x2, y2;
+    lowest_single_cords(bit_board1, x1, y1);
+    lowest_single_cords(bit_board2, x2, y2);
+    return get_distance(x1, y1, x2, y2);
+}
+
 // finding the index of the least significant set bit in a 64 bit long word
 // De Bruijn Sequence
 int lowest_bit_index(const B64 board) {
