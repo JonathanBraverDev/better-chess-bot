@@ -84,7 +84,7 @@ struct PositionalBonuses {
 	int castling_same_bonus; // should consider attacker
 	int castling_diff_bonus; // should consider attacker
 	int pawn_space_bonus; // tiles behind pawns
-	int max_pawn_space; // a point in whic hthe bot is not exited by more tiles
+	int max_pawn_space; // a point in which the bot is not exited by more tiles
 	int pawn_space_scale; // weight per line/tile taken
 	int movment_freedom_bonus; // point bonsu for each avalible move
 	int max_movment_freedom; // same as pawn limit
@@ -97,4 +97,8 @@ struct PositionalBonuses {
 struct EvalParameters {
 	BasicParameters basic;
 	PieceBonuses piece_bonuses;
+	AdvancedPieceBonuses advanced_piece_bonuses;
+	DefensiveBonuses defensive_bonuses;
+	OffensiveBonuses offensive_bonuses;
+	PositionalBonuses positional_bonuses;
 };

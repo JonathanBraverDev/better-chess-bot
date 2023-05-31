@@ -12,6 +12,7 @@ bool is_check(const SidedPosition sided_position) {
 				  (pawn_attacks[tile] & sided_position.opponent_pawns));
 
 	// then look at generated moves
+	// walk from the king and check if an enemy is found
 	if (!check) {
 		bishop_attackes = generate_bishop_moves(blockers, sided_position.own_king);
 

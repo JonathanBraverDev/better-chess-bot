@@ -13,4 +13,4 @@ inline int score_by_player(const bool is_white, int score) { return (is_white ? 
 bool was_piece_taken(const SidedPosition original_position, const SidedPosition end_turn_position);
 
 int alphabeta_init(GameState state, int depth);
-int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int alpha, int beta);
+int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int own_best, int opponent_best);

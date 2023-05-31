@@ -55,7 +55,7 @@ struct Move {
 // 1 bit mover color - logic help 
 // 3 bit moving/promoted type - must, logic help. when promote flag is on look as promotion
 // 3 bit captured type - reversability, logic help
-// 3 bit own castle rights - reversability
+// 3 bit own castle rights - reversability (maybe 2 possible, only castle L/R)
 // 1 bit valid en passant - reversability, logic help
 // 3 bit en passant index - reversability, logic help
 // 

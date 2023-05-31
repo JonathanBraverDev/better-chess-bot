@@ -53,13 +53,13 @@ int alphabeta_init(GameState state, int depth) {
     return final_eval;
 }
 
-int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int alpha, int beta) {
+int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int own_best, int opponent_best) {
 
     // use prealocated vectors, clears happen to relevent vectors in the function that needs them
     std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
     // note that at depth 0, the pointer is INVALID
 
-    int eval = 0;
+    int eval;
 
     // end search conditions
     if (depth == 0) {
@@ -69,6 +69,9 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int a
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else { // continue search
+
+        eval = own_best; // initially set to the WORST possible score for the current player
+
         valid_positions(allocation, depth, state);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
@@ -76,15 +79,14 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int a
 
         for (const SidedPosition& sided_position : next_positions) {
 
-            // Recursively search the resulting position from the perspective of the opposite player, alpha and beta are passed inverted
-            eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -beta, -alpha));
-
-            alpha = (state.sided_position.is_white ? std::max(alpha, eval) // min/max by the current player color
-                                                   : std::min(alpha, eval));
-
-            // If alpha is greater than or equal to beta, terminate the branch early
-            if (beta <= alpha)
+            // Recursively search the resulting position from the perspective of the opposite player, own_best and opponent_best are passed inverted
+            eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -opponent_best, -own_best));
+            
+            // If current eval is greater than opponent_best, terminate the branch early, opponent won't allow that branch
+            if (opponent_best < eval)
                 break;
+
+            own_best = std::max(own_best, eval); // update own best eval
         }
     }
 
