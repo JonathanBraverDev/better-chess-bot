@@ -4,7 +4,11 @@
 
 typedef uint64_t B64; // 64 bit board
 
-void swap(B64& a, B64& b);
+inline void swap(B64& a, B64& b) {
+	B64 temp = a;
+	a = b;
+	b = temp;
+}
 
 // the things I do for readability... (aren't very readable themselves eh)
 enum TileIndex {

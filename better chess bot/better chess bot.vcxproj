@@ -149,7 +149,6 @@
     <ClCompile Include="Move handling.cpp" />
     <ClCompile Include="Move search.cpp" />
     <ClCompile Include="Position generation.cpp" />
-    <ClCompile Include="Board structure.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Attack detection.h" />

@@ -42,9 +42,6 @@
     <ClCompile Include="Position structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Board structure.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Move structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
