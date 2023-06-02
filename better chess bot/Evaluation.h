@@ -8,7 +8,7 @@
 #include "Position generation.h"
 #include "Evaluation structure.h"
 
-constexpr int DRAW_MOVE_LIMIT = 50;
+constexpr int DRAW_MOVE_LIMIT = 100; // 50 moves by EACH player, enforcing FIDE 9.3.2
 constexpr int DRAW_REPETITIONS = 3;
 
 // simple eval

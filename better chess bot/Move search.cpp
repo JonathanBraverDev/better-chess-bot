@@ -12,10 +12,9 @@ GameState generate_next_state(GameState state, const SidedPosition new_position)
     new_state.sided_position = new_position;
     switch_sides(new_state.sided_position);
 
-    if (state.sided_position.own_pawns != new_position.own_pawns || // check if any pawn change has occured
-        state.sided_position.opponent_pawns != new_position.opponent_pawns || // any pawn move or capture is a garanteed reset
-        was_piece_taken(state.sided_position, new_position)) { // check for any captures on the opposing side of the board
-        draw_timer = 0;
+    if (state.draw_timer == DRAW_MOVE_LIMIT - 1) { // check only needs to happen when the game is about to end
+        draw_timer = find_last_draw_reset(state);
+        (draw_timer == -1 ? draw_timer = DRAW_MOVE_LIMIT : NULL);
     } else {
         draw_timer = state.draw_timer + 1;
     }
@@ -24,10 +23,56 @@ GameState generate_next_state(GameState state, const SidedPosition new_position)
     return new_state;
 }
 
-bool was_piece_taken(const SidedPosition original_position, const SidedPosition end_turn_position) {
+bool was_draw_reset(const SidedPosition original_position, const SidedPosition new_position) {
 
-    return (original_position.is_white ? (count_bits64(opponent_pieces(original_position)) == count_bits64(opponent_pieces(end_turn_position)))
-                                       : (count_bits64(own_pieces(original_position)) == count_bits64(own_pieces(end_turn_position))));
+    return original_position.own_pawns      != new_position.own_pawns || // check if any pawn change has occured
+           original_position.opponent_pawns != new_position.opponent_pawns || // any pawn move or capture is a garanteed reset
+           // check for any captures, potential optimization to only check one side
+           count_bits64(original_position.own_knights)      == count_bits64(new_position.own_knights) ||
+           count_bits64(original_position.opponent_knights) == count_bits64(new_position.opponent_knights) ||
+           count_bits64(original_position.own_bishops)      == count_bits64(new_position.own_bishops) ||
+           count_bits64(original_position.opponent_bishops) == count_bits64(new_position.opponent_bishops) ||
+           count_bits64(original_position.own_rooks)        == count_bits64(new_position.own_rooks) ||
+           count_bits64(original_position.opponent_rooks)   == count_bits64(new_position.opponent_rooks) ||
+           count_bits64(original_position.own_queens)       == count_bits64(new_position.own_queens) ||
+           count_bits64(original_position.opponent_queens)  == count_bits64(new_position.opponent_queens);
+           // king cannot be killed / missing
+}
+
+int find_last_draw_reset(const GameState& current_state) {
+    GameState** state_arr = new GameState*[DRAW_MOVE_LIMIT];
+    GameState* previous_state = current_state.previous_state;
+
+    int min_range = 0; // min range for binary search
+    int max_range = DRAW_MOVE_LIMIT - 1;
+    int next_check; // index of next check
+    int last_initialized = max_range; // lowest index in the array to be filled
+
+    // worst case here is index 0 false cuse the penalty on pointers
+
+    // untill the search area collapses
+    while (min_range <= max_range) {
+        next_check = (min_range + max_range) / 2;
+
+        if (next_check < last_initialized) {
+            // fill the array leading up to the check index
+            for (; last_initialized >= next_check; last_initialized--) {
+                state_arr[DRAW_MOVE_LIMIT - last_initialized - 1] = previous_state;
+                previous_state = previous_state->previous_state;
+            }
+        }
+
+        // adjsut range based on check
+        if (was_draw_reset(state_arr[next_check]->sided_position, current_state.sided_position)) {
+            max_range = next_check;
+        } else {
+            min_range = next_check + 1;
+        }
+    }
+
+    delete[] state_arr;
+
+    return (min_range == max_range ? max_range : -1);
 }
 
 int alphabeta_init(GameState state, int depth) {
