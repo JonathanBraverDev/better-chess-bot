@@ -89,5 +89,8 @@
     <ClInclude Include="Evaluation structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Magic bit boards.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

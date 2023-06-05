@@ -154,6 +154,7 @@
     <ClInclude Include="Attack detection.h" />
     <ClInclude Include="Board operations.h" />
     <ClInclude Include="Evaluation structure.h" />
+    <ClInclude Include="Magic bit boards.h" />
     <ClInclude Include="Position structure.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Board generation.h" />
