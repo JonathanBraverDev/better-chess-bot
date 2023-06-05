@@ -8,6 +8,10 @@
 #include "Position generation.h"
 #include "Preallocation structure.h"
 
+extern unsigned long long cutoffs;
+extern unsigned long long evals;
+extern unsigned long long nodes;
+
 GameState generate_next_state(GameState state, const SidedPosition new_position);
 inline int score_by_player(const bool is_white, int score) { return (is_white ? score : -score);  }
 int find_last_draw_reset(const GameState& current_state);

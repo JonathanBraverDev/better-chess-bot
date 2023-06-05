@@ -25,4 +25,7 @@ int main() {
 
     std::cout << "eval:" << eval << std::endl;
     std::cout << "microseconds:" << (double)microseconds << std::endl;
+    std::cout << "positions evaluated:" << evals << std::endl;
+    std::cout << "parent nodes visited:" << nodes - evals << std::endl;
+    std::cout << "cutoffs performed:" << cutoffs << std::endl;
 }

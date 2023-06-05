@@ -1,9 +1,15 @@
 
 #include "Move search.h"
 
+unsigned long long cutoffs = 0;
+unsigned long long evals = 0;
+unsigned long long nodes = 0;
+
 // returns the next gamestate, also 'flips' the board to the other side
 GameState generate_next_state(GameState state, const SidedPosition new_position) {
 
+    // use move type to determine timer upon capture/promotiom
+    // use captured/promoted piece to keep a running tally of the raw material balance
     GameState new_state;
     int draw_timer;
 
@@ -109,6 +115,7 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
     // end search conditions
     if (depth == 0) {
         eval = material_eval(state.sided_position); // calculate current position // the most basic function is used for now
+        evals++;
     } else if (is_checkmate(state.sided_position)) { // should never get here, checkmates can be found during the winnign move
         eval = score_by_player(state.sided_position.is_white, -WIN_VALUE); // set value as losing for the current player
     } else if (is_draw(state)) {
@@ -123,13 +130,16 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
         // that might reqire considerable proccesing
 
         for (const SidedPosition& sided_position : next_positions) {
+            nodes++;
 
             // Recursively search the resulting position from the perspective of the opposite player, own_best and opponent_best are passed inverted
             eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -opponent_best, -own_best));
-            
-            // If current eval is greater than opponent_best, terminate the branch early, opponent won't allow that branch
-            if (opponent_best < eval)
+
+            // If current eval is "agreed upon" by both players, cut the brunch, nither will accept a differnt score.
+            if (opponent_best == eval) {
+                cutoffs++;
                 break;
+            }
 
             own_best = std::max(own_best, eval); // update own best eval
         }
