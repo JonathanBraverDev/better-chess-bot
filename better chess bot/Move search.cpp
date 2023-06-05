@@ -100,10 +100,7 @@ int alphabeta_init(GameState state, int depth) {
     // make black appear as negative eval, maching convention
     final_eval = score_by_player(state.sided_position.is_white, alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE));
     
-    // free up space
-    for (size_t i = 0; i < depth; i++) {
-        delete[] allocation.valid_positions;
-    }
+    delete[] allocation.valid_positions;
 
     return final_eval;
 }
