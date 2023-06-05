@@ -26,7 +26,7 @@ constexpr int KNIGHT_VALUE = 310; // so the bot dosent want to go rook + pawn fo
 constexpr int BISHOP_VALUE = 320; // slightly over a knight
 constexpr int ROOK_VALUE = 500;
 constexpr int QUEEN_VALUE = 900;
-constexpr int WIN_VALUE = 100000; // aka 'stupidly large number' that you can't achive even with 64 queens
+constexpr int WIN_VALUE = 100000; // aka 'stupidly large number' unachivble even with 64 queens
 constexpr int DRAW_VALUE = 0; // possibly set negative to discourage draws
 
 struct BasicParameters {

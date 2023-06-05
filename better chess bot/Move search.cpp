@@ -96,10 +96,14 @@ int alphabeta_init(GameState state, int depth) {
     allocation.all_positions.reserve(EXPECTED_BRANCHING);
     allocation.single_pieces.reserve(EXPECTED_BRANCHING);
     allocation.single_moves.reserve(EXPECTED_BRANCHING);
-
-    final_eval = alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE);
-
-    delete[] allocation.valid_positions;
+    
+    // make black appear as negative eval, maching convention
+    final_eval = score_by_player(state.sided_position.is_white, alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE));
+    
+    // free up space
+    for (size_t i = 0; i < depth; i++) {
+        delete[] allocation.valid_positions;
+    }
 
     return final_eval;
 }
@@ -117,7 +121,7 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
         eval = material_eval(state.sided_position); // calculate current position // the most basic function is used for now
         evals++;
     } else if (is_checkmate(state.sided_position)) { // should never get here, checkmates can be found during the winnign move
-        eval = score_by_player(state.sided_position.is_white, -WIN_VALUE); // set value as losing for the current player
+        eval = -WIN_VALUE; // set value as losing for the current player
     } else if (is_draw(state)) {
         eval = DRAW_VALUE;
     } else { // continue search
