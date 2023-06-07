@@ -6,6 +6,7 @@
 #include "Evaluation.h"
 #include "Board generation.h"
 #include "Move search.h"
+#include "Magic bit boards.h"
 
 int main() {
 

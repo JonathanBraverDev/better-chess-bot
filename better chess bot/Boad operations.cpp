@@ -90,6 +90,19 @@ B64 slide(B64(*const direction)(B64), const B64 blockers, B64 piece) {
     return moves;
 }
 
+B64 safe_slide(B64(* const direction)(B64), const B64 blockers, B64 piece) {
+    B64 moves = 0;
+
+    piece = direction(piece); // move the piece away from the origin
+
+    while (piece && !(piece & blockers)) {
+        moves |= piece; // adding the move to the move board
+        piece = direction(piece);
+    }
+
+    return moves;
+}
+
 // return direcion function between 2 boards along a sliding piece move
 B64(*get_direction(const B64 start, const B64 end))(B64) {
 

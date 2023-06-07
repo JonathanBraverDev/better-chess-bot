@@ -142,6 +142,7 @@
     <ClCompile Include="Attack detection.cpp" />
     <ClCompile Include="better chess bot.cpp" />
     <ClCompile Include="Boad operations.cpp" />
+    <ClCompile Include="Magic bit boards.cpp" />
     <ClCompile Include="Move structure.cpp" />
     <ClCompile Include="Position structure.cpp" />
     <ClCompile Include="Evaluation.cpp" />
