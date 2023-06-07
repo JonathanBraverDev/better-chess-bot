@@ -7,12 +7,14 @@
 #include "Attack detection.h"
 #include "Preallocation structure.h"
 
+void visualize_position(const SidedPosition position);
+
 bool is_castle_legal(const SidedPosition sided_position, const B64 king_start, const B64 king_end);
 
 // all different position type generation
 void possible_piece_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64) = nullptr, const B64* move_source = nullptr, const int index_scale = 1, const int first_index = 0);
 void possible_pawn_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 free_tiles, const B64 opponent_pieces);
-void possible_capture_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces);
+void possible_capture_positions(SearchPreallocation& allocation, SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces);
 void possible_pawn_promotions(std::vector<SidedPosition>& positions, SidedPosition sided_position);
 void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition sided_position);
 

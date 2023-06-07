@@ -1,6 +1,45 @@
 
 #include "Position generation.h"
 
+// prints a human readable version of the position, is A1 being 1(2^0) and H8 a lot (2^64)
+void visualize_position(const SidedPosition position) {
+	for (int i = 7; i >= 0; i--) { // it's VERY stupid but it works...
+		for (int j = 0; j <= 7; j++) {
+			if (get_bit(position.own_pawns, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "P " : "p ");
+			} else if (get_bit(position.opponent_pawns, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "p " : "P ");
+			} else if (get_bit(position.own_knights, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "H " : "h ");
+			} else if (get_bit(position.opponent_knights, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "h " : "H ");
+			} else if (get_bit(position.own_bishops, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "B " : "b ");
+			} else if (get_bit(position.opponent_bishops, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "b " : "B ");
+			} else if (get_bit(position.own_rooks, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "R " : "r ");
+			} else if (get_bit(position.opponent_rooks, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "r " : "R ");
+			} else if (get_bit(position.own_queens, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "Q " : "q ");
+			} else if (get_bit(position.opponent_queens, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "q " : "Q ");
+			} else if (get_bit(position.own_king, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "K " : "k ");
+			} else if (get_bit(position.opponent_king, i * BOARD_SIZE + j)) {
+				std::cout << (position.is_white ? "k " : "K ");
+			} else {
+				std::cout << "_ ";
+			}
+		}
+
+		std::cout << '\n';
+	}
+
+	std::cout << '\n';
+}
+
 void possible_piece_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
 	
 	// clear out preallocated memory before use
@@ -126,7 +165,7 @@ void possible_pawn_positions(SearchPreallocation& allocation, const SidedPositio
 	}
 }
 
-void possible_capture_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
+void possible_capture_positions(SearchPreallocation& allocation, SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;
@@ -135,21 +174,20 @@ void possible_capture_positions(SearchPreallocation& allocation, const SidedPosi
 
 	SidedPosition base_position = sided_position;
 	base_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant for all moves
-	SidedPosition new_position;
 
 	seperate_bits(potential_moves, single_moves); // seperate the generated moves
 
 	for (const B64& move : single_moves) {
-		new_position = base_position;
+		sided_position = base_position; // reset the position to the original
 		current_pieces ^= move; // add the current piece to its destination
 		// delete any enemy piece in the destination
-		clear_bits(new_position.opponent_pawns, move);
-		clear_bits(new_position.opponent_knights, move);
-		clear_bits(new_position.opponent_bishops, move);
-		clear_bits(new_position.opponent_rooks, move);
-		clear_bits(new_position.opponent_queens, move);
+		clear_bits(sided_position.opponent_pawns, move);
+		clear_bits(sided_position.opponent_knights, move);
+		clear_bits(sided_position.opponent_bishops, move);
+		clear_bits(sided_position.opponent_rooks, move);
+		clear_bits(sided_position.opponent_queens, move);
 
-		positions.push_back(new_position);
+		positions.push_back(sided_position);
 	}
 }
 

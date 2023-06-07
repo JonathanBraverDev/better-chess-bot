@@ -81,24 +81,58 @@ int find_last_draw_reset(const GameState& current_state) {
     return (min_range == max_range ? max_range : -1);
 }
 
-int alphabeta_init(GameState state, int depth) {
+// run the first search, recordign the moves 
+PositionScore alphabeta_init(GameState state, int depth) {
     SearchPreallocation allocation;
-    int final_eval;
+    int opponent_eval;
+    PositionScore final_eval;
     // create the valid move array
     allocation.valid_positions = new std::vector<SidedPosition>[depth];
+    std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
 
-    // reserve space in the dynamic array
-    for (size_t i = 0; i < depth; i++) {
-        allocation.valid_positions[i].reserve(EXPECTED_BRANCHING);
+    // end search conditions
+    if (depth == 0) {
+        final_eval.current_score = material_eval(state.sided_position); // calculate current position // the most basic function is used for now
+        final_eval.next_position = state.sided_position;
+        evals++;
+    } else if (is_checkmate(state.sided_position)) { // should never get here, checkmates can be found during the winnign move
+        final_eval.current_score = -WIN_VALUE; // set value as losing for the current player
+        final_eval.next_position = state.sided_position;
+    } else if (is_draw(state)) {
+        final_eval.current_score = DRAW_VALUE;
+        final_eval.next_position = state.sided_position;
+    } else { // continue search
+
+        // reserve space in the dynamic array
+        for (size_t i = 0; i < depth; i++) {
+            allocation.valid_positions[i].reserve(EXPECTED_BRANCHING);
+        }
+
+        // reserve space for the simple vectors, if they end up growing the'll keep their size
+        allocation.all_positions.reserve(EXPECTED_BRANCHING);
+        allocation.single_pieces.reserve(EXPECTED_BRANCHING);
+        allocation.single_moves.reserve(EXPECTED_BRANCHING);
+
+        final_eval.current_score = 2 * WIN_VALUE;
+
+        valid_positions(allocation, depth, state);
+        // move ordering goes here, better first = more pruning
+        // perhaps i can use the "Move" structure to prefer captures, especially with pawns
+        // that might reqire considerable proccesing
+
+        for (const SidedPosition& sided_position : next_positions) {
+            nodes++;
+
+            // initialize the call with both playes having the worse possivbe score as their best
+            opponent_eval = -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -2 * WIN_VALUE, 2 * WIN_VALUE);
+
+            // If current eval is less favorable to the oppenent, use it.
+            if (opponent_eval < final_eval.current_score) {
+                final_eval.current_score = opponent_eval;
+                final_eval.next_position = sided_position;
+            }
+        }
     }
-
-    // reserve space for the simple vectors, if they end up growing the'll keep their size
-    allocation.all_positions.reserve(EXPECTED_BRANCHING);
-    allocation.single_pieces.reserve(EXPECTED_BRANCHING);
-    allocation.single_moves.reserve(EXPECTED_BRANCHING);
-    
-    // make black appear as negative eval, maching convention
-    final_eval = score_by_player(state.sided_position.is_white, alphabeta(allocation, state, depth, -2 * WIN_VALUE, 2 * WIN_VALUE));
     
     delete[] allocation.valid_positions;
 
