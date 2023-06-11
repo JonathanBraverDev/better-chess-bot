@@ -467,20 +467,19 @@ void possible_evade_positions(SearchPreallocation& allocation, const SidedPositi
 	}
 }
 
-void valid_positions(SearchPreallocation& allocation, const int current_depth, const GameState state) {
+void valid_positions(SearchPreallocation& allocation, std::vector<SidedPosition>& valid_positions, const SidedPosition sided_position) {
 
 	// use preallocated memory, clear out position vectors
-	std::vector<SidedPosition>& valid_positions = allocation.valid_positions[current_depth - 1];
 	std::vector<SidedPosition>& positions = allocation.all_positions;
 	valid_positions.clear();
 	positions.clear();
 
-	(is_check(state) ? possible_evade_positions(allocation, state.sided_position)
-					 : all_possible_positions(allocation, state.sided_position));
+	(is_check(sided_position) ? possible_evade_positions(allocation, sided_position)
+							  : all_possible_positions(allocation, sided_position));
 
-	for (const SidedPosition& Sided_position : positions) {
-		if (!is_check(Sided_position)) {
-			valid_positions.push_back(Sided_position);
+	for (const SidedPosition& Possible_position : positions) {
+		if (!is_check(Possible_position)) {
+			valid_positions.push_back(Possible_position);
 		}
 	}
 }

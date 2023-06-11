@@ -26,7 +26,7 @@ void moves_to_tiles(SearchPreallocation& allocation, const SidedPosition sided_p
 // final validation of generated boards
 void all_possible_positions(SearchPreallocation& allocation, const SidedPosition sided_position);
 void possible_evade_positions(SearchPreallocation& allocation, const SidedPosition sided_position);
-void valid_positions(SearchPreallocation& allocation, const int current_depth, const GameState state);
+void valid_positions(SearchPreallocation& allocation, std::vector<SidedPosition>& valid_positions, const SidedPosition sided_position);
 
 inline void all_possible_positions(SearchPreallocation& allocation, const GameState state) { all_possible_positions(allocation, state.sided_position); };
 inline void possible_evade_positions(SearchPreallocation& allocation, const GameState state) { possible_evade_positions(allocation, state.sided_position); };

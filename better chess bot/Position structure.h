@@ -3,6 +3,7 @@
 #include <vcruntime_string.h>
 
 #include "Board structure.h"
+#include "Board operations.h"
 #include "Piece structure.h"
 
 // the position thorough the eyes of the player who's turn it is

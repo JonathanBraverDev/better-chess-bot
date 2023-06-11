@@ -9,8 +9,9 @@ void switch_sides(SidedPosition& sided_position) {
     swap(sided_position.own_rooks, sided_position.opponent_rooks);
     swap(sided_position.own_queens, sided_position.opponent_queens);
     swap(sided_position.own_king, sided_position.opponent_king);
+    sided_position.special_move_rigths = rotate180(sided_position.special_move_rigths);
 
-    // Invert is_white
+    // Invert player
     sided_position.is_white = !sided_position.is_white;
 }
 

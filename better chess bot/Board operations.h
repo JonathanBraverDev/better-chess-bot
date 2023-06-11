@@ -10,6 +10,8 @@
 //				   all bitshifts are flipped
 void visualize_board(const B64 board);
 
+B64 rotate180(B64 board);
+
 // general bit manipulation
 inline void set_bit(B64& board, int bit) {  (board |= (1ULL << bit)); } // shift 1 to position and set to OR
 inline bool get_bit(const B64 board, int bit) { return (board & (1ULL << bit)); } // shift 1 to position and use AND as a boolean check on the bit

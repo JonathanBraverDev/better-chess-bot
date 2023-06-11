@@ -115,7 +115,7 @@ PositionScore alphabeta_init(GameState state, int depth) {
 
         final_eval.current_score = 2 * WIN_VALUE;
 
-        valid_positions(allocation, depth, state);
+        valid_positions(allocation, allocation.valid_positions[depth - 1], state.sided_position);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
@@ -135,7 +135,8 @@ PositionScore alphabeta_init(GameState state, int depth) {
     }
     
     delete[] allocation.valid_positions;
-
+    
+    switch_sides(final_eval.next_position); // correct the board to the next player
     return final_eval;
 }
 
@@ -149,6 +150,8 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
 
     // end search conditions
     if (depth == 0) {
+        visualize_position(state.sided_position);
+        _sleep(500);
         eval = material_eval(state.sided_position); // calculate current position // the most basic function is used for now
         evals++;
     } else if (is_checkmate(state.sided_position)) { // should never get here, checkmates can be found during the winnign move
@@ -159,7 +162,7 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
 
         eval = own_best; // initially set to the WORST possible score for the current player
 
-        valid_positions(allocation, depth, state);
+        valid_positions(allocation, allocation.valid_positions[depth - 1], state.sided_position);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing

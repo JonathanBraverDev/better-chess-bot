@@ -105,3 +105,18 @@ void prepare_pawn_moves() {
 	prepare_white_pawn_moves();
 	prepare_black_pawn_moves();
 }
+
+B64 rotate180(B64 board) {
+	const B64 h1 = 0x5555555555555555;
+	const B64 h2 = 0x3333333333333333;
+	const B64 h4 = 0x0F0F0F0F0F0F0F0F;
+	const B64 v1 = 0x00FF00FF00FF00FF;
+	const B64 v2 = 0x0000FFFF0000FFFF;
+	board = ((board >> 1) & h1) | ((board & h1) << 1);
+	board = ((board >> 2) & h2) | ((board & h2) << 2);
+	board = ((board >> 4) & h4) | ((board & h4) << 4);
+	board = ((board >> 8) & v1) | ((board & v1) << 8);
+	board = ((board >> 16) & v2) | ((board & v2) << 16);
+	board = (board >> 32) | (board << 32);
+	return board;
+}

@@ -17,24 +17,26 @@ int main() {
     PositionScore position_score;
     GameState game = INITIAL_GAMESTATE;
 
-    while (game.turn <= 100) {
-        auto start = std::chrono::high_resolution_clock::now();
+    position_score = alphabeta_init(game, 5);
 
-        position_score = alphabeta_init(game, 5);
+    //while (game.turn <= 100) {
+    //    auto start = std::chrono::high_resolution_clock::now();
 
-        auto end = std::chrono::high_resolution_clock::now();
-        auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    //    position_score = alphabeta_init(game, 5);
 
-        std::cout << "eval:" << position_score.current_score << std::endl;
-        std::cout << "microseconds:" << (double)microseconds << std::endl;
-        std::cout << "positions evaluated:" << evals << std::endl;
-        std::cout << "parent nodes visited:" << nodes - evals << std::endl;
-        std::cout << "cutoffs performed:" << cutoffs << std::endl;
+    //    auto end = std::chrono::high_resolution_clock::now();
+    //    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        visualize_position(position_score.next_position);
-        game.turn++;
-        game.sided_position = position_score.next_position;
-    }
+    //    std::cout << "eval:" << position_score.current_score << std::endl;
+    //    std::cout << "microseconds:" << (double)microseconds << std::endl;
+    //    std::cout << "positions evaluated:" << evals << std::endl;
+    //    std::cout << "parent nodes visited:" << nodes - evals << std::endl;
+    //    std::cout << "cutoffs performed:" << cutoffs << std::endl;
+
+    //    visualize_position(position_score.next_position);
+    //    game.turn++;
+    //    game.sided_position = position_score.next_position;
+    //}
 
 
 
