@@ -7,7 +7,7 @@
 #include "Attack detection.h"
 #include "Preallocation structure.h"
 
-void visualize_position(const SidedPosition position);
+void visualize_position(const SidedPosition position, const bool sided = false);
 
 bool is_castle_legal(const SidedPosition sided_position, const B64 king_start, const B64 king_end);
 

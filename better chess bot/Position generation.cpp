@@ -2,33 +2,33 @@
 #include "Position generation.h"
 
 // prints a human readable version of the position, is A1 being 1(2^0) and H8 a lot (2^64)
-void visualize_position(const SidedPosition position) {
+void visualize_position(const SidedPosition position, const bool sided) {
 	for (int i = 7; i >= 0; i--) { // it's VERY stupid but it works...
 		for (int j = 0; j <= 7; j++) {
 			if (get_bit(position.own_pawns, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "P " : "p ");
+				std::cout << (position.is_white || sided ? "P " : "p ");
 			} else if (get_bit(position.opponent_pawns, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "p " : "P ");
+				std::cout << (position.is_white || sided ? "p " : "P ");
 			} else if (get_bit(position.own_knights, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "H " : "h ");
+				std::cout << (position.is_white || sided ? "H " : "h ");
 			} else if (get_bit(position.opponent_knights, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "h " : "H ");
+				std::cout << (position.is_white || sided ? "h " : "H ");
 			} else if (get_bit(position.own_bishops, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "B " : "b ");
+				std::cout << (position.is_white || sided ? "B " : "b ");
 			} else if (get_bit(position.opponent_bishops, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "b " : "B ");
+				std::cout << (position.is_white || sided ? "b " : "B ");
 			} else if (get_bit(position.own_rooks, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "R " : "r ");
+				std::cout << (position.is_white || sided ? "R " : "r ");
 			} else if (get_bit(position.opponent_rooks, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "r " : "R ");
+				std::cout << (position.is_white || sided ? "r " : "R ");
 			} else if (get_bit(position.own_queens, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "Q " : "q ");
+				std::cout << (position.is_white || sided ? "Q " : "q ");
 			} else if (get_bit(position.opponent_queens, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "q " : "Q ");
+				std::cout << (position.is_white || sided ? "q " : "Q ");
 			} else if (get_bit(position.own_king, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "K " : "k ");
+				std::cout << (position.is_white || sided ? "K " : "k ");
 			} else if (get_bit(position.opponent_king, i * BOARD_SIZE + j)) {
-				std::cout << (position.is_white ? "k " : "K ");
+				std::cout << (position.is_white || sided ? "k " : "K ");
 			} else {
 				std::cout << "_ ";
 			}

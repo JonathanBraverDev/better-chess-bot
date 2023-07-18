@@ -17,7 +17,10 @@ int main() {
     PositionScore position_score;
     GameState game = INITIAL_GAMESTATE;
 
-    position_score = alphabeta_init(game, 5);
+    //position_score = alphabeta_init(game, 5);
+
+    visualize_position(game.sided_position, true);
+    visualize_position(generate_next_state(game, INITIAL_POSITION).sided_position, true);
 
     //while (game.turn <= 100) {
     //    auto start = std::chrono::high_resolution_clock::now();

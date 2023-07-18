@@ -10,7 +10,7 @@ GameState generate_next_state(GameState state, const SidedPosition new_position)
 
     // use move type to determine timer upon capture/promotiom
     // use captured/promoted piece to keep a running tally of the raw material balance
-    GameState new_state;
+    GameState new_state{};
     int draw_timer;
 
     new_state.turn = state.turn + 1;
@@ -142,14 +142,15 @@ PositionScore alphabeta_init(GameState state, int depth) {
 
 int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int own_best, int opponent_best) {
 
-    // use prealocated vectors, clears happen to relevent vectors in the function that needs them
-    std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
-    // note that at depth 0, the pointer is INVALID
+    std::cout << "depth " << depth << ", entering with:" << std::endl;
+    visualize_position(state.sided_position);
+    _sleep(500);
 
     int eval;
 
     // end search conditions
     if (depth == 0) {
+        std::cout << "evaluating:" << std::endl;
         visualize_position(state.sided_position);
         _sleep(500);
         eval = material_eval(state.sided_position); // calculate current position // the most basic function is used for now
@@ -160,6 +161,10 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
         eval = DRAW_VALUE;
     } else { // continue search
 
+        // use prealocated vectors, clears happen to relevent vectors in the function that needs them
+        std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
+        // note that at depth 0, the pointer is INVALID
+
         eval = own_best; // initially set to the WORST possible score for the current player
 
         valid_positions(allocation, allocation.valid_positions[depth - 1], state.sided_position);
@@ -169,6 +174,10 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
 
         for (const SidedPosition& sided_position : next_positions) {
             nodes++;
+
+            std::cout << "depth " << depth << ", change player:" << std::endl;
+            visualize_position(sided_position);
+            _sleep(500);
 
             // Recursively search the resulting position from the perspective of the opposite player, own_best and opponent_best are passed inverted
             eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -opponent_best, -own_best));
