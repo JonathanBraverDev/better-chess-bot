@@ -4,26 +4,11 @@
 #include "Position structure.h"
 #include "Piece structure.h"
 
-enum MoveType {
+enum MoveType { // can it be improved? i need 2 checks to figure out the castle type and if any
     NORMAL = 0,
     CASTLE_LONG,
     CASTLE_SHORT,
     GOOD_GENERIC,
-    CHECK = 4,
-    CHECK_CASTLE_LONG,
-    CHECK_CASTLE_SHORT,
-    CAPTURE = 8,
-    CAPTURE_GOOD_GENERIC = 11,
-    CAPTURE_CHECK,
-    CAPTURE_CHECK_GOOD_GENERIC = 15,
-    PROMOTION = 16,
-    PROMOTION_GOOD_GENERIC = 19,
-    PROMOTION_CHECK,
-    PROMOTION_CHECK_GOOD_GENERIC = 23,
-    PROMOTION_CAPTURE,
-    PROMOTION_CAPTURE_GOOD_GENERIC = 27,
-    PROMOTION_CAPTURE_CHECK,
-    PROMOTION_CAPTURE_CHECK_GOOD_GENERIC = 31,
 };
 
 
@@ -51,21 +36,22 @@ struct Move {
 // BitMove encoding:
 // 6 bit origin index - must
 // 6 bit destination index - must
-// 1 bit mover color - logic help 
+// 1 bit mover color - logic help (redundant with position indicator?)
 // 3 bit moving/promoted type - must, logic help. when promote flag is on look as promotion
 // 3 bit captured type - logic help
-// potential for cutting, but no idea what to do with so many bits sooo they stay
-// 2 bit own castle rights L/R - reversability
-// 1 bit valid en passant - reversability, logic help
-// 3 bit en passant index - reversability, logic help
+// total 19 bit move
 // 
-// total 25 bit move, leaving 7 for order hints 
+// note that everything but the special move right is 100% reversibe as is
+// 
+// Move type / order hints
 // 1 bit promotion flag
 // 1 bit check flag
 // 1 bit capture flag
-// 2 bit UNASSIGNED SPACE - no idea what to put here
 // 2 bit misc move types (normal, both castles, generic good move
-// this is NOT the minimal possiblbe but a generic form for all possible function i might need
+// total 5 order bits
+// 
+// 8 bits left unused for now
+// why undo if i can save the original and just reset every time?
 
 // draw reset can be interptered from any pawn moves or any capture
 
@@ -75,30 +61,24 @@ inline Move invert_move(Move move) {
     return move; 
 }
 
-Move expand_move(const SidedPosition& sided_position, const BitMove bitmove);
-
 constexpr int ORIGIN_INDEX_LENGTH = 6;
 constexpr int DESTINATION_INDEX_LENGTH = 6;
 constexpr int MOVING_COLOR_LENGTH = 1;
 constexpr int MOVING_TYPE_LENGTH = 3;
 constexpr int CAPTURED_TYPE_LENGTH = 3;
-constexpr int OWN_CASTLE_RIGHTS_LENGTH = 2;
-constexpr int EN_PASSANT_VALID_LENGTH = 1;
-constexpr int EN_PASSANT_INDEX_LENGTH = 3;
-constexpr int MOVE_TYPE_LENGTH = 7;
+constexpr int UNUSED_SPACE_LENGTH = 8;
+constexpr int MOVE_TYPE_LENGTH = 5;
 // sanity check
-constexpr int TOTAL_LENGTH = ORIGIN_INDEX_LENGTH + DESTINATION_INDEX_LENGTH + MOVING_COLOR_LENGTH + MOVING_TYPE_LENGTH + CAPTURED_TYPE_LENGTH +
-                             OWN_CASTLE_RIGHTS_LENGTH + EN_PASSANT_VALID_LENGTH + EN_PASSANT_INDEX_LENGTH + MOVE_TYPE_LENGTH;
+constexpr int TOTAL_LENGTH = ORIGIN_INDEX_LENGTH + DESTINATION_INDEX_LENGTH + MOVING_COLOR_LENGTH + MOVING_TYPE_LENGTH +
+                             CAPTURED_TYPE_LENGTH + UNUSED_SPACE_LENGTH + MOVE_TYPE_LENGTH;
 
 constexpr int ORIGIN_INDEX_OFFSET = 0;
 constexpr int DESTINATION_INDEX_OFFSET = ORIGIN_INDEX_OFFSET + ORIGIN_INDEX_LENGTH;
 constexpr int MOVING_COLOR_OFFSET = DESTINATION_INDEX_OFFSET + DESTINATION_INDEX_LENGTH;
 constexpr int MOVING_TYPE_OFFSET = MOVING_COLOR_OFFSET + MOVING_COLOR_LENGTH;
 constexpr int CAPTURED_TYPE_OFFSET = MOVING_TYPE_OFFSET + MOVING_TYPE_LENGTH;
-constexpr int OWN_CASTLE_RIGHTS_OFFSET = CAPTURED_TYPE_OFFSET + CAPTURED_TYPE_LENGTH;
-constexpr int EN_PASSANT_VALID_OFFSET = OWN_CASTLE_RIGHTS_OFFSET + OWN_CASTLE_RIGHTS_LENGTH;
-constexpr int EN_PASSANT_INDEX_OFFSET = EN_PASSANT_VALID_OFFSET + EN_PASSANT_VALID_LENGTH;
-constexpr int MOVE_TYPE_OFFSET = EN_PASSANT_INDEX_OFFSET + EN_PASSANT_INDEX_LENGTH;
+constexpr int UNUSED_SPACE_OFFSET = CAPTURED_TYPE_OFFSET + CAPTURED_TYPE_LENGTH;
+constexpr int MOVE_TYPE_OFFSET = UNUSED_SPACE_OFFSET + UNUSED_SPACE_LENGTH;
 // sanity check
 constexpr int TOTAL_OFFSET = MOVE_TYPE_OFFSET + MOVE_TYPE_LENGTH;
 
@@ -107,19 +87,34 @@ constexpr BitMove DESTINATION_INDEX_MASK = 0b111111 << DESTINATION_INDEX_OFFSET;
 constexpr BitMove MOVING_COLOR_MASK = 0b1 << MOVING_COLOR_OFFSET;
 constexpr BitMove MOVING_TYPE_MASK = 0b111 << MOVING_TYPE_OFFSET;
 constexpr BitMove CAPTURED_TYPE_MASK = 0b111 << CAPTURED_TYPE_OFFSET;
-constexpr BitMove OWN_CASTLE_RIGHTS_MASK = 0b11 << OWN_CASTLE_RIGHTS_OFFSET;
-constexpr BitMove EN_PASSANT_VALID_MASK = 0b1 << EN_PASSANT_VALID_OFFSET;
-constexpr BitMove EN_PASSANT_INDEX_MASK = 0b111 << EN_PASSANT_INDEX_OFFSET;
-constexpr BitMove MOVE_TYPE_MASK = 0b1111111 << MOVE_TYPE_OFFSET;
+constexpr BitMove UNUSED_SPACE_MASK = 0b11111111 << CAPTURED_TYPE_OFFSET;
+constexpr BitMove MOVE_TYPE_MASK = 0b11111 << MOVE_TYPE_OFFSET;
 // sanity check
-constexpr BitMove TOTAL_MASK = ORIGIN_INDEX_MASK | DESTINATION_INDEX_MASK | MOVING_COLOR_MASK | MOVING_TYPE_MASK | CAPTURED_TYPE_MASK |
-                  OWN_CASTLE_RIGHTS_MASK | EN_PASSANT_VALID_MASK | EN_PASSANT_INDEX_MASK | MOVE_TYPE_MASK;
+constexpr BitMove TOTAL_MASK = ORIGIN_INDEX_MASK | DESTINATION_INDEX_MASK | MOVING_COLOR_MASK |
+                  MOVING_TYPE_MASK | CAPTURED_TYPE_MASK | UNUSED_SPACE_MASK | MOVE_TYPE_MASK;
 
-constexpr BitMove MOVE_TYPE_MASK = 0b1111111 << MOVE_TYPE_OFFSET; // no mask needed with BitMove format, compare full int value
-constexpr BitMove IS_PROMOTE_MASK = 0b1000000 << MOVE_TYPE_OFFSET;
-constexpr BitMove IS_CHECK_MASK = 0b0100000 << MOVE_TYPE_OFFSET;
-constexpr BitMove IS_CAPTURE_MASK = 0b0010000 << MOVE_TYPE_OFFSET;
-constexpr BitMove UNUSED_SPACE_MASK = 0b0001100 << MOVE_TYPE_OFFSET;
-constexpr BitMove MISC_MOVE_TYPE_MASK = 0b0000011 << MOVE_TYPE_OFFSET;
+constexpr BitMove IS_PROMOTE_MASK = 0b10000 << MOVE_TYPE_OFFSET;
+constexpr BitMove IS_CHECK_MASK = 0b01000 << MOVE_TYPE_OFFSET;
+constexpr BitMove IS_CAPTURE_MASK = 0b00100 << MOVE_TYPE_OFFSET;
+constexpr BitMove MISC_MOVE_TYPE_MASK = 0b00011 << MOVE_TYPE_OFFSET;
 // sanity check
-constexpr BitMove MOVE_TYPE_MASK_CHECK = IS_PROMOTE_MASK | IS_CHECK_MASK  | IS_CAPTURE_MASK | UNUSED_SPACE_MASK | MISC_MOVE_TYPE_MASK;
+constexpr BitMove MOVE_TYPE_MASK_CHECK = IS_PROMOTE_MASK | IS_CHECK_MASK |
+                  IS_CAPTURE_MASK | MISC_MOVE_TYPE_MASK;
+
+inline BitMove get_origin_index(BitMove move) { return (move & ORIGIN_INDEX_MASK) >> ORIGIN_INDEX_OFFSET; }
+inline BitMove get_destination_index(BitMove move) { return (move & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET; }
+inline BitMove get_moving_color(BitMove move) { return (move & MOVING_COLOR_MASK) >> MOVING_COLOR_OFFSET; }
+inline BitMove get_moving_type(BitMove move) { return (move & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET; }
+inline BitMove get_captured_type(BitMove move) { return (move & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET; }
+inline BitMove get_unused_space(BitMove move) { return (move & UNUSED_SPACE_MASK) >> UNUSED_SPACE_OFFSET; }
+inline BitMove get_move_type(BitMove move) { return (move & MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET; }
+
+inline bool is_promotion(BitMove move) { return (move & IS_PROMOTE_MASK); }
+inline bool is_check(BitMove move) { return (move & IS_CHECK_MASK); }
+inline bool is_capture(BitMove move) { return (move & IS_CAPTURE_MASK); }
+inline BitMove get_misc_move_type(BitMove move) { return (move & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET; }
+
+// kinda hacky but cool
+inline bool is_castle(BitMove move) { return (move & (move - 1)); }
+inline B64 origin_board(BitMove move) { return bit_board_from_index(get_origin_index(move)); }
+inline B64 destination_board(BitMove move) { return bit_board_from_index(get_destination_index(move)); }

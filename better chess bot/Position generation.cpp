@@ -70,7 +70,7 @@ void possible_piece_positions(SearchPreallocation& allocation, const SidedPositi
 
 		// add the mvoes if any exist, removing the opponent's piece
 		if (potential_moves) {
-			possible_capture_positions(allocation, new_position, potential_moves, piece, current_pieces);
+			possible_capture_positions(allocation, new_position, potential_moves, current_pieces);
 		}
 	}
 }
@@ -165,7 +165,7 @@ void possible_pawn_positions(SearchPreallocation& allocation, const SidedPositio
 	}
 }
 
-void possible_capture_positions(SearchPreallocation& allocation, SidedPosition& sided_position, B64 potential_moves, const B64 piece, B64& current_pieces) {
+void possible_capture_positions(SearchPreallocation& allocation, SidedPosition& sided_position, B64 potential_moves, B64& current_pieces) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<SidedPosition>& positions = allocation.all_positions;

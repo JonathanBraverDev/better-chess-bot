@@ -42,7 +42,7 @@
     <ClCompile Include="Position structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Move structure.cpp">
+    <ClCompile Include="Magic bit boards.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

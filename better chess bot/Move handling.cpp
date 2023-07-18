@@ -3,99 +3,105 @@
 #include "Game constants.h"
 
 // makes a given move, does not check its validity
-SidedPosition Make_move(SidedPosition& sided_position, BitMove bitmove) {
+SidedPosition make_move(SidedPosition& sided_position, BitMove bitmove) {
+	// quite a lot of conversion are happening repeatedly to the board etc
 
-	Move move = expand_move(sided_position, bitmove);
-
-	if (Is_castle(bitmove)) {
-		Toggle_castle(sided_position, move);
-	} else {
-		Move_piece(sided_position, move);
-
-		if (Is_capture(bitmove)) {
-			Toggle_captured(sided_position, move);
+	if (is_castle(bitmove)) {
+		toggle_castle(sided_position, bitmove);
+	} else { 
+		if (is_capture(bitmove)) {
+			toggle_captured(sided_position, bitmove);
 		}
 
-		if (Is_promotion(bitmove)) {
-			Toggle_promotion(sided_position, move);
+		if (is_promotion(bitmove)) {
+			toggle_promotion(sided_position, bitmove);
+		} else {
+			toggle_move(sided_position, bitmove);
 		}
 	}
 
-	set_special_move_rights(sided_position, move);
+	//set_special_move_rights(sided_position, move);
 
 	return sided_position;
 }
 
-void Toggle_castle(SidedPosition& sided_position, const Move& move) {
+void toggle_castle(SidedPosition& sided_position, const BitMove move) {
 
-	const B64 king_dest = (sided_position.is_white ? (move.type == CASTLE_SHORT ? WHITE_KING_SHORT_CASTLE : WHITE_KING_LONG_CASTLE)
-												   : (move.type == CASTLE_SHORT ? BLACK_KING_SHORT_CASTLE : BLACK_KING_LONG_CASTLE));
-	const B64 rook_dest = (sided_position.is_white ? (move.type == CASTLE_SHORT ? WHITE_ROOK_SHORT_CASTLE : WHITE_ROOK_LONG_CASTLE)
-								   				   : (move.type == CASTLE_SHORT ? BLACK_ROOK_SHORT_CASTLE : BLACK_ROOK_LONG_CASTLE));
+	B64 king_dest, rook_dest;
+
+	bool is_short_castle = (get_misc_move_type(move) == CASTLE_SHORT);
+
+	if (sided_position.is_white) {
+		king_dest = (is_short_castle ? WHITE_KING_SHORT_CASTLE : WHITE_KING_LONG_CASTLE);
+		rook_dest = (is_short_castle ? WHITE_ROOK_SHORT_CASTLE : WHITE_ROOK_LONG_CASTLE);
+	} else {
+		king_dest = (is_short_castle ? BLACK_KING_SHORT_CASTLE : BLACK_KING_LONG_CASTLE);
+		rook_dest = (is_short_castle ? BLACK_ROOK_SHORT_CASTLE : BLACK_ROOK_LONG_CASTLE);
+	}
 
 	// toggle origins and destinations
-	sided_position.own_king ^= (move.origin | king_dest);
-	sided_position.own_rooks ^= (move.destination | rook_dest); // rook is saved in destination, as both land on predefined tiles
+	sided_position.own_king ^= (origin_board(move) | king_dest);
+	sided_position.own_rooks ^= (destination_board(move) | rook_dest); // rook is saved in destination, as both land on predefined tiles
 }
 
-void Move_piece(SidedPosition& sided_position, const Move& move) {
+void toggle_move(SidedPosition& sided_position, const BitMove move) {
 
-	B64& moved_pieces = *own_piece_board_ref(sided_position, move.piece.type);
+	B64& moved_pieces = *own_piece_board_ref(sided_position, (PieceType)get_moving_type(move));
 
-	moved_pieces ^= (move.origin | move.destination);
+	moved_pieces ^= (origin_board(move) | destination_board(move));
 }
 
-void Toggle_captured(SidedPosition& sided_position, const Move& move) {
+void toggle_captured(SidedPosition& sided_position, const BitMove move) {
 
-	switch (move.captured_type) {
+	switch (get_captured_type(move)) {
 	case PAWN:
-		sided_position.opponent_pawns ^= move.destination;
+		sided_position.opponent_pawns ^= destination_board(move);
 		break;
 
 	case KNIGHT:
-		sided_position.opponent_knights ^= move.destination;
+		sided_position.opponent_knights ^= destination_board(move);
 		break;
 
 	case BISHOP:
-		sided_position.opponent_bishops ^= move.destination;
+		sided_position.opponent_bishops ^= destination_board(move);
 		break;
 
 	case ROOK:
-		sided_position.opponent_rooks ^= move.destination;
+		sided_position.opponent_rooks ^= destination_board(move);
 		break;
 
 	case QUEEN:
-		sided_position.opponent_queens ^= move.destination;
+		sided_position.opponent_queens ^= destination_board(move);
 		break;
 	}
 }
 
-void Toggle_promotion(SidedPosition& sided_position, const Move& move) {
+void toggle_promotion(SidedPosition& sided_position, const BitMove move) {
 
-	// find the promoted pawn and remove it
-	const B64 promoted = sided_position.own_pawns & (sided_position.is_white ? ROW_1 : ROW_8);
-	sided_position.own_pawns ^= promoted;
+	// toggle the pawn
+	sided_position.own_pawns ^= origin_board(move);
 
-	// add the promoted piece in its place
-	switch (move.promoted_type) {
+	// toggle the promoted piece type
+	switch (get_moving_type(move)) {
 	case QUEEN:
-		sided_position.own_queens ^= promoted;
+		sided_position.own_queens ^= destination_board(move);
 		break;
 
 	case ROOK:
-		sided_position.own_rooks ^= promoted;
+		sided_position.own_rooks ^= destination_board(move);
 		break;
 
 	case BISHOP:
-		sided_position.own_bishops ^= promoted;
+		sided_position.own_bishops ^= destination_board(move);
 		break;
 
 	case KNIGHT:
-		sided_position.own_knights ^= promoted;
+		sided_position.own_knights ^= destination_board(move);
 		break;
 	}
 }
 
+// DEPRACATED! this was make impossible to exstract from the move itself
 void set_special_move_rights(SidedPosition& sided_position, const Move& move) {
 	switch (move.piece.type) {
 	case PAWN:
@@ -117,26 +123,24 @@ void set_special_move_rights(SidedPosition& sided_position, const Move& move) {
 }
 
 // returns the board to the position before the move, no validity check
-SidedPosition Undo_move(SidedPosition& sided_position, BitMove bitmove) {
+SidedPosition undo_move(SidedPosition& sided_position, BitMove bitmove) {
 
-	Move move = expand_move(sided_position, bitmove);
-
-	if (Is_castle(bitmove)) {
-		Toggle_castle(sided_position, move);
-	} else {
-		if (Is_promotion(bitmove)) {
-			Toggle_promotion(sided_position, move);
+	if (is_castle(bitmove)) {
+		toggle_castle(sided_position, bitmove);
+	}
+	else {
+		if (is_capture(bitmove)) {
+			toggle_captured(sided_position, bitmove);
 		}
 
-		if (Is_capture(bitmove)) {
-			Toggle_captured(sided_position, move);
+		if (is_promotion(bitmove)) {
+			toggle_promotion(sided_position, bitmove);
 		}
-
-		Move_piece(sided_position, invert_move(move));
+		else {
+			toggle_move(sided_position, bitmove);
+		}
 	}
 
-	// return the special move rights as they were before the move
-	sided_position.special_move_rigths = move.special_move_rigths;
-
+	//set_special_move_rights(sided_position, move);
 	return sided_position;
 }

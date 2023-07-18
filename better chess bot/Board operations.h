@@ -18,7 +18,7 @@ inline bool get_bit(const B64 board, int bit) { return (board & (1ULL << bit)); 
 inline void clear_bit(B64& board, int bit) { (board &= ~(1ULL << bit)); } // shift 1 to position, INVERT and set to AND
 inline void flip_bit(B64& board, int bit) { (board ^= (1ULL << bit)); } // shift 1 to position and set to XOR
 inline B64 lowest_bit_board(B64 board) { return (board & -board); } // AND with 2's compliment to get the lowest bit (very cool)
-inline B64 remove_lowest_bit(B64 board) { return (board & board - 1); } // AND after -1, garantees removal of exactly one lowest bit
+inline B64 remove_lowest_bit(B64 board) { return (board & (board - 1)); } // AND after -1, garantees removal of exactly one lowest bit
 // alternatives that take 2 boards
 inline void set_bits(B64& board, B64 bit_board) { (board |= bit_board); }
 inline B64 copy_bits(B64& board, B64 bit_board) { (board & bit_board); }
