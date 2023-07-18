@@ -103,7 +103,10 @@ constexpr BitMove MOVE_TYPE_MASK_CHECK = IS_PROMOTE_MASK | IS_CHECK_MASK |
 
 inline BitMove get_origin_index(BitMove move) { return (move & ORIGIN_INDEX_MASK) >> ORIGIN_INDEX_OFFSET; }
 inline BitMove get_destination_index(BitMove move) { return (move & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET; }
-inline BitMove get_moving_color(BitMove move) { return (move & MOVING_COLOR_MASK) >> MOVING_COLOR_OFFSET; }
+inline B64 origin_board(BitMove move) { return bit_board_from_index(get_origin_index(move)); }
+inline B64 destination_board(BitMove move) { return bit_board_from_index(get_destination_index(move)); }
+
+inline bool is_moving_white(BitMove move) { return (move & MOVING_COLOR_MASK); }
 inline BitMove get_moving_type(BitMove move) { return (move & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET; }
 inline BitMove get_captured_type(BitMove move) { return (move & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET; }
 inline BitMove get_unused_space(BitMove move) { return (move & UNUSED_SPACE_MASK) >> UNUSED_SPACE_OFFSET; }
@@ -116,5 +119,71 @@ inline BitMove get_misc_move_type(BitMove move) { return (move & MISC_MOVE_TYPE_
 
 // kinda hacky but cool
 inline bool is_castle(BitMove move) { return (move & (move - 1)); }
-inline B64 origin_board(BitMove move) { return bit_board_from_index(get_origin_index(move)); }
-inline B64 destination_board(BitMove move) { return bit_board_from_index(get_destination_index(move)); }
+
+// for all setters, wipe the target data with the invert mask and set the requested value
+inline void set_origin_index(BitMove& move, int origin_index) {
+    move = (move & ~ORIGIN_INDEX_MASK) | (origin_index << ORIGIN_INDEX_OFFSET);
+}
+
+inline void set_destination_index(BitMove& move, int destination_index) {
+    move = (move & ~DESTINATION_INDEX_MASK) | (destination_index << DESTINATION_INDEX_OFFSET);
+}
+
+// possibly redundant info
+inline void set_white(BitMove& move, bool is_white) {
+    if (is_white) {
+        move |= IS_PROMOTE_MASK;
+    }
+    else {
+        move &= ~IS_PROMOTE_MASK;
+    }
+}
+
+inline void set_moving_type(BitMove& move, PieceType moving_type) {
+    move = (move & ~MOVING_TYPE_MASK) | (moving_type << MOVING_TYPE_OFFSET);
+}
+
+inline void set_captured_type(BitMove& move, PieceType captured_type) {
+    move = (move & ~CAPTURED_TYPE_MASK) | (captured_type << CAPTURED_TYPE_OFFSET);
+}
+
+// should NOT be used directly
+inline void set_unused_space(BitMove& move, BitMove unused_space) {
+    move = (move & ~UNUSED_SPACE_MASK) | (unused_space << UNUSED_SPACE_OFFSET);
+}
+
+// should NOT be used directly
+inline void set_move_type(BitMove& move, BitMove move_type) {
+    move = (move & ~MOVE_TYPE_MASK) | (move_type << MOVE_TYPE_OFFSET);
+}
+
+inline void set_promote(BitMove& move, bool is_promote) {
+    if (is_promote) {
+        move |= IS_PROMOTE_MASK;
+    }
+    else {
+        move &= ~IS_PROMOTE_MASK;
+    }
+}
+
+inline void set_check(BitMove& move, bool is_check) {
+    if (is_check) {
+        move |= IS_CHECK_MASK;
+    }
+    else {
+        move &= ~IS_CHECK_MASK;
+    }
+}
+
+inline void set_capture(BitMove& move, bool is_capture) {
+    if (is_capture) {
+        move |= IS_CAPTURE_MASK;
+    }
+    else {
+        move &= ~IS_CAPTURE_MASK;
+    }
+}
+
+inline void set_misc_move_type(BitMove& move, MoveType misc_move_type) {
+    move = (move & ~MISC_MOVE_TYPE_MASK) | (misc_move_type << MOVE_TYPE_OFFSET);
+}
