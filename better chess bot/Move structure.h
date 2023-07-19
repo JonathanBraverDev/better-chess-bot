@@ -63,19 +63,19 @@ inline Move invert_move(Move move) {
 
 constexpr int ORIGIN_INDEX_LENGTH = 6;
 constexpr int DESTINATION_INDEX_LENGTH = 6;
-constexpr int MOVING_COLOR_LENGTH = 1;
+constexpr int IS_WHITE_MOVE_LENGTH = 1;
 constexpr int MOVING_TYPE_LENGTH = 3;
 constexpr int CAPTURED_TYPE_LENGTH = 3;
 constexpr int UNUSED_SPACE_LENGTH = 8;
 constexpr int MOVE_TYPE_LENGTH = 5;
 // sanity check
-constexpr int TOTAL_LENGTH = ORIGIN_INDEX_LENGTH + DESTINATION_INDEX_LENGTH + MOVING_COLOR_LENGTH + MOVING_TYPE_LENGTH +
+constexpr int TOTAL_LENGTH = ORIGIN_INDEX_LENGTH + DESTINATION_INDEX_LENGTH + IS_WHITE_MOVE_LENGTH + MOVING_TYPE_LENGTH +
                              CAPTURED_TYPE_LENGTH + UNUSED_SPACE_LENGTH + MOVE_TYPE_LENGTH;
 
 constexpr int ORIGIN_INDEX_OFFSET = 0;
 constexpr int DESTINATION_INDEX_OFFSET = ORIGIN_INDEX_OFFSET + ORIGIN_INDEX_LENGTH;
-constexpr int MOVING_COLOR_OFFSET = DESTINATION_INDEX_OFFSET + DESTINATION_INDEX_LENGTH;
-constexpr int MOVING_TYPE_OFFSET = MOVING_COLOR_OFFSET + MOVING_COLOR_LENGTH;
+constexpr int IS_WHITE_MOVE_OFFSET = DESTINATION_INDEX_OFFSET + DESTINATION_INDEX_LENGTH;
+constexpr int MOVING_TYPE_OFFSET = IS_WHITE_MOVE_OFFSET + IS_WHITE_MOVE_LENGTH;
 constexpr int CAPTURED_TYPE_OFFSET = MOVING_TYPE_OFFSET + MOVING_TYPE_LENGTH;
 constexpr int UNUSED_SPACE_OFFSET = CAPTURED_TYPE_OFFSET + CAPTURED_TYPE_LENGTH;
 constexpr int MOVE_TYPE_OFFSET = UNUSED_SPACE_OFFSET + UNUSED_SPACE_LENGTH;
@@ -84,13 +84,13 @@ constexpr int TOTAL_OFFSET = MOVE_TYPE_OFFSET + MOVE_TYPE_LENGTH;
 
 constexpr BitMove ORIGIN_INDEX_MASK = 0b111111 << ORIGIN_INDEX_OFFSET;
 constexpr BitMove DESTINATION_INDEX_MASK = 0b111111 << DESTINATION_INDEX_OFFSET;
-constexpr BitMove MOVING_COLOR_MASK = 0b1 << MOVING_COLOR_OFFSET;
+constexpr BitMove IS_WHITE_MOVE_MASK = 0b1 << IS_WHITE_MOVE_OFFSET;
 constexpr BitMove MOVING_TYPE_MASK = 0b111 << MOVING_TYPE_OFFSET;
 constexpr BitMove CAPTURED_TYPE_MASK = 0b111 << CAPTURED_TYPE_OFFSET;
 constexpr BitMove UNUSED_SPACE_MASK = 0b11111111 << CAPTURED_TYPE_OFFSET;
 constexpr BitMove MOVE_TYPE_MASK = 0b11111 << MOVE_TYPE_OFFSET;
 // sanity check
-constexpr BitMove TOTAL_MASK = ORIGIN_INDEX_MASK | DESTINATION_INDEX_MASK | MOVING_COLOR_MASK |
+constexpr BitMove TOTAL_MASK = ORIGIN_INDEX_MASK | DESTINATION_INDEX_MASK | IS_WHITE_MOVE_MASK |
                   MOVING_TYPE_MASK | CAPTURED_TYPE_MASK | UNUSED_SPACE_MASK | MOVE_TYPE_MASK;
 
 constexpr BitMove IS_PROMOTE_MASK = 0b10000 << MOVE_TYPE_OFFSET;
@@ -106,7 +106,7 @@ inline BitMove get_destination_index(BitMove move) { return (move & DESTINATION_
 inline B64 origin_board(BitMove move) { return bit_board_from_index(get_origin_index(move)); }
 inline B64 destination_board(BitMove move) { return bit_board_from_index(get_destination_index(move)); }
 
-inline bool is_moving_white(BitMove move) { return (move & MOVING_COLOR_MASK); }
+inline bool is_moving_white(BitMove move) { return (move & IS_WHITE_MOVE_MASK); }
 inline BitMove get_moving_type(BitMove move) { return (move & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET; }
 inline BitMove get_captured_type(BitMove move) { return (move & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET; }
 inline BitMove get_unused_space(BitMove move) { return (move & UNUSED_SPACE_MASK) >> UNUSED_SPACE_OFFSET; }
@@ -130,12 +130,12 @@ inline void set_destination_index(BitMove& move, int destination_index) {
 }
 
 // possibly redundant info
-inline void set_white(BitMove& move, bool is_white) {
+inline void set_white_move(BitMove& move, bool is_white) {
     if (is_white) {
-        move |= IS_PROMOTE_MASK;
+        move |= IS_WHITE_MOVE_MASK;
     }
     else {
-        move &= ~IS_PROMOTE_MASK;
+        move &= ~IS_WHITE_MOVE_MASK;
     }
 }
 
