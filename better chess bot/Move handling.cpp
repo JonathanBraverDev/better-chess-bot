@@ -20,7 +20,7 @@ SidedPosition make_move(SidedPosition& sided_position, BitMove bitmove) {
 		}
 	}
 
-	//set_special_move_rights(sided_position, move);
+	set_special_move_rights(sided_position, move);
 
 	return sided_position;
 }
@@ -101,23 +101,27 @@ void toggle_promotion(SidedPosition& sided_position, const BitMove move) {
 	}
 }
 
-// DEPRACATED! this was make impossible to exstract from the move itself
 void set_special_move_rights(SidedPosition& sided_position, const Move& move) {
 	switch (move.piece.type) {
 	case PAWN:
-		// this is very crude and pointless in undos as im recovering it from the moveitself
+		// add en passant behind jumping pawns, wipe it in any other case
 		if ((move.origin & ROW_2) && (move.destination | ROW_4)) {
 			sided_position.special_move_rigths ^= up(move.origin);
 		} else if ((move.origin & ROW_7) && (move.destination | ROW_5)) {
 			sided_position.special_move_rigths ^= down(move.origin);
+		} else {
+			sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 		}
+		break;
 
 	case ROOK:
 		clear_bits(sided_position.special_move_rigths, move.origin); // void castling right
+		sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 		break;
 
 	case KING:
 		sided_position.special_move_rigths &= (sided_position.is_white ? VOID_WHITE_CASTLE : VOID_BLACK_CASTLE); // void all castling rights
+		sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 		break;
 	}
 }
