@@ -12,4 +12,4 @@ void toggle_castle(SidedPosition& sided_position, const BitMove move);
 void toggle_move(SidedPosition& sided_position, const BitMove);
 void toggle_captured(SidedPosition& sided_position, const BitMove);
 void toggle_promotion(SidedPosition& sided_position, const BitMove);
-//void set_special_move_rights(SidedPosition& sided_position, const Move& move);
+void set_special_move_rights(SidedPosition& sided_position, const BitMove move);

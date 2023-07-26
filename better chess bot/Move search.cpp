@@ -6,7 +6,7 @@ unsigned long long evals = 0;
 unsigned long long nodes = 0;
 
 // returns the next gamestate, also 'flips' the board to the other side
-GameState generate_next_state(GameState state, const SidedPosition new_position) {
+GameState generate_next_state(GameState state, const BitMove move) {
 
     // use move type to determine timer upon capture/promotiom
     // use captured/promoted piece to keep a running tally of the raw material balance
@@ -15,7 +15,7 @@ GameState generate_next_state(GameState state, const SidedPosition new_position)
 
     new_state.turn = state.turn + 1;
     new_state.previous_state = &state;
-    new_state.sided_position = new_position;
+    new_state.sided_position = make_move(state.sided_position, move);
     switch_sides(new_state.sided_position);
 
     if (state.draw_timer == DRAW_MOVE_LIMIT - 1) { // check only needs to happen when the game is about to end

@@ -120,6 +120,14 @@ inline BitMove get_misc_move_type(BitMove move) { return (move & MISC_MOVE_TYPE_
 // kinda hacky but cool
 inline bool is_castle(BitMove move) { return (move & (move - 1)); }
 
+// raturns a changed more with no impact on the original
+template <typename T>
+BitMove copy_changed(const BitMove move, void(* const setter)(BitMove&, T), T new_value) {
+    BitMove new_move = move; // copy the original move
+    setter(new_move, new_value); // apply the passed function
+    return new_move;
+}
+
 // for all setters, wipe the target data with the invert mask and set the requested value
 inline void set_origin_index(BitMove& move, int origin_index) {
     move = (move & ~ORIGIN_INDEX_MASK) | (origin_index << ORIGIN_INDEX_OFFSET);

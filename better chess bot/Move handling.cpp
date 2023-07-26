@@ -20,7 +20,7 @@ SidedPosition make_move(SidedPosition& sided_position, BitMove bitmove) {
 		}
 	}
 
-	set_special_move_rights(sided_position, move);
+	set_special_move_rights(sided_position, bitmove);
 
 	return sided_position;
 }
@@ -53,25 +53,35 @@ void toggle_move(SidedPosition& sided_position, const BitMove move) {
 
 void toggle_captured(SidedPosition& sided_position, const BitMove move) {
 
+	B64 captured_tile = destination_board(move);
+
 	switch (get_captured_type(move)) {
 	case PAWN:
-		sided_position.opponent_pawns ^= destination_board(move);
+
+		// check if capture targets an empty tile, the piece check is redundant
+		if (!(sided_position.opponent_pawns & captured_tile)) {
+			captured_tile = (sided_position.is_white ? up(captured_tile) :
+															down(captured_tile)); // black pawns have an enpassant ABOVE them
+		}
+
+		// apply the capture
+		sided_position.opponent_pawns ^= captured_tile;
 		break;
 
 	case KNIGHT:
-		sided_position.opponent_knights ^= destination_board(move);
+		sided_position.opponent_knights ^= captured_tile;
 		break;
 
 	case BISHOP:
-		sided_position.opponent_bishops ^= destination_board(move);
+		sided_position.opponent_bishops ^= captured_tile;
 		break;
 
 	case ROOK:
-		sided_position.opponent_rooks ^= destination_board(move);
+		sided_position.opponent_rooks ^= captured_tile;
 		break;
 
 	case QUEEN:
-		sided_position.opponent_queens ^= destination_board(move);
+		sided_position.opponent_queens ^= captured_tile;
 		break;
 	}
 }
@@ -101,26 +111,40 @@ void toggle_promotion(SidedPosition& sided_position, const BitMove move) {
 	}
 }
 
-void set_special_move_rights(SidedPosition& sided_position, const Move& move) {
-	switch (move.piece.type) {
+void set_special_move_rights(SidedPosition& sided_position, const BitMove move) {
+
+	B64 origin;
+	B64 destination;
+
+	switch (get_moving_type(move)) {
 	case PAWN:
+
+		origin = origin_board(move);
+		destination = destination_board(move);
+
 		// add en passant behind jumping pawns, wipe it in any other case
-		if ((move.origin & ROW_2) && (move.destination | ROW_4)) {
-			sided_position.special_move_rigths ^= up(move.origin);
-		} else if ((move.origin & ROW_7) && (move.destination | ROW_5)) {
-			sided_position.special_move_rigths ^= down(move.origin);
-		} else {
+		if ((origin & ROW_2) && (destination | ROW_4)) {
+			sided_position.special_move_rigths ^= up(origin);
+		}
+		else if ((origin & ROW_7) && (destination | ROW_5)) {
+			sided_position.special_move_rigths ^= down(origin);
+		}
+		else {
 			sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 		}
 		break;
 
 	case ROOK:
-		clear_bits(sided_position.special_move_rigths, move.origin); // void castling right
+		clear_bit(sided_position.special_move_rigths, get_origin_index(move)); // void castling right
 		sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 		break;
 
 	case KING:
 		sided_position.special_move_rigths &= (sided_position.is_white ? VOID_WHITE_CASTLE : VOID_BLACK_CASTLE); // void all castling rights
+		sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
+		break;
+	case KNIGHT:
+	case BISHOP:
 		sided_position.special_move_rigths &= VOID_ALL_EN_PASSANT;
 		break;
 	}
