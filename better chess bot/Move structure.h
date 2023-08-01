@@ -137,6 +137,10 @@ inline void set_destination_index(BitMove& move, int destination_index) {
     move = (move & ~DESTINATION_INDEX_MASK) | (destination_index << DESTINATION_INDEX_OFFSET);
 }
 
+inline void set_destination_index(BitMove& move, B64 single_bit_board) {
+    set_destination_index(move, lowest_single_bit_index(single_bit_board));
+}
+
 // possibly redundant info
 inline void set_white_move(BitMove& move, bool is_white) {
     if (is_white) {
@@ -190,6 +194,13 @@ inline void set_capture(BitMove& move, bool is_capture) {
     else {
         move &= ~IS_CAPTURE_MASK;
     }
+}
+
+// sets the captured type and flag in one call
+// use only for confirmed captures
+inline void set_full_capture(BitMove& move, PieceType captured_type) {
+    set_capture(move, true);
+    set_captured_type(move, captured_type);
 }
 
 inline void set_misc_move_type(BitMove& move, MoveType misc_move_type) {

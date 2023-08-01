@@ -66,7 +66,11 @@ void lowest_single_cords(const B64 board, int& x, int& y) {
 }
 
 // fills a vector with bitBoards of all the active bits on the given board
-void seperate_bits(B64 board, std::vector<B64>& bit_boards) {
+void seperate_bits(B64 board, std::vector<B64>& bit_boards, bool clear) {
+
+    if (clear) {
+        bit_boards.clear();
+    }
 
     // counting bits in caller to preserve enough sounds wastful
     bit_boards.reserve(8); // max piece count is a practicly unachivable 10 (2 minor and 8 pawns)

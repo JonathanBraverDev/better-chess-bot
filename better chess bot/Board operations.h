@@ -41,7 +41,7 @@ inline B64 lower_than_bit_index(const int index) { return (1ULL << index) - 1; }
 inline B64 higher_than_bit_index(const int index) { return (-1ULL << index); }
 
 // piece handling
-void seperate_bits(B64 board, std::vector<B64>& pieces);
+void seperate_bits(B64 board, std::vector<B64>& pieces, bool clear = false);
 
 // piece movment assists, with bound protections
 inline B64 up(B64 board) { return board << BOARD_SIZE; } // shifts out of the board would just be 0 anyway
