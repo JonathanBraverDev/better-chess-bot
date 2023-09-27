@@ -40,7 +40,7 @@ void visualize_position(const SidedPosition position) {
 	std::cout << '\n';
 }
 
-void possible_piece_positions(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
+void possible_piece_moves(SearchPreallocation& allocation, const SidedPosition& sided_position, const PieceType piece_type, const B64 blockers, const B64 valid_destinations, B64(*const move_generator)(B64, B64), const B64* move_source, const int index_scale, const int first_index) {
 	
 	// clear out preallocated memory before use
 	std::vector<B64>& single_pieces = allocation.single_pieces;
@@ -67,7 +67,7 @@ void possible_piece_positions(SearchPreallocation& allocation, const SidedPositi
 
 		// add the mvoes if any exist, removing the opponent's piece
 		if (potential_moves) {
-			possible_capture_positions(allocation, new_position, piece, potential_moves);
+			possible_capture_moves(allocation, new_position, piece, potential_moves);
 		}
 	}
 }
@@ -92,16 +92,15 @@ void possible_pawn_moves(SearchPreallocation& allocation, const SidedPosition& s
 	bool promoting; // a pawn can only more towards promotion so any more from the row before is promoting
 	B64 jump;
 	PieceType captured_type;
-	
-	set_white_move(move_base, sided_position.is_white);
 
+	set_white_move(move_base, sided_position.is_white);
+	
 	seperate_bits(base_pieces, single_pieces, true); // get a vector of all pieces
 	for (const B64& piece : single_pieces) {
 
 		set_origin_index(move_base, lowest_single_bit_index(piece)); // shared for all moves
 
 		// calculate all information needed for the moves
-		new_position = sided_position;
 		move_index = first_index + 2 * lowest_single_bit_index(piece);
 		normal_move = pawn_moves[move_index] & free_tiles;
 		en_passant = sided_position.special_move_rigths & (sided_position.is_white ? BLACK_PAWN_EN_PASSANT : WHITE_PAWN_EN_PASSANT);
@@ -162,18 +161,18 @@ void possible_pawn_moves(SearchPreallocation& allocation, const SidedPosition& s
 				// check pawn promotion, send a capture copy
 				if (promoting) { 
 					possible_pawn_promotions(moves, new_move);
-					} else {
+				} else {
 					moves.push_back(new_move);
-					}
 				}
 			}
+		}
 
 		// add smart check check (haha) that looks at discovered checkes (rook/bishop hits from mover) or those caused by the moving piece
 		// will be faster than a full scan from the king's location and the best time to look for things is when i already have the board
-		}
 	}
+}
 
-void possible_capture_positions(SearchPreallocation& allocation, SidedPosition& sided_position, B64 piece, B64 potential_moves) {
+void possible_capture_moves(SearchPreallocation& allocation, SidedPosition& sided_position, B64 piece, B64 potential_moves) {
 	
 	// use preallocated memory, clear out everything but the position vector
 	std::vector<BitMove>& moves = allocation.all_moves;
@@ -218,7 +217,7 @@ void possible_pawn_promotions(std::vector<BitMove>& moves, BitMove base_move) {
 }
 
 bool is_castle_legal(const SidedPosition sided_position, const B64 king_start, const B64 king_end) {
-	const B64 king_path = get_connecting_tiles(king_start, king_end);
+	const B64 king_path = get_connecting_tiles(king_start, king_end); // !!! BUG !!! king start is MULTIPLE BITS
 
 	bool is_legal = false;
 
@@ -248,10 +247,15 @@ PieceType check_capture_type(const SidedPosition& sided_position, B64 target) {
 	return captured_type;
 }
 
-void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosition sided_position) {
+void possible_castle_moves(std::vector<BitMove>& moves, SidedPosition sided_position) {
 
 	const B64 short_rook_valid = higher_than_bit(sided_position.own_king) & sided_position.special_move_rigths & sided_position.own_rooks;
 	const B64 long_rook_valid = lower_than_bit(sided_position.own_king) & sided_position.special_move_rigths & sided_position.own_rooks;
+
+	BitMove base_move{};
+	BitMove new_move;
+	set_white_move(base_move, sided_position.is_white);
+	set_origin_index(base_move, lowest_single_bit_index(sided_position.own_king));
 
 	sided_position.special_move_rigths &= (sided_position.is_white ? VOID_WHITE_CASTLE : VOID_BLACK_CASTLE); // void all castle rights after checking them
 
@@ -261,8 +265,8 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 		castled_king = (sided_position.is_white ? WHITE_KING_SHORT_CASTLE : BLACK_KING_SHORT_CASTLE);
 
 		if (is_castle_legal(sided_position, sided_position.own_king, castled_king)) {
-			sided_position.own_rooks ^= (short_rook_valid | (sided_position.is_white ? WHITE_ROOK_SHORT_CASTLE : BLACK_ROOK_SHORT_CASTLE)); // flip both old and new location
-			positions.push_back(sided_position);
+			new_move = copy_changed(base_move, set_destination_index, short_rook_valid);
+			moves.push_back(new_move);
 		}
 	}
 
@@ -270,13 +274,13 @@ void possible_castle_positions(std::vector<SidedPosition>& positions, SidedPosit
 		castled_king = (sided_position.is_white ? WHITE_KING_LONG_CASTLE : BLACK_KING_LONG_CASTLE);
 
 		if (is_castle_legal(sided_position, sided_position.own_king, castled_king)) {
-			sided_position.own_rooks ^= long_rook_valid | (sided_position.is_white ? WHITE_ROOK_LONG_CASTLE : BLACK_ROOK_LONG_CASTLE);
-			positions.push_back(sided_position);
+			new_move = copy_changed(base_move, set_destination_index, long_rook_valid);
+			moves.push_back(new_move);
 		}
 	}
 }
 
-void all_possible_positions(SearchPreallocation& allocation, const SidedPosition sided_position) {
+void all_possible_moves(SearchPreallocation& allocation, const SidedPosition sided_position) {
 
 	const B64 opponent = opponent_pieces(sided_position);
 	const B64 own = own_pieces(sided_position);
@@ -285,70 +289,65 @@ void all_possible_positions(SearchPreallocation& allocation, const SidedPosition
 
 	// for every exisintg piece type, add it's moves
 	if (sided_position.own_pawns) { // can I just say that I HATE how complicated this piece type is?
-		possible_pawn_positions(allocation, sided_position, PAWN, ~blockers, opponent);
+		possible_pawn_moves(allocation, sided_position, ~blockers, opponent);
 	}
 	if (sided_position.own_knights) {
-		possible_piece_positions(allocation, sided_position, KNIGHT, blockers, not_own, nullptr, knight_moves);
+		possible_piece_moves(allocation, sided_position, KNIGHT, blockers, not_own, nullptr, knight_moves);
 	}
 	if (sided_position.own_bishops) {
-		possible_piece_positions(allocation, sided_position, BISHOP, blockers, not_own, &generate_bishop_moves);
+		possible_piece_moves(allocation, sided_position, BISHOP, blockers, not_own, &generate_bishop_moves);
 	}
 	if (sided_position.own_rooks) {
-		possible_piece_positions(allocation, sided_position, ROOK, blockers, not_own, &generate_rook_moves);
+		possible_piece_moves(allocation, sided_position, ROOK, blockers, not_own, &generate_rook_moves);
 	}
 	if (sided_position.own_queens) {
-		possible_piece_positions(allocation, sided_position, QUEEN, blockers, not_own, &generate_queen_moves);
+		possible_piece_moves(allocation, sided_position, QUEEN, blockers, not_own, &generate_queen_moves);
 	}
 
 	// king normals, assuming he didn't get brutally murdered (eveluation planned to end on unavaidable check)
-	possible_piece_positions(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
+	possible_piece_moves(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
 	if (sided_position.own_king & sided_position.special_move_rigths) { // add castles is legal
-		possible_castle_positions(allocation.all_positions, sided_position);
+		possible_castle_moves(allocation.all_moves, sided_position);
 	}
 
 	// validation for checks dosent happen here
 }
 
-// moves that get here are garanteed to be possible, all killing hte target one way or another
-void tile_capture_positions(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target, B64 killing_pieces) {
+// moves that get here are garanteed to be possible, all killing the target one way or another
+void tile_capture_positions(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target, B64 killing_pieces, const PieceType piece_type) {
 
 	// use preallocated memory, clear out everything but the position vector
-	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<BitMove>& moves = allocation.all_moves;
 	std::vector<B64>& single_pieces = allocation.single_pieces;
-	single_pieces.clear();
 
-	SidedPosition new_position;
 	B64 en_passant_tile;
+	int destination_index;
+
+	BitMove base_move{};
+	BitMove new_move;
+	set_white_move(base_move, sided_position.is_white);
+	set_capture(base_move, true);
+	set_captured_type(base_move, check_capture_type(sided_position, target));
+	set_moving_type(base_move, piece_type);
 
 	seperate_bits(killing_pieces, single_pieces, true);
 
 	for (const B64& piece : single_pieces) {
-		new_position = sided_position; // reset position
-		// delete any enemy piece in the destination
-		if (killing_pieces & sided_position.own_pawns) { // if there's overlap, its a pawn
+
+		new_move = copy_changed(base_move, set_origin_index, lowest_single_bit_index(piece));
+
+		if (piece_type == PAWN) {
 			en_passant_tile = (sided_position.is_white ? up(target) : down(target)); // dark pawns have an enpassant ABOVE them
-			if (en_passant_tile & new_position.special_move_rigths) {
-				killing_pieces ^= en_passant_tile; // add the pawn to the en passant tile
+			if (en_passant_tile & sided_position.special_move_rigths) {
+				destination_index = lowest_single_bit_index(en_passant_tile); // add the pawn to the en passant tile
+			} else {
+				destination_index = lowest_single_bit_index(target);
 			}
 		} else {
-			killing_pieces ^= target; // add the piece to the target tile
+			destination_index = lowest_single_bit_index(target);
 		}
-		killing_pieces ^= piece; // remove piece from its origin
 
-		// clear the target
-		clear_bits(new_position.opponent_pawns, target);
-		clear_bits(new_position.opponent_knights, target);
-		clear_bits(new_position.opponent_bishops, target);
-		clear_bits(new_position.opponent_rooks, target);
-		clear_bits(new_position.opponent_queens, target);
-
-		new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant
-
-		if (new_position.own_pawns & (new_position.is_white ? ROW_8 : ROW_1)) { // check pawn promotion
-			possible_pawn_promotions(positions, new_position);
-		} else {
-			positions.push_back(new_position);
-		}
+		moves.push_back(copy_changed(base_move, set_origin_index, lowest_single_bit_index(piece)));
 	}
 }
 
@@ -376,30 +375,30 @@ void kills_to_tile(SearchPreallocation& allocation, const SidedPosition sided_po
 	killing_pawns &= sided_position.own_pawns;
 
 	if (killing_pawns) {
-		tile_capture_positions(allocation, sided_position, target_board_bit, killing_pawns);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_pawns, PAWN);
 	}
 	if (killing_knights) {
-		tile_capture_positions(allocation, sided_position, target_board_bit, killing_knights);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_knights, KNIGHT);
 	}
 	if (killing_bishops) {
-		tile_capture_positions(allocation, sided_position, target_board_bit, killing_bishops);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_bishops, BISHOP);
 	}
 	if (killing_rooks) {
-		tile_capture_positions(allocation, sided_position, target_board_bit, killing_rooks);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_rooks, ROOK);
 	}
 	if (killing_queens) {
-		tile_capture_positions(allocation, sided_position, target_board_bit, killing_queens);
+		tile_capture_positions(allocation, sided_position, target_board_bit, killing_queens, QUEEN);
 	}
 }
 
-void tile_move_positions(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
+void moves_to_tile(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board_bit, const PieceType piece_type, B64 possible_moves) {
 	
 	// use preallocated memory, clear out everything but the position vector
-	std::vector<SidedPosition>& positions = allocation.all_positions;
+	std::vector<BitMove>& moves = allocation.all_moves;
 	std::vector<B64>& single_pieces = allocation.single_pieces;
-	single_pieces.clear();
 
 	SidedPosition new_position;
+	BitMove new_move;
 	bool add_move;
 
 	B64& current_pieces = *own_piece_board_ref(new_position, piece_type);
@@ -408,16 +407,17 @@ void tile_move_positions(SearchPreallocation& allocation, const SidedPosition si
 	for (const B64& piece : single_pieces) {
 		add_move = false;
 		new_position = sided_position; // reset position
+		new_move = { 0 }; // clear out move
 		if ((piece_type == PAWN) && // check for pawn jump
 			(piece & (new_position.is_white ? WHITE_PAWN_JUMP_START : BLACK_PAWN_JUMP_START)) &&
 			(target_board_bit & (new_position.is_white ? WHITE_PAWN_JUMP_END : BLACK_PAWN_JUMP_END))) {
-				current_pieces ^= generate_pawn_jump(all_pieces(sided_position), piece, sided_position.is_white);
-				add_move = true;
+			add_move = true;
 		} else {
 			if (possible_moves == NULL) { // only 2 piece types get here
 				possible_moves = (piece_type == PAWN ? pawn_moves[lowest_single_bit_index(piece)] : knight_moves[lowest_single_bit_index(piece)]);
 			}
 			
+			// check if the possible moves hit the target tile
 			if (possible_moves & target_board_bit) {
 				current_pieces ^= target_board_bit; // add the piece to the target tile
 				add_move = true;
@@ -425,14 +425,15 @@ void tile_move_positions(SearchPreallocation& allocation, const SidedPosition si
 		}
 
 		if (add_move) {
-			current_pieces ^= piece; // remove piece from its origin
-			new_position.special_move_rigths &= VOID_ALL_EN_PASSANT; // void en passant
+			set_moving_type(new_move, piece_type);
+			set_origin_index(new_move, lowest_single_bit_index(piece));
+			set_destination_index(new_move, lowest_single_bit_index(target_board_bit));
 
 			// check pawn promotion
 			if (new_position.own_pawns & (new_position.is_white ? WHITE_PAWN_PROMOTION : BLACK_PAWN_PROMOTION)) {
-				possible_pawn_promotions(positions, new_position);
+				possible_pawn_promotions(moves, new_move);
 			} else {
-				positions.push_back(new_position);
+				moves.push_back(new_move);
 			}
 		}
 	}
@@ -441,10 +442,11 @@ void tile_move_positions(SearchPreallocation& allocation, const SidedPosition si
 void moves_to_tiles(SearchPreallocation& allocation, const SidedPosition sided_position, const B64 target_board) {
 	
 	// clear out preallocated memory before use
-	std::vector<B64>& single_targets = allocation.single_moves;
-	single_targets.clear();
+	std::vector<B64>& single_targets = allocation.single_boards;
 
 	B64 slide_moves;
+	int target_index;
+	int pawn_index;
 
 	seperate_bits(target_board, single_targets, true);
 
@@ -452,15 +454,17 @@ void moves_to_tiles(SearchPreallocation& allocation, const SidedPosition sided_p
 		// maybe an approach like with the kills is better, i'm looping everything here, that can't be good.
 		// i'm not sure how to handle multiple origin points at the same time tho, what if a piece can block 2 tiles?
 		slide_moves = generate_queen_moves(all_pieces(sided_position), target);
-		tile_move_positions(allocation, sided_position, target, QUEEN, slide_moves);
-		tile_move_positions(allocation, sided_position, target, ROOK, slide_moves);
-		tile_move_positions(allocation, sided_position, target, BISHOP, slide_moves);
-		tile_move_positions(allocation, sided_position, target, PAWN); // pawns can also block by jumping.
-		tile_move_positions(allocation, sided_position, target, KNIGHT);
+		target_index = lowest_single_bit_index(target);
+		pawn_index = (sided_position.is_white ? 1 : 0) + 2 * target_index; // look for the OPOSITE color of pawn moves
+		moves_to_tile(allocation, sided_position, target, QUEEN, slide_moves);
+		moves_to_tile(allocation, sided_position, target, ROOK, slide_moves);
+		moves_to_tile(allocation, sided_position, target, BISHOP, slide_moves);
+		moves_to_tile(allocation, sided_position, target, PAWN, pawn_attacks[pawn_index]); // pawns can also block by jumping.
+		moves_to_tile(allocation, sided_position, target, KNIGHT, knight_moves[target_index]);
 	}
 }
 
-void possible_evade_positions(SearchPreallocation& allocation, const SidedPosition sided_position) {
+void possible_evade_moves(SearchPreallocation& allocation, const SidedPosition sided_position) {
 
 	const B64 attackers = attacking_pieces(sided_position, sided_position.own_king); // find attackers of the oposite color
 	const B64 blockers = all_pieces(sided_position);
@@ -470,7 +474,7 @@ void possible_evade_positions(SearchPreallocation& allocation, const SidedPositi
 	B64 potential_moves = 0;
 
 	// add all king moves besides castles
-	possible_piece_positions(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
+	possible_piece_moves(allocation, sided_position, KING, blockers, not_own, nullptr, king_moves);
 
 	if (count_bits64(attackers) == 1) { // its either 1 or 2, given that the position starts in a check
 
@@ -487,19 +491,19 @@ void possible_evade_positions(SearchPreallocation& allocation, const SidedPositi
 	}
 }
 
-void valid_positions(SearchPreallocation& allocation, std::vector<SidedPosition>& valid_positions, const SidedPosition sided_position) {
+void valid_moves(SearchPreallocation& allocation, std::vector<BitMove>& valid_moves, const SidedPosition sided_position) {
 
 	// use preallocated memory, clear out position vectors
-	std::vector<SidedPosition>& positions = allocation.all_positions;
-	valid_positions.clear();
-	positions.clear();
+	std::vector<BitMove>& moves = allocation.all_moves;
+	valid_moves.clear();
+	moves.clear();
 
-	(is_check(sided_position) ? possible_evade_positions(allocation, sided_position)
-							  : all_possible_positions(allocation, sided_position));
+	(is_check(sided_position) ? possible_evade_moves(allocation, sided_position)
+							  : all_possible_moves(allocation, sided_position));
 
-	for (const SidedPosition& Possible_position : positions) {
-		if (!is_check(Possible_position)) {
-			valid_positions.push_back(Possible_position);
+	for (const BitMove& move : moves) {
+		if (!is_check(move)) {
+			valid_moves.push_back(move);
 		}
 	}
 }

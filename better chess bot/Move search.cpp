@@ -87,8 +87,8 @@ PositionScore alphabeta_init(GameState state, int depth) {
     int opponent_eval;
     PositionScore final_eval;
     // create the valid move array
-    allocation.valid_positions = new std::vector<SidedPosition>[depth];
-    std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
+    allocation.valid_moves = new std::vector<BitMove>[depth];
+    std::vector<BitMove>& next_moves = allocation.valid_moves[depth - 1];
 
     // end search conditions
     if (depth == 0) {
@@ -105,36 +105,36 @@ PositionScore alphabeta_init(GameState state, int depth) {
 
         // reserve space in the dynamic array
         for (size_t i = 0; i < depth; i++) {
-            allocation.valid_positions[i].reserve(EXPECTED_BRANCHING);
+            allocation.valid_moves[i].reserve(EXPECTED_BRANCHING);
         }
 
         // reserve space for the simple vectors, if they end up growing the'll keep their size
-        allocation.all_positions.reserve(EXPECTED_BRANCHING);
+        allocation.all_moves.reserve(EXPECTED_BRANCHING);
         allocation.single_pieces.reserve(EXPECTED_BRANCHING);
-        allocation.single_moves.reserve(EXPECTED_BRANCHING);
+        allocation.single_boards.reserve(EXPECTED_BRANCHING);
 
         final_eval.current_score = 2 * WIN_VALUE;
 
-        valid_positions(allocation, allocation.valid_positions[depth - 1], state.sided_position);
+        valid_moves(allocation, allocation.valid_moves[depth - 1], state.sided_position);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
 
-        for (const SidedPosition& sided_position : next_positions) {
+        for (const BitMove& move : next_moves) { // !!! BUG !!! after this line the king and rooks get messed up somewhere
             nodes++;
 
             // initialize the call with both playes having the worse possivbe score as their best
-            opponent_eval = -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -2 * WIN_VALUE, 2 * WIN_VALUE);
+            opponent_eval = -alphabeta(allocation, generate_next_state(state, move), depth - 1, -2 * WIN_VALUE, 2 * WIN_VALUE);
 
             // If current eval is less favorable to the oppenent, use it.
             if (opponent_eval < final_eval.current_score) {
                 final_eval.current_score = opponent_eval;
-                final_eval.next_position = sided_position;
+                final_eval.next_position = make_move(state.sided_position, move);
             }
         }
     }
     
-    delete[] allocation.valid_positions;
+    delete[] allocation.valid_moves;
     
     switch_sides(final_eval.next_position); // correct the board to the next player
     return final_eval;
@@ -143,7 +143,7 @@ PositionScore alphabeta_init(GameState state, int depth) {
 int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int own_best, int opponent_best) {
 
     // use prealocated vectors, clears happen to relevent vectors in the function that needs them
-    std::vector<SidedPosition>& next_positions = allocation.valid_positions[depth - 1];
+    std::vector<BitMove>& next_moves = allocation.valid_moves[depth - 1];
     // note that at depth 0, the pointer is INVALID
 
     int eval;
@@ -162,16 +162,16 @@ int alphabeta(SearchPreallocation& allocation, GameState state, int depth, int o
 
         eval = own_best; // initially set to the WORST possible score for the current player
 
-        valid_positions(allocation, allocation.valid_positions[depth - 1], state.sided_position);
+        valid_moves(allocation, allocation.valid_moves[depth - 1], state.sided_position);
         // move ordering goes here, better first = more pruning
         // perhaps i can use the "Move" structure to prefer captures, especially with pawns
         // that might reqire considerable proccesing
 
-        for (const SidedPosition& sided_position : next_positions) {
+        for (const BitMove& move: next_moves) {
             nodes++;
 
             // Recursively search the resulting position from the perspective of the opposite player, own_best and opponent_best are passed inverted
-            eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, sided_position), depth - 1, -opponent_best, -own_best));
+            eval = std::max(eval, -alphabeta(allocation, generate_next_state(state, move), depth - 1, -opponent_best, -own_best));
 
             // If current eval is "agreed upon" by both players, cut the brunch, nither will accept a differnt score.
             if (opponent_best == eval) {
