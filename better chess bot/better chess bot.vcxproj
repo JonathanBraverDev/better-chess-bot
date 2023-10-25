@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="Attack detection.cpp" />
     <ClCompile Include="better chess bot.cpp" />
+    <ClCompile Include="Bitboard.cpp" />
     <ClCompile Include="Boad operations.cpp" />
     <ClCompile Include="Magic bit boards.cpp" />
     <ClCompile Include="Move.cpp" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Attack detection.h" />
+    <ClInclude Include="Bitboard.h" />
     <ClInclude Include="Board operations.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
@@ -162,11 +164,9 @@
     <ClInclude Include="Position structure.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Board generation.h" />
-    <ClInclude Include="Piece structure.h" />
     <ClInclude Include="Game constants.h" />
     <ClInclude Include="Move handling.h" />
     <ClInclude Include="Move search.h" />
-    <ClInclude Include="Move structure.h" />
     <ClInclude Include="Position generation.h" />
     <ClInclude Include="Board structure.h" />
     <ClInclude Include="Preallocation structure.h" />
