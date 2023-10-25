@@ -143,6 +143,7 @@
     <ClCompile Include="better chess bot.cpp" />
     <ClCompile Include="Boad operations.cpp" />
     <ClCompile Include="Magic bit boards.cpp" />
+    <ClCompile Include="Move.cpp" />
     <ClCompile Include="Position structure.cpp" />
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="Board generation.cpp" />
@@ -153,7 +154,10 @@
   <ItemGroup>
     <ClInclude Include="Attack detection.h" />
     <ClInclude Include="Board operations.h" />
+    <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
+    <ClInclude Include="Move encoding.h" />
+    <ClInclude Include="Move.h" />
     <ClInclude Include="Magic bit boards.h" />
     <ClInclude Include="Position structure.h" />
     <ClInclude Include="Evaluation.h" />
