@@ -1,6 +1,6 @@
 #pragma once
 
 enum class Color { WHITE, BLACK };
-enum class PieceType { KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
+enum class PieceType { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 
-enum class MoveType { NORMAL, CASTLE_LONG, CASTLE_SHORT, GOOD_GENERIC, };
+enum class MoveType { NORMAL, PAWN_UNIQE, CASTLE_LONG, CASTLE_SHORT };

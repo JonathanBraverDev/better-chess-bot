@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Move structure.h"
+#include <cstdint>
+
+typedef uint32_t BitMove;
 
 constexpr int ORIGIN_INDEX_LENGTH = 6;
 constexpr int DESTINATION_INDEX_LENGTH = 6;
@@ -41,3 +43,30 @@ constexpr BitMove MISC_MOVE_TYPE_MASK = 0b00011 << MOVE_TYPE_OFFSET;
 // sanity check
 constexpr BitMove MOVE_TYPE_MASK_CHECK = IS_PROMOTE_MASK | IS_CHECK_MASK |
 IS_CAPTURE_MASK | MISC_MOVE_TYPE_MASK;
+
+
+// BitMove encoding:
+// 6 bit origin index - must
+// 6 bit destination index - must
+// 1 bit mover color - logic help (redundant with position indicator?)
+// 3 bit moving/promoted type - must, logic help. when promote flag is on look as promotion
+// 3 bit captured type - logic help
+// total 19 bit move
+// 
+// note that everything but the special move right is 100% reversibe as is
+// 
+// Move type / order hints
+// 1 bit promotion flag
+// 1 bit check flag
+// 1 bit capture flag
+// 2 bit misc move types (normal, both castles, generic good move)
+// total 5 order bits
+// 
+// 8 bits left unused for now (possibly BitRights)
+
+// BitRights encoding:
+// 2 bit L/R castle white
+// 2 bit L/R castle black
+// 1 bit valid en passant
+// 3 bit en passant index
+// all avalible before the move

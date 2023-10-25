@@ -3,15 +3,17 @@
 #include "Enums.h"
 #include <cstdint>
 
+typedef uint32_t BitMove;
+
 class Move {
 private:
-    uint32_t encodedMove;
+    BitMove encodedMove;
 
 public:
     Move();
-    Move(uint32_t encoded);
+    Move(BitMove encoded);
 
-    uint32_t getEncodedMove() const;
+    BitMove getEncodedMove() const;
 
     uint8_t getOriginIndex() const;
     uint8_t getDestinationIndex() const;
