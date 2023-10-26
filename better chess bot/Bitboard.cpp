@@ -24,7 +24,7 @@ int Bitboard::countSetBits() const{
     int count;
     B64 board_copy = board;
     for (count = 0; board; count++) // runs untill board is zeroed out, counting up
-        board_copy = (board_copy - 1); // removes one bit per iteration
+        board_copy = (board_copy & -board_copy); // removes one bit per iteration
     return count;
 }
 
