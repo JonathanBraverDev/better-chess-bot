@@ -1,14 +1,6 @@
 #pragma once
 
-#include <cstdint>
-
-typedef uint64_t B64; // 64 bit board
-
-inline void swap(B64& a, B64& b) {
-	B64 temp = a;
-	a = b;
-	b = temp;
-}
+#include "Types.h"
 
 // the things I do for readability... (aren't very readable themselves eh)
 enum TileIndex {
@@ -150,13 +142,13 @@ constexpr int BOARD_SIZE = 8;
 // useful for out of bounds detection
 constexpr B64 COLUMN_A = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8;
 constexpr B64 COLUMN_B = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
-constexpr B64 COLUMN_AB = COLUMN_A | COLUMN_B;
 constexpr B64 COLUMN_C = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8;
 constexpr B64 COLUMN_D = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8;
 constexpr B64 COLUMN_E = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8;
 constexpr B64 COLUMB_F = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8;
 constexpr B64 COLUMB_G = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8;
 constexpr B64 COLUMN_H = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8;
+constexpr B64 COLUMN_AB = COLUMN_A | COLUMN_B;
 constexpr B64 COLUMN_GH = COLUMB_G | COLUMN_H;
 
 // used for pawn first move/promotion

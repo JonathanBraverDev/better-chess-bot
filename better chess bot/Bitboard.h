@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstdint>
-
-typedef uint64_t B64;
+#include "Types.h"
 
 class Bitboard {
 private:
@@ -24,4 +22,3 @@ public:
     void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);
 };
-

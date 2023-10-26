@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Board structure.h"
-#include "Move structure.h"
+#include "Types.h"
+#include "BoardConstants.h"
 
 
 constexpr B64 INITIAL_WHITE_PAWNS = ROW_2;

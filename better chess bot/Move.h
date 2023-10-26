@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Enums.h"
-#include <cstdint>
-
-typedef uint32_t BitMove;
+#include "Types.h"
 
 class Move {
 private:

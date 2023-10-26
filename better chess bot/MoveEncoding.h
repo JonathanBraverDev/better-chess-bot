@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstdint>
-
-typedef uint32_t BitMove;
+#include "Types.h"
 
 constexpr int ORIGIN_INDEX_LENGTH = 6;
 constexpr int DESTINATION_INDEX_LENGTH = 6;

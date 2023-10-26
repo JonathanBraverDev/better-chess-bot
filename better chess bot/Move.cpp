@@ -1,5 +1,5 @@
 #include "Move.h"
-#include "Move encoding.h"
+#include "MoveEncoding.h"
 
 // Default constructor initializes data to 0
 Move::Move() : encodedMove(0) {}
