@@ -10,6 +10,7 @@ private:
     Board board;
     Bitboard special_move_rigths; // en passant AND castle rights for both sides, they can't overlap anyway
     Color current_color;
+    int moveCounter; // used to count moves untill the forced draw
 
 public:
     void makeMove(Move move);

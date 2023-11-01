@@ -11,7 +11,6 @@ private:
     Player* playerWhite;
     Player* playerBlack;
     Player* currentPlayer;
-    int moveCounter; // used to count moves untill the forced draw
     GameState gameState;
     std::vector<Move> moveHistory; // for easy export
     std::vector<GameState> gameHistory; // for 3 time repetition
