@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "Board.h"
+#include "Gamestate.h"
 #include "Move.h"
 #include "Player.h"
 
@@ -12,9 +12,9 @@ private:
     Player* playerBlack;
     Player* currentPlayer;
     int moveCounter; // used to count moves untill the forced draw
-    Board board;
+    GameState gameState;
     std::vector<Move> moveHistory; // for easy export
-    std::vector<Board> boardHistory; // for 3 time repetition
+    std::vector<GameState> gameHistory; // for 3 time repetition
 
 public:
     void makeMove();

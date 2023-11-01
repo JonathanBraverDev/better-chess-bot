@@ -1,10 +1,10 @@
 #include "Game.h"
 
 void Game::makeMove() {
-    Move move = currentPlayer->findMove(board);
-    board.makeMove(move);
+    Move move = currentPlayer->findMove(gameState);
+    gameState.makeMove(move);
     moveHistory.push_back(move);
-    boardHistory.push_back(board);
+    gameHistory.push_back(gameState);
 
     currentPlayer = (currentPlayer == playerWhite) ? playerBlack : playerWhite;
     moveCounter++;

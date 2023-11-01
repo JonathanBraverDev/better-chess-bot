@@ -145,6 +145,7 @@
     <ClCompile Include="Boad operations.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="Position structure.cpp" />
     <ClCompile Include="Evaluation.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="MoveEncoding.h" />
     <ClInclude Include="Move.h" />
     <ClInclude Include="Player.h" />
