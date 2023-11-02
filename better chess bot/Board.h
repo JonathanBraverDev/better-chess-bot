@@ -20,4 +20,6 @@ private:
 
 public:
     void makeMove(Move move);
+
+    Bitboard getPieces(Color color, PieceType type) const;
 };
