@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "Board.h"
 #include "Enums.h"
 
@@ -10,11 +11,18 @@ private:
     Board board;
     Bitboard special_move_rigths; // en passant AND castle rights for both sides, they can't overlap anyway
     Color current_color;
-    int moveCounter; // used to count moves untill the forced draw
+    int moveCounter; // used to count moves until the forced draw
+    bool isCheck;
 
 public:
     void makeMove(Move move);
+    
+    std::vector<Move> getLegalMoves() const;
 
+    Bitboard getOwnPieces(Color color, PieceType type) const;
+    Bitboard getOpponentPieces(Color color, PieceType type) const;
+
+    // check check only if moving from any tile a queen can reach from the king (incliding first colision)
 };
 
 
