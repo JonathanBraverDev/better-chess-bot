@@ -8,7 +8,7 @@ private:
     Color color; // to make each player 'aware' of thier own pieces
     int evaluationParameter; // very much a placeholder for a WAY more complex... something
 public:
-    virtual Move makeMove(const GameState& gameState) = 0; // not quite sure how i want to handle eval at the moment
+    virtual Move pickMove(const GameState& gameState) = 0; // not quite sure how i want to handle eval at the moment
 };
 
 // Bot class with fins move and eval

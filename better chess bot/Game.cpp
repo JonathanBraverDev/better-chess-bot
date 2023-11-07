@@ -1,7 +1,7 @@
 #include "Game.h"
 
-void Game::makeMove() {
-    Move move = currentPlayer->makeMove(gameState);
+void Game::playMove() {
+    Move move = currentPlayer->pickMove(gameState);
     gameState.makeMove(move);
     moveHistory.push_back(move);
     gameHistory.push_back(gameState);

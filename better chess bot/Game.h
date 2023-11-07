@@ -15,5 +15,5 @@ private:
     std::vector<Replay> matchHistory; // when a game concludes it is added here
 
 public:
-    void makeMove();
+    void playMove();
 };

@@ -60,3 +60,41 @@ Piece Board::getPieceAtIndex(int index) const {
         return { Color::NONE, PieceType::NONE };
     }
 }
+
+bool Board::validate() const {
+    const Bitboard white_pieces = white_pawns.getBoard() | white_knights.getBoard() | white_bishops.getBoard() |
+        white_rooks.getBoard() | white_queens.getBoard();
+
+    const Bitboard black_pieces = black_pawns.getBoard() | black_knights.getBoard() | black_bishops.getBoard() |
+        black_rooks.getBoard() | black_queens.getBoard();
+
+    const Bitboard* boards[] = {
+        &white_pawns, &white_knights, &white_bishops,
+        &white_rooks, &white_queens, &white_king,
+        &black_pawns, &black_knights, &black_bishops,
+        &black_rooks, &black_queens, &black_king
+    };
+
+    int boardNum = sizeof(boards) / sizeof(boards[0]);
+
+    // Check if there is only one king for each color
+    if (white_king.countSetBits() != 1 || black_king.countSetBits() != 1) {
+        return false;
+    }
+
+    // Check if there are no more than 15 pieces for each color (king already checked)
+    if (white_pieces.countSetBits() > 15 || black_pieces.countSetBits() > 15) {
+        return false;
+    }
+
+    // Check for overlaps between all piece types (overkill)
+    for (int i = 0; i < boardNum; ++i) {
+        for (int j = i + 1; j < boardNum; ++j) {
+            if (boards[i]->getBoard() & boards[j]->getBoard()) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
