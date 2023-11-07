@@ -13,6 +13,9 @@ private:
     Color current_color;
     int moveCounter; // used to count moves until the forced draw
     bool isCheck;
+    std::vector<Move> moveHistory; // for easy export
+    std::vector<GameState> gameHistory; // for 3 time repetition
+    // add a hash to help count repeting moves? need a function
 
 public:
     void makeMove(Move move);

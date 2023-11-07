@@ -12,8 +12,7 @@ private:
     Player* playerBlack;
     Player* currentPlayer;
     GameState gameState;
-    std::vector<Move> moveHistory; // for easy export
-    std::vector<GameState> gameHistory; // for 3 time repetition
+    std::vector<Replay> matchHistory; // when a game concludes it is added here
 
 public:
     void makeMove();
