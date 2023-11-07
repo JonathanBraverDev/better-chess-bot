@@ -2,6 +2,7 @@
 
 #include "Bitboard.h"
 #include "Move.h"
+#include "Enums.h"
 
 class Board {
 private:
@@ -22,4 +23,5 @@ public:
     void makeMove(Move move);
 
     Bitboard getPieces(Color color, PieceType type) const;
+    Piece getPieceAtIndex(int index) const;
 };

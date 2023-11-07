@@ -30,3 +30,33 @@ Bitboard Board::getPieces(Color color, PieceType type) const {
         default: throw InvalidColorException();
     }
 }
+
+Piece Board::getPieceAtIndex(int index) const {
+    if (white_pawns.getBoard() & (1ULL << index)) {
+        return { Color::WHITE, PieceType::PAWN };
+    } else if (black_pawns.getBoard() & (1ULL << index)) {
+        return { Color::BLACK, PieceType::PAWN };
+    } else if (white_knights.getBoard() & (1ULL << index)) {
+        return { Color::WHITE, PieceType::KNIGHT };
+    } else if (black_knights.getBoard() & (1ULL << index)) {
+        return { Color::BLACK, PieceType::KNIGHT };
+    } else if (white_bishops.getBoard() & (1ULL << index)) {
+        return { Color::WHITE, PieceType::BISHOP };
+    } else if (black_bishops.getBoard() & (1ULL << index)) {
+        return { Color::BLACK, PieceType::BISHOP };
+    } else if (white_rooks.getBoard() & (1ULL << index)) {
+        return { Color::WHITE, PieceType::ROOK };
+    } else if (black_rooks.getBoard() & (1ULL << index)) {
+        return { Color::BLACK, PieceType::ROOK };
+    } else if (white_queens.getBoard() & (1ULL << index)) {
+        return { Color::WHITE, PieceType::QUEEN };
+    } else if (black_queens.getBoard() & (1ULL << index)) {
+        return { Color::BLACK, PieceType::QUEEN };
+    } else if (white_king.getBoard() & (1ULL << index)) {
+        return { Color::WHITE, PieceType::KING };
+    } else if (black_king.getBoard() & (1ULL << index)) {
+        return { Color::BLACK, PieceType::KING };
+    } else {
+        return { Color::NONE, PieceType::NONE };
+    }
+}

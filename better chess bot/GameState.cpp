@@ -3,6 +3,9 @@
 
 void GameState::makeMove(Move move) {
 	// pass the call to the board
+
+	// update color
+	// update timerbased on move
 }
 
 std::vector<Move> GameState::getLegalMoves() const {
