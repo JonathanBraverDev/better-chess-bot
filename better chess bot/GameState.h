@@ -33,6 +33,8 @@ public:
 
     Bitboard getOwnPieces(PieceType type) const;
     Bitboard getOpponentPieces(PieceType type) const;
+    Bitboard getAllOwnPieces() const;
+    Bitboard getAllOpponentPieces() const;
 
     // check check only if moving from any tile a queen can reach from the king (incliding first colision)
 
