@@ -1,6 +1,11 @@
 #include "GameState.h"
 #include "Enums.h"
 
+std::vector<Move> GameState::getPotentialMoves() {
+	std::vector<Move> moves;
+	return moves;
+}
+
 void GameState::makeMove(Move move) {
 	// pass the call to the board
 
@@ -21,10 +26,10 @@ std::vector<Move> GameState::getLegalMoves() const {
 	return std::vector<Move>();
 }
 
-Bitboard GameState::getOwnPieces(Color color, PieceType type) const {
-	return board.getPieces(color, type);
+Bitboard GameState::getOwnPieces(PieceType type) const {
+	return board.getPieces(current_color, type);
 }
 
-Bitboard GameState::getOpponentPieces(Color color, PieceType type) const {
-	return board.getPieces((color == Color::WHITE ? Color::BLACK : Color::WHITE), type);
+Bitboard GameState::getOpponentPieces(PieceType type) const {
+	return board.getPieces((current_color == Color::WHITE ? Color::BLACK : Color::WHITE), type);
 }

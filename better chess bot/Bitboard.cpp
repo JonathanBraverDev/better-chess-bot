@@ -76,6 +76,12 @@ void Bitboard::clearBitsFrom(Bitboard otherBoard) {
     board &= ~otherBoard.getBoard();
 }
 
+Bitboard Bitboard::popLowestBit() {
+    B64 lowest = lowestBitBoard();
+    clearLowestBit();
+    return Bitboard(lowest);
+}
+
 void Bitboard::clearLowestBit()
 {
     board &= (board - 1); // AND after -1, garantees removal of exactly one lowest bit;

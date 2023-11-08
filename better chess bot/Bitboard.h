@@ -6,6 +6,9 @@ class Bitboard {
 private:
     B64 board;
 
+    // B64 shouldn't be exposed
+    B64 lowestBitBoard() const;
+
     // expected to be used on a board with only one active bit
     Bitboard slide(void (Bitboard::* const direction)(), const Bitboard& allPieces);
 
@@ -17,7 +20,6 @@ public:
 
     B64 getBoard() const;
     bool getBit(int index) const;
-    B64 lowestBitBoard() const;
     int countSetBits() const;
 
     void setBit(int index);
@@ -25,6 +27,7 @@ public:
     void clearLowestBit();
     void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);
+    Bitboard popLowestBit();
 
     // piece movement assists, with bound protections
     void moveUp();

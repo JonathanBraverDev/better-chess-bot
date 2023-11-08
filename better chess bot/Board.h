@@ -20,16 +20,10 @@ private:
     Bitboard black_queens;
     Bitboard black_king; // I swear it's not just discrimination
 
-    // moves the pieces could make
-    std::vector<Move> getPotentialMoves(Color color);
-
 public:
     void makeMove(Move move);
 
     Bitboard getPieces(Color color, PieceType type) const;
     Piece getPieceAtIndex(int index) const;
     bool validate() const;
-
-    // moves that can be legally played
-    std::vector<Move> getLegalMoves(Color color);
 };

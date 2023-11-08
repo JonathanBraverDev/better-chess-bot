@@ -17,15 +17,27 @@ private:
     std::vector<GameState> gameHistory; // for 3 time repetition
     // add a hash to help count repeting moves? need a function
 
+    // moves the pieces could make
+    std::vector<Move> getPotentialMoves();
+    void getPawnMoves(std::vector<Move>& moves);
+    void getKnightMoves(std::vector<Move>& moves);
+    void getBishopMoves(std::vector<Move>& moves);
+    void getRookMoves(std::vector<Move>& moves);
+    void getQueenMoves(std::vector<Move>& moves);
+    void getKingMoves(std::vector<Move>& moves);
+
 public:
     void makeMove(Move move);
     
     std::vector<Move> getLegalMoves() const;
 
-    Bitboard getOwnPieces(Color color, PieceType type) const;
-    Bitboard getOpponentPieces(Color color, PieceType type) const;
+    Bitboard getOwnPieces(PieceType type) const;
+    Bitboard getOpponentPieces(PieceType type) const;
 
     // check check only if moving from any tile a queen can reach from the king (incliding first colision)
+
+    // moves that can be legally played
+    std::vector<Move> getLegalMoves();
 };
 
 
