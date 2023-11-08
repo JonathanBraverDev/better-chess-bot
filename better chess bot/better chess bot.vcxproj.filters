@@ -42,10 +42,19 @@
     <ClCompile Include="Position structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Magic bit boards.cpp">
+    <ClCompile Include="Move.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Move.cpp">
+    <ClCompile Include="Bitboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Board.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,13 +77,7 @@
     <ClInclude Include="Move search.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Move structure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Position generation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Board structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Game constants.h">
@@ -83,25 +86,46 @@
     <ClInclude Include="Attack detection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Piece structure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Preallocation structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Evaluation structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Magic bit boards.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Move.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Move encoding.h">
+    <ClInclude Include="Enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Enums.h">
+    <ClInclude Include="Bitboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Board.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Exceptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveEncoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Consts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

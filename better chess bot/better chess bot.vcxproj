@@ -159,6 +159,7 @@
     <ClInclude Include="Bitboard.h" />
     <ClInclude Include="Board operations.h" />
     <ClInclude Include="Board.h" />
+    <ClInclude Include="Consts.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
     <ClInclude Include="Exceptions.h" />
