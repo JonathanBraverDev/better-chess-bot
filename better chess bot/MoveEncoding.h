@@ -57,7 +57,7 @@ IS_CAPTURE_MASK | MISC_MOVE_TYPE_MASK;
 // 1 bit promotion flag
 // 1 bit check flag
 // 1 bit capture flag
-// 2 bit misc move types (normal, both castles, generic good move)
+// 2 bit misc move types (see emun)
 // total 5 order bits
 // 
 // 8 bits left unused for now (possibly BitRights)

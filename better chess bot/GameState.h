@@ -18,13 +18,17 @@ private:
     // add a hash to help count repeting moves? need a function
 
     // moves the pieces could make
-    std::vector<Move> getPotentialMoves();
+    std::vector<Move> getPotentialMoves() const;
     void getPawnMoves(std::vector<Move>& moves);
     void getKnightMoves(std::vector<Move>& moves);
-    void getBishopMoves(std::vector<Move>& moves);
+    void getBishopMoves(std::vector<Move>& moves) const;
     void getRookMoves(std::vector<Move>& moves);
     void getQueenMoves(std::vector<Move>& moves);
     void getKingMoves(std::vector<Move>& moves);
+    void addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const;
+    void addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captues) const;
+
+    Color getOpponentColor() const;
 
 public:
     void makeMove(Move move);
@@ -39,7 +43,7 @@ public:
     // check check only if moving from any tile a queen can reach from the king (incliding first colision)
 
     // moves that can be legally played
-    std::vector<Move> getLegalMoves();
+    std::vector<Move> getLegalMoves(); // update the check for the move itself during this check
 };
 
 

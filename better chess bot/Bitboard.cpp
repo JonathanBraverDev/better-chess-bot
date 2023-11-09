@@ -38,7 +38,7 @@ void Bitboard::visualize() {
     std::cout << '\n';
 }
 
-
+// any use is a potential danger to data integrity
 B64 Bitboard::getBoard() const {
     return board;
 }
@@ -60,7 +60,7 @@ int Bitboard::countSetBits() const {
 }
 
 // use only on SINGLE BIT boards
-int Bitboard::lowestSingleBitIndex() const {
+int Bitboard::singleBitIndex() const {
     return DeBruijnPositionLookup[((board * DeBruijnMultiplier)) >> 58];
 }
 

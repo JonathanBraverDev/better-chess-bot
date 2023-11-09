@@ -21,7 +21,7 @@ public:
     B64 getBoard() const;
     bool getBit(int index) const;
     int countSetBits() const;
-    int lowestSingleBitIndex() const;
+    int singleBitIndex() const;
 
     void setBit(int index);
     void clearBit(int index);
@@ -29,7 +29,7 @@ public:
     void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);
 
-    // extracts the lowest bit and deletes it from the board
+    // extracts the lowest bit, deleting it from the board
     Bitboard popLowestBit();
 
     // piece movement assists, with bound protections
