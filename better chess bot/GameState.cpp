@@ -45,7 +45,7 @@ void GameState::addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bit
 	Bitboard destination = destinations.popLowestBit();
 	Move move;
 
-	while (destination.getBoard()) {
+	while (destination.hasRemainingBits()) {
 		move = baseMove; // reset the move
 
 		move.setDestinationIndex(destination.singleBitIndex());
