@@ -15,6 +15,7 @@ private:
 public:
     Bitboard(); // Default constructor
     Bitboard(B64 initialData); // Constructor with initial data
+    void clear();
 
     void visualize();
 
@@ -52,4 +53,20 @@ public:
     Bitboard slideUpRight(const Bitboard allPieces);
     Bitboard slideDownLeft(const Bitboard allPieces);
     Bitboard slideDownRight(const Bitboard allPieces);
+
+
+    // create a bitboard containing all bits on given boards
+    static Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2);
+
+    // adapt base case to any number of inputs recursivley
+    template <typename... Boards>
+    static Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2, const Boards&... boards);
+
+
+    // create a bitboard of overlaping bits on given boards
+    static Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2);
+
+    // adapt base case to any number of inputs recursivley
+    template <typename... Boards>
+    static Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2, const Boards&... boards);
 };

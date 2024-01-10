@@ -10,6 +10,7 @@ private:
 public:
     Move();
     Move(BitMove encoded);
+    void clear();
 
     BitMove getEncodedMove() const;
 

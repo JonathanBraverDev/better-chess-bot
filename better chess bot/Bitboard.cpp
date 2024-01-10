@@ -21,6 +21,10 @@ Bitboard::Bitboard() : board(0) {}
 // Constructor with initial data
 Bitboard::Bitboard(B64 initialData) : board(initialData) {}
 
+ void Bitboard::clear() {
+    board = 0;
+}
+
 void Bitboard::visualize() {
     for (int i = BOARD_SIDE_SUB1; i >= 0; i--) {
         for (int j = 0; j <= BOARD_SIDE_SUB1; j++) {
@@ -108,3 +112,26 @@ Bitboard Bitboard::slideUpLeft(const Bitboard allPieces) { return slide(&moveUpL
 Bitboard Bitboard::slideUpRight(const Bitboard allPieces) { return slide(&moveUpRight, allPieces); }
 Bitboard Bitboard::slideDownLeft(const Bitboard allPieces) { return slide(&moveDownLeft, allPieces); }
 Bitboard Bitboard::slideDownRight(const Bitboard allPieces) { return slide(&moveDownRight, allPieces); }
+
+
+// Base case for recursion: Combine two Bitboards
+Bitboard Bitboard::combineBoards(const Bitboard& board1, const Bitboard& board2) {
+    return Bitboard(board1.getBoard() | board2.getBoard());
+}
+
+// Recursive function to combine any number of Bitboards
+template <typename... Boards>
+Bitboard Bitboard::combineBoards(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
+    return combineBoards(board1, combineBoards(board2, boards...));
+}
+
+// Base case for recursion: Find common bits between two Bitboards
+Bitboard Bitboard::findCommonBits(const Bitboard& board1, const Bitboard& board2) {
+    return Bitboard(board1.getBoard() & board2.getBoard());
+}
+
+// Recursive function to find common bits among any number of Bitboards
+template <typename... Boards>
+Bitboard Bitboard::findCommonBits(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
+    return findCommonBits(board1, findCommonBits(board2, boards...));
+}

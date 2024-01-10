@@ -10,7 +10,7 @@ void GameState::getBishopMoves(std::vector<Move>& moves) const {
 	Bitboard bishops = board.getPieces(current_color, PieceType::BISHOP);
 	Bitboard ownPieces = getAllOwnPieces();
 	Bitboard opponentPieces = getAllOpponentPieces();
-	Bitboard allPieces = ownPieces.getBoard() | opponentPieces.getBoard();
+	Bitboard allPieces = Bitboard::combineBoards(ownPieces, opponentPieces);
 	Bitboard destinations;
 	Bitboard captures;
 	Move moveBase;
@@ -18,20 +18,20 @@ void GameState::getBishopMoves(std::vector<Move>& moves) const {
 	Bitboard bishop = bishops.popLowestBit(); // focus on the next bishop
 
 	while (bishop.getBoard()) { // check that a bishop exists
-		moveBase = Move(0); // reset the move
-		destinations = Bitboard(0);
+		moveBase.clear();
+		destinations.clear();
 
 		moveBase.setMoverColor(current_color);
 		moveBase.setMovingOrPromotedType(PieceType::BISHOP);
 		moveBase.setOriginIndex(bishop.singleBitIndex());
 
-		destinations = (bishop.slideUpLeft(allPieces).getBoard() |
-						bishop.slideUpRight(allPieces).getBoard() |
-						bishop.slideDownLeft(allPieces).getBoard() |
-						bishop.slideDownRight(allPieces).getBoard());
+		destinations = Bitboard::combineBoards(bishop.slideUpLeft(allPieces),
+											   bishop.slideUpRight(allPieces),
+											   bishop.slideDownLeft(allPieces),
+											   bishop.slideDownRight(allPieces));
 		destinations.clearBitsFrom(ownPieces);
 
-		captures = destinations.getBoard() & opponentPieces.getBoard();
+		captures = Bitboard::findCommonBits(destinations, opponentPieces);
 		destinations.clearBitsFrom(captures);
 		
 		addDestinationMoves(moves, moveBase, destinations);
