@@ -17,7 +17,7 @@ void GameState::getBishopMoves(std::vector<Move>& moves) const {
 	
 	Bitboard bishop = bishops.popLowestBit(); // focus on the next bishop
 
-	while (bishop.getBoard()) { // check that a bishop exists
+	while (bishop.hasRemainingBits()) {
 		moveBase.clear();
 		destinations.clear();
 
@@ -60,12 +60,12 @@ void GameState::addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboar
 	Move move;
 	int destinationIndex = capture.singleBitIndex();
 
-	while (capture.getBoard()) {
+	while (capture.hasRemainingBits()) {
 		move = baseMove; // reset the move
 
 		move.setDestinationIndex(destinationIndex);
 		move.setCapturedType(board.getPieceAtIndex(destinationIndex).type);
-		move.setCapture(true);
+		move.setCapture(true); // very similar functions to "DestinationMoves" but saves the check on every tile
 
 		moves.push_back(move);
 
@@ -106,19 +106,19 @@ Bitboard GameState::getOpponentPieces(PieceType type) const {
 }
 
 Bitboard GameState::getAllOwnPieces() const {
-	return Bitboard(getOwnPieces(PieceType::PAWN).getBoard() |
-				    getOwnPieces(PieceType::KNIGHT).getBoard() |
-				    getOwnPieces(PieceType::BISHOP).getBoard() |
-				    getOwnPieces(PieceType::ROOK).getBoard() |
-				    getOwnPieces(PieceType::QUEEN).getBoard() |
-				    getOwnPieces(PieceType::KING).getBoard());
+	return Bitboard::combineBoards(getOwnPieces(PieceType::PAWN),
+									getOwnPieces(PieceType::KNIGHT),
+									getOwnPieces(PieceType::BISHOP),
+									getOwnPieces(PieceType::ROOK),
+									getOwnPieces(PieceType::QUEEN),
+									getOwnPieces(PieceType::KING));
 }
 
 Bitboard GameState::getAllOpponentPieces() const {
-	return Bitboard(getOpponentPieces(PieceType::PAWN).getBoard() |
-					getOpponentPieces(PieceType::KNIGHT).getBoard() |
-					getOpponentPieces(PieceType::BISHOP).getBoard() |
-					getOpponentPieces(PieceType::ROOK).getBoard() |
-					getOpponentPieces(PieceType::QUEEN).getBoard() |
-					getOpponentPieces(PieceType::KING).getBoard());
+	return Bitboard::combineBoards(getOpponentPieces(PieceType::PAWN),
+									getOpponentPieces(PieceType::KNIGHT),
+									getOpponentPieces(PieceType::BISHOP),
+									getOpponentPieces(PieceType::ROOK),
+									getOpponentPieces(PieceType::QUEEN),
+									getOpponentPieces(PieceType::KING));
 }

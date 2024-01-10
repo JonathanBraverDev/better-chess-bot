@@ -23,6 +23,7 @@ public:
     bool getBit(int index) const;
     int countSetBits() const;
     int singleBitIndex() const;
+    bool hasRemainingBits() const;
 
     void setBit(int index);
     void clearBit(int index);

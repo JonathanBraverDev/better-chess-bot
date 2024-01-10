@@ -62,11 +62,9 @@ Piece Board::getPieceAtIndex(int index) const {
 }
 
 bool Board::validate() const {
-    const Bitboard white_pieces = white_pawns.getBoard() | white_knights.getBoard() | white_bishops.getBoard() |
-        white_rooks.getBoard() | white_queens.getBoard();
+    const Bitboard white_pieces = Bitboard::combineBoards(white_pawns, white_knights, white_bishops, white_rooks,white_queens);
 
-    const Bitboard black_pieces = black_pawns.getBoard() | black_knights.getBoard() | black_bishops.getBoard() |
-        black_rooks.getBoard() | black_queens.getBoard();
+    const Bitboard black_pieces = Bitboard::combineBoards(black_pawns, black_knights, black_bishops, black_rooks, black_queens);
 
     const Bitboard* boards[] = {
         &white_pawns, &white_knights, &white_bishops,

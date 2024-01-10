@@ -68,6 +68,10 @@ int Bitboard::singleBitIndex() const {
     return DeBruijnPositionLookup[((board * DeBruijnMultiplier)) >> 58];
 }
 
+bool Bitboard::hasRemainingBits() const {
+    return board != 0;
+}
+
 
 void Bitboard::setBit(int index) {
     board |= (1ULL << index); // SHIFT 1 to position, set to OR
