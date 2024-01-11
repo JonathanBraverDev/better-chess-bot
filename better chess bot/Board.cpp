@@ -66,15 +66,6 @@ bool Board::validate() const {
 
     const Bitboard black_pieces = Bitboard::combineBoards(black_pawns, black_knights, black_bishops, black_rooks, black_queens);
 
-    const Bitboard* boards[] = {
-        &white_pawns, &white_knights, &white_bishops,
-        &white_rooks, &white_queens, &white_king,
-        &black_pawns, &black_knights, &black_bishops,
-        &black_rooks, &black_queens, &black_king
-    };
-
-    int boardNum = sizeof(boards) / sizeof(boards[0]);
-
     // Check if there is only one king for each color
     if (white_king.countSetBits() != 1 || black_king.countSetBits() != 1) {
         return false;
@@ -86,12 +77,9 @@ bool Board::validate() const {
     }
 
     // Check for overlaps between all piece types (overkill)
-    for (int i = 0; i < boardNum; ++i) {
-        for (int j = i + 1; j < boardNum; ++j) {
-            if (boards[i]->getBoard() & boards[j]->getBoard()) {
-                return false;
-            }
-        }
+    if (Bitboard::findCommonBits(white_pawns, white_knights, white_bishops, white_rooks, white_queens,
+                                 black_pawns, black_knights, black_bishops, black_rooks, black_queens).hasRemainingBits()) {
+        return false;
     }
 
     return true;
