@@ -117,25 +117,23 @@ Bitboard Bitboard::slideUpRight(const Bitboard allPieces) { return slide(&moveUp
 Bitboard Bitboard::slideDownLeft(const Bitboard allPieces) { return slide(&moveDownLeft, allPieces); }
 Bitboard Bitboard::slideDownRight(const Bitboard allPieces) { return slide(&moveDownRight, allPieces); }
 
+namespace BitboardOperations {
+    Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2) {
+        return Bitboard(board1.getBoard() | board2.getBoard());
+    }
 
-// Base case for recursion: Combine two Bitboards
-Bitboard Bitboard::combineBoards(const Bitboard& board1, const Bitboard& board2) {
-    return Bitboard(board1.getBoard() | board2.getBoard());
-}
+    template <typename... Boards>
+    Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
+        return combineBoards(board1, combineBoards(board2, boards...));
+    }
 
-// Recursive function to combine any number of Bitboards
-template <typename... Boards>
-Bitboard Bitboard::combineBoards(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
-    return combineBoards(board1, combineBoards(board2, boards...));
-}
 
-// Base case for recursion: Find common bits between two Bitboards
-Bitboard Bitboard::findCommonBits(const Bitboard& board1, const Bitboard& board2) {
-    return Bitboard(board1.getBoard() & board2.getBoard());
-}
+    Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2) {
+        return Bitboard(board1.getBoard() & board2.getBoard());
+    }
 
-// Recursive function to find common bits among any number of Bitboards
-template <typename... Boards>
-Bitboard Bitboard::findCommonBits(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
-    return findCommonBits(board1, findCommonBits(board2, boards...));
+    template <typename... Boards>
+    Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
+        return findCommonBits(board1, findCommonBits(board2, boards...));
+    }
 }

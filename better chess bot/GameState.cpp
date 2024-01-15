@@ -10,7 +10,7 @@ void GameState::getBishopMoves(std::vector<Move>& moves) const {
 	Bitboard bishops = board.getPieces(current_color, PieceType::BISHOP);
 	Bitboard ownPieces = getAllOwnPieces();
 	Bitboard opponentPieces = getAllOpponentPieces();
-	Bitboard allPieces = Bitboard::combineBoards(ownPieces, opponentPieces);
+	Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
 	Bitboard destinations;
 	Bitboard captures;
 	Move moveBase;
@@ -25,13 +25,13 @@ void GameState::getBishopMoves(std::vector<Move>& moves) const {
 		moveBase.setMovingOrPromotedType(PieceType::BISHOP);
 		moveBase.setOriginIndex(bishop.singleBitIndex());
 
-		destinations = Bitboard::combineBoards(bishop.slideUpLeft(allPieces),
+		destinations = BitboardOperations::combineBoards(bishop.slideUpLeft(allPieces),
 											   bishop.slideUpRight(allPieces),
 											   bishop.slideDownLeft(allPieces),
 											   bishop.slideDownRight(allPieces));
 		destinations.clearBitsFrom(ownPieces);
 
-		captures = Bitboard::findCommonBits(destinations, opponentPieces);
+		captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
 		destinations.clearBitsFrom(captures);
 		
 		addDestinationMoves(moves, moveBase, destinations);
@@ -106,7 +106,7 @@ Bitboard GameState::getOpponentPieces(PieceType type) const {
 }
 
 Bitboard GameState::getAllOwnPieces() const {
-	return Bitboard::combineBoards(getOwnPieces(PieceType::PAWN),
+	return BitboardOperations::combineBoards(getOwnPieces(PieceType::PAWN),
 									getOwnPieces(PieceType::KNIGHT),
 									getOwnPieces(PieceType::BISHOP),
 									getOwnPieces(PieceType::ROOK),
@@ -115,7 +115,7 @@ Bitboard GameState::getAllOwnPieces() const {
 }
 
 Bitboard GameState::getAllOpponentPieces() const {
-	return Bitboard::combineBoards(getOpponentPieces(PieceType::PAWN),
+	return BitboardOperations::combineBoards(getOpponentPieces(PieceType::PAWN),
 									getOpponentPieces(PieceType::KNIGHT),
 									getOpponentPieces(PieceType::BISHOP),
 									getOpponentPieces(PieceType::ROOK),
