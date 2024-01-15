@@ -6,39 +6,79 @@ std::vector<Move> GameState::getPotentialMoves() const {
 	return moves;
 }
 
+void GameState::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pieceType) const {
+    Bitboard pieces = board.getPieces(current_color, pieceType);
+    Bitboard ownPieces = getAllOwnPieces();
+    Bitboard opponentPieces = getAllOpponentPieces();
+    Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
+    Bitboard destinations;
+    Bitboard captures;
+    Move moveBase;
+
+    Bitboard piece = pieces.popLowestBit(); // focus on the next piece
+
+    while (piece.hasRemainingBits()) {
+        moveBase.clear();
+        destinations.clear();
+
+        moveBase.setMoverColor(current_color);
+        moveBase.setMovingOrPromotedType(pieceType);
+        moveBase.setOriginIndex(piece.singleBitIndex());
+
+        // Update destinations based on piece type
+        switch (pieceType) {
+        case PieceType::BISHOP:
+            destinations = BitboardOperations::combineBoards(
+                piece.slideUpLeft(allPieces),
+                piece.slideUpRight(allPieces),
+                piece.slideDownLeft(allPieces),
+                piece.slideDownRight(allPieces)
+            );
+            break;
+        case PieceType::ROOK:
+            destinations = BitboardOperations::combineBoards(
+                piece.slideUp(allPieces),
+                piece.slideDown(allPieces),
+                piece.slideLeft(allPieces),
+                piece.slideRight(allPieces)
+            );
+            break;
+        case PieceType::QUEEN:
+            destinations = BitboardOperations::combineBoards(
+                piece.slideUp(allPieces),
+                piece.slideDown(allPieces),
+                piece.slideLeft(allPieces),
+                piece.slideRight(allPieces),
+                piece.slideUpLeft(allPieces),
+                piece.slideUpRight(allPieces),
+                piece.slideDownLeft(allPieces),
+                piece.slideDownRight(allPieces)
+            );
+            break;
+        }
+
+        destinations.clearBitsFrom(ownPieces);
+
+        captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
+        destinations.clearBitsFrom(captures);
+
+        addDestinationMoves(moves, moveBase, destinations);
+        addCaptureMoves(moves, moveBase, captures);
+
+        piece = pieces.popLowestBit();
+    }
+}
+
 void GameState::getBishopMoves(std::vector<Move>& moves) const {
-	Bitboard bishops = board.getPieces(current_color, PieceType::BISHOP);
-	Bitboard ownPieces = getAllOwnPieces();
-	Bitboard opponentPieces = getAllOpponentPieces();
-	Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
-	Bitboard destinations;
-	Bitboard captures;
-	Move moveBase;
-	
-	Bitboard bishop = bishops.popLowestBit(); // focus on the next bishop
+    getSlidingPieceMoves(moves, PieceType::BISHOP);
+}
 
-	while (bishop.hasRemainingBits()) {
-		moveBase.clear();
-		destinations.clear();
+void GameState::getRookMoves(std::vector<Move>& moves) const {
+    getSlidingPieceMoves(moves, PieceType::ROOK);
+}
 
-		moveBase.setMoverColor(current_color);
-		moveBase.setMovingOrPromotedType(PieceType::BISHOP);
-		moveBase.setOriginIndex(bishop.singleBitIndex());
-
-		destinations = BitboardOperations::combineBoards(bishop.slideUpLeft(allPieces),
-											   bishop.slideUpRight(allPieces),
-											   bishop.slideDownLeft(allPieces),
-											   bishop.slideDownRight(allPieces));
-		destinations.clearBitsFrom(ownPieces);
-
-		captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
-		destinations.clearBitsFrom(captures);
-		
-		addDestinationMoves(moves, moveBase, destinations);
-		addCaptureMoves(moves, moveBase, captures);
-
-		bishop = bishops.popLowestBit();
-	}
+void GameState::getQueenMoves(std::vector<Move>& moves) const {
+    getSlidingPieceMoves(moves, PieceType::QUEEN);
 }
 
 void GameState::addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const {
@@ -107,18 +147,18 @@ Bitboard GameState::getOpponentPieces(PieceType type) const {
 
 Bitboard GameState::getAllOwnPieces() const {
 	return BitboardOperations::combineBoards(getOwnPieces(PieceType::PAWN),
-									getOwnPieces(PieceType::KNIGHT),
-									getOwnPieces(PieceType::BISHOP),
-									getOwnPieces(PieceType::ROOK),
-									getOwnPieces(PieceType::QUEEN),
-									getOwnPieces(PieceType::KING));
+											 getOwnPieces(PieceType::KNIGHT),
+											 getOwnPieces(PieceType::BISHOP),
+											 getOwnPieces(PieceType::ROOK),
+  											 getOwnPieces(PieceType::QUEEN),
+											 getOwnPieces(PieceType::KING));
 }
 
 Bitboard GameState::getAllOpponentPieces() const {
 	return BitboardOperations::combineBoards(getOpponentPieces(PieceType::PAWN),
-									getOpponentPieces(PieceType::KNIGHT),
-									getOpponentPieces(PieceType::BISHOP),
-									getOpponentPieces(PieceType::ROOK),
-									getOpponentPieces(PieceType::QUEEN),
-									getOpponentPieces(PieceType::KING));
+											 getOpponentPieces(PieceType::KNIGHT),
+											 getOpponentPieces(PieceType::BISHOP),
+											 getOpponentPieces(PieceType::ROOK),
+											 getOpponentPieces(PieceType::QUEEN),
+											 getOpponentPieces(PieceType::KING));
 }

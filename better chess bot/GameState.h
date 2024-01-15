@@ -21,9 +21,10 @@ private:
     std::vector<Move> getPotentialMoves() const;
     void getPawnMoves(std::vector<Move>& moves);
     void getKnightMoves(std::vector<Move>& moves);
+    void getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pieceType) const;
     void getBishopMoves(std::vector<Move>& moves) const;
-    void getRookMoves(std::vector<Move>& moves);
-    void getQueenMoves(std::vector<Move>& moves);
+    void getRookMoves(std::vector<Move>& moves) const;
+    void getQueenMoves(std::vector<Move>& moves) const;
     void getKingMoves(std::vector<Move>& moves);
     void addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const;
     void addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captues) const;
