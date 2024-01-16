@@ -18,28 +18,7 @@
     <ClCompile Include="better chess bot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Boad operations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Evaluation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Board generation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Move handling.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Move search.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Position generation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Attack detection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Position structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Move.cpp">
@@ -59,36 +38,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Position structure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Board operations.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Evaluation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Board generation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Move handling.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Move search.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Position generation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Game constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Attack detection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Preallocation structure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Evaluation structure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
