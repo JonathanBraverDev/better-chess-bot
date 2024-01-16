@@ -5,16 +5,9 @@
 
 typedef uint64_t B64; // 64 bit board
 typedef uint32_t BitMove; // bit-encoded move format
-typedef uint8_t BitRights; // minimalistic traching of special moverights
+typedef uint8_t BitRights; // minimalistic tracing of special move rights
 
 struct Piece {
     Color color;
     PieceType type;
-};
-
-// will be "promoted" to a class later
-struct Replay {
-    Color winner;
-    GameOverCause endType;
-    GameState finalState;
 };

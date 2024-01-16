@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Bitboard.h"
-#include "Game constants.h"
+#include "BoardConstants.h"
 #include "Consts.h"
 
 Bitboard Bitboard::slide(void (Bitboard::* const direction)(), const Bitboard allPieces) {
@@ -108,14 +108,14 @@ void Bitboard::moveUpRight() { (board & COLUMN_A_INV) << BOARD_SIDE_ADD1; }
 void Bitboard::moveDownLeft() { board = (board & COLUMN_H_INV) >> BOARD_SIDE_ADD1; }
 void Bitboard::moveDownRight() { board = (board & COLUMN_A_INV) >> BOARD_SIDE_SUB1; }
 
-Bitboard Bitboard::slideUp(const Bitboard allPieces) { return slide(&moveUp, allPieces); }
-Bitboard Bitboard::slideDown(const Bitboard allPieces) { return slide(&moveDown, allPieces); }
-Bitboard Bitboard::slideLeft(const Bitboard allPieces) { return slide(&moveLeft, allPieces); }
-Bitboard Bitboard::slideRight(const Bitboard allPieces) { return slide(&moveRight, allPieces); }
-Bitboard Bitboard::slideUpLeft(const Bitboard allPieces) { return slide(&moveUpLeft, allPieces); }
-Bitboard Bitboard::slideUpRight(const Bitboard allPieces) { return slide(&moveUpRight, allPieces); }
-Bitboard Bitboard::slideDownLeft(const Bitboard allPieces) { return slide(&moveDownLeft, allPieces); }
-Bitboard Bitboard::slideDownRight(const Bitboard allPieces) { return slide(&moveDownRight, allPieces); }
+Bitboard Bitboard::slideUp(const Bitboard allPieces) { return slide(&Bitboard::moveUp, allPieces); }
+Bitboard Bitboard::slideDown(const Bitboard allPieces) { return slide(&Bitboard::moveDown, allPieces); }
+Bitboard Bitboard::slideLeft(const Bitboard allPieces) { return slide(&Bitboard::moveLeft, allPieces); }
+Bitboard Bitboard::slideRight(const Bitboard allPieces) { return slide(&Bitboard::moveRight, allPieces); }
+Bitboard Bitboard::slideUpLeft(const Bitboard allPieces) { return slide(&Bitboard::moveUpLeft, allPieces); }
+Bitboard Bitboard::slideUpRight(const Bitboard allPieces) { return slide(&Bitboard::moveUpRight, allPieces); }
+Bitboard Bitboard::slideDownLeft(const Bitboard allPieces) { return slide(&Bitboard::moveDownLeft, allPieces); }
+Bitboard Bitboard::slideDownRight(const Bitboard allPieces) { return slide(&Bitboard::moveDownRight, allPieces); }
 
 namespace BitboardOperations {
     Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2) {

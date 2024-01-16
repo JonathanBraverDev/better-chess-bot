@@ -141,14 +141,13 @@
   <ItemGroup>
     <ClCompile Include="better chess bot.cpp" />
     <ClCompile Include="Bitboard.cpp" />
-    <ClCompile Include="Board.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Move.cpp" />
+    <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitboard.h" />
-    <ClInclude Include="Board.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
@@ -159,6 +158,7 @@
     <ClInclude Include="Move.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="BoardConstants.h" />
+    <ClInclude Include="Position.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

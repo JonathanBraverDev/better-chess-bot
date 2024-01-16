@@ -5,7 +5,7 @@
 #include "Move.h"
 #include "Player.h"
 
-// info on gamestate
+// top level info on the game, who's playing, and how did the games end
 class Game { // split off from positiopn to allow memcmp (both the timer and pointer whould interefere)
 private:
     Player* playerWhite;

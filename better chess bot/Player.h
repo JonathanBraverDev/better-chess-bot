@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Board.h"
+#include "Position.h"
 #include "Move.h"
 
 class Player {
