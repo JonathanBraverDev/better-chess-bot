@@ -18,9 +18,6 @@
     <ClCompile Include="better chess bot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Evaluation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Move.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
