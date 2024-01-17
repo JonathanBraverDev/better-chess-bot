@@ -57,26 +57,37 @@ public:
 };
 
 namespace BitboardOperations {
-    // create a bitboard containing all bits from inputs
-    template <typename T, typename... Boards>
-    Bitboard combineBoards(T board, Boards... boards) {
-        return combineBoards(board, boards...);
-    }
 
     template <typename T>
-    Bitboard combineBoards(T board) {
+    B64 combineBoardsJoiner(T board) {
+        return board.getBoard();
+    }
+    
+    template <typename T, typename... Boards>
+    B64 combineBoardsJoiner(T board, Boards... boards) {
+        return board.getBoard() | combineBoardsJoiner(boards...);
+    }
+
+    // create a board containing all bits from inputs
+    template <typename T, typename... Boards>
+    Bitboard combineBoards(T board, Boards... boards) {
+        return Bitboard(combineBoardsJoiner(board, boards...));
+    }
+
+
+    template <typename T>
+    B64 findCommonBitsJoiner(T board) {
         return board.getBoard();
     }
 
+    template <typename T, typename... Boards>
+    B64 findCommonBitsJoiner(T board, Boards... boards) {
+        return board.getBoard() & findCommonBitsJoiner(boards...);
+    }
 
     // create a bitboard of overlaping bits on all inputs
     template <typename T, typename... Boards>
     Bitboard findCommonBits(T board, Boards... boards) {
-        return findCommonBits(board, boards...);
-    }
-
-    template <typename T>
-    Bitboard findCommonBits(T board) {
-        return board.getBoard();
+        return Bitboard(findCommonBitsJoiner(board, boards...));
     }
 }
