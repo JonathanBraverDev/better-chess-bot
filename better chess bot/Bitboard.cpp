@@ -101,10 +101,10 @@ void Bitboard::clearLowestBit() {
 
 void Bitboard::moveUp() { board = board << BOARD_SIZE; }
 void Bitboard::moveDown() { board = board >> BOARD_SIZE; }
-void Bitboard::moveLeft() { (board & COLUMN_H_INV) >> 1; }
-void Bitboard::moveRight() { (board & COLUMN_A_INV) << 1; }
-void Bitboard::moveUpLeft() { (board & COLUMN_H_INV) << BOARD_SIDE_SUB1; }
-void Bitboard::moveUpRight() { (board & COLUMN_A_INV) << BOARD_SIDE_ADD1; }
+void Bitboard::moveLeft() { board = (board & COLUMN_H_INV) >> 1; }
+void Bitboard::moveRight() { board = (board & COLUMN_A_INV) << 1; }
+void Bitboard::moveUpLeft() { board = (board & COLUMN_H_INV) << BOARD_SIDE_SUB1; }
+void Bitboard::moveUpRight() { board = (board & COLUMN_A_INV) << BOARD_SIDE_ADD1; }
 void Bitboard::moveDownLeft() { board = (board & COLUMN_H_INV) >> BOARD_SIDE_ADD1; }
 void Bitboard::moveDownRight() { board = (board & COLUMN_A_INV) >> BOARD_SIDE_SUB1; }
 
