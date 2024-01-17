@@ -116,24 +116,3 @@ Bitboard Bitboard::slideUpLeft(const Bitboard allPieces) { return slide(&Bitboar
 Bitboard Bitboard::slideUpRight(const Bitboard allPieces) { return slide(&Bitboard::moveUpRight, allPieces); }
 Bitboard Bitboard::slideDownLeft(const Bitboard allPieces) { return slide(&Bitboard::moveDownLeft, allPieces); }
 Bitboard Bitboard::slideDownRight(const Bitboard allPieces) { return slide(&Bitboard::moveDownRight, allPieces); }
-
-namespace BitboardOperations {
-    Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2) {
-        return Bitboard(board1.getBoard() | board2.getBoard());
-    }
-
-    template <typename... Boards>
-    Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
-        return combineBoards(board1, combineBoards(board2, boards...));
-    }
-
-
-    Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2) {
-        return Bitboard(board1.getBoard() & board2.getBoard());
-    }
-
-    template <typename... Boards>
-    Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2, const Boards&... boards) {
-        return findCommonBits(board1, findCommonBits(board2, boards...));
-    }
-}

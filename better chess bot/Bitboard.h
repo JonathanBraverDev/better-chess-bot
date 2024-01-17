@@ -57,18 +57,26 @@ public:
 };
 
 namespace BitboardOperations {
-    // create a bitboard containing all bits on given boards
-    Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2);
+    // create a bitboard containing all bits from inputs
+    template <typename T, typename... Boards>
+    Bitboard combineBoards(T board, Boards... boards) {
+        return combineBoards(board, boards...);
+    }
 
-    // adapt base case to any number of inputs recursivley
-    template <typename... Boards>
-    Bitboard combineBoards(const Bitboard& board1, const Bitboard& board2, const Boards&... boards);
+    template <typename T>
+    Bitboard combineBoards(T board) {
+        return board.getBoard();
+    }
 
 
-    // create a bitboard of overlaping bits on given boards
-    Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2);
+    // create a bitboard of overlaping bits on all inputs
+    template <typename T, typename... Boards>
+    Bitboard findCommonBits(T board, Boards... boards) {
+        return findCommonBits(board, boards...);
+    }
 
-    // adapt base case to any number of inputs recursivley
-    template <typename... Boards>
-    Bitboard findCommonBits(const Bitboard& board1, const Bitboard& board2, const Boards&... boards);
+    template <typename T>
+    Bitboard findCommonBits(T board) {
+        return board.getBoard();
+    }
 }
