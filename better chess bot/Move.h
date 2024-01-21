@@ -33,4 +33,6 @@ public:
     void setCheck(bool isCheck);
     void setCapture(bool isCapture);
     void setMiscMoveType(int miscType);
+
+    // add conversion to text form
 };

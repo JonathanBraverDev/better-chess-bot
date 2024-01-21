@@ -114,6 +114,7 @@ void Position::addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard
         moves.push_back(move);
 
         capture = captures.popLowestBit();
+        destinationIndex = capture.singleBitIndex();
     }
 }
 
@@ -197,6 +198,8 @@ bool Position::validate() const {
                                            black_pawns, black_knights, black_bishops, black_rooks, black_queens).hasRemainingBits()) {
         return false;
     }
+
+    // check only one enpasant exists, rook and king right match thier position
 
     return true;
 }

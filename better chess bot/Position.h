@@ -39,6 +39,8 @@ private:
     void addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captues) const;
 
 public:
+    // allow initialization from string
+
     void makeMove(Move move);
 
     Bitboard getPieces(Color color, PieceType type) const;
