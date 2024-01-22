@@ -1,5 +1,6 @@
 #include "Position.h"
 #include "Exceptions.h"
+#include "BoardConstants.h"
 
 void Position::makeMove(Move move) {
 	// should be mostly a copy from old code
@@ -25,7 +26,6 @@ void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pi
         moveBase.clear();
         destinations.clear();
 
-        moveBase.setMoverColor(current_color);
         moveBase.setMovingOrPromotedType(pieceType);
         moveBase.setOriginIndex(piece.singleBitIndex());
 
@@ -185,21 +185,31 @@ bool Position::validate() const {
 
     // Check if there is only one king for each color
     if (white_king.countSetBits() != 1 || black_king.countSetBits() != 1) {
-        return false;
+        throw MultipleKingsException();
     }
 
     // Check if there are no more than 15 pieces for each color (king already checked)
     if (white_pieces.countSetBits() > 15 || black_pieces.countSetBits() > 15) {
-        return false;
+        throw InvalidPieceCountException();
     }
 
     // Check for overlaps between all piece types (overkill)
     if (BitboardOperations::findCommonBits(white_pawns, white_knights, white_bishops, white_rooks, white_queens,
                                            black_pawns, black_knights, black_bishops, black_rooks, black_queens).hasRemainingBits()) {
-        return false;
+        throw OverlappingPiecesException();
     }
 
-    // check only one enpasant exists, rook and king right match thier position
+    // check that there are no 'floating' castle rights without a rook/king
+    Bitboard castalbles = BitboardOperations::combineBoards(white_king, white_rooks, black_king, black_rooks);
+    if ((special_move_rigths.getBoard() & (WHITE_CASTLE | BLACK_CASTLE)) != castalbles.getBoard()) {
+        throw InvalidCastlingRights();
+        // check that king is in the middle of rook rights?
+    }
+
+    // check that no more than one enpasant exists
+    if (Bitboard(special_move_rigths.getBoard() & ALL_EN_PASSANT).countSetBits() <= 1) {
+        throw MultipleEnpasants();
+    }
 
     return true;
 }

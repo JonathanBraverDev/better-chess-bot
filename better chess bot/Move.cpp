@@ -24,10 +24,6 @@ uint8_t Move::getDestinationIndex() const {
     return (encodedMove & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET;
 }
 
-Color Move::getMoverColor() const {
-    return static_cast<Color>((encodedMove & IS_WHITE_MOVE_MASK) >> IS_WHITE_MOVE_OFFSET);
-}
-
 PieceType Move::getMovingOrPromotedType() const {
     return static_cast<PieceType>((encodedMove & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET);
 }
@@ -60,10 +56,6 @@ void Move::setOriginIndex(uint8_t index) {
 
 void Move::setDestinationIndex(uint8_t index) {
     encodedMove = (encodedMove & ~DESTINATION_INDEX_MASK) | ((index << DESTINATION_INDEX_OFFSET) & DESTINATION_INDEX_MASK);
-}
-
-void Move::setMoverColor(Color color) {
-    encodedMove = (encodedMove & ~IS_WHITE_MOVE_MASK) | ((static_cast<uint32_t>(color) << IS_WHITE_MOVE_OFFSET) & IS_WHITE_MOVE_MASK);
 }
 
 void Move::setMovingOrPromotedType(PieceType type) {

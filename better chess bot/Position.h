@@ -45,6 +45,8 @@ public:
 
     Bitboard getPieces(Color color, PieceType type) const;
     Piece getPieceAtIndex(int index) const;
+
+    // check that the position representation is not messed up
     bool validate() const;
 
     std::vector<Move> getLegalMoves() const;

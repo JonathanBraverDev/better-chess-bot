@@ -16,7 +16,6 @@ public:
 
     uint8_t getOriginIndex() const;
     uint8_t getDestinationIndex() const;
-    Color getMoverColor() const;
     PieceType getMovingOrPromotedType() const;
     PieceType getCapturedType() const;
     bool isPromotion() const;
@@ -26,7 +25,6 @@ public:
 
     void setOriginIndex(uint8_t index);
     void setDestinationIndex(uint8_t index);
-    void setMoverColor(Color color);
     void setMovingOrPromotedType(PieceType type);
     void setCapturedType(PieceType type);
     void setPromotion(bool isPromote);

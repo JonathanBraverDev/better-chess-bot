@@ -163,10 +163,13 @@ constexpr B64 ROW_1 = A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1;
 constexpr B64 TILE_BLACK = 0xAAAAAAAAAAAAAAAAULL;
 constexpr B64 TILE_WHITE = 0x5555555555555555ULL;
 
-// programmatically needed splits of the board
-constexpr B64 VOID_WHITE_CASTLE = ~ROW_1;
-constexpr B64 VOID_BLACK_CASTLE = ~ROW_8;
-constexpr B64 VOID_ALL_EN_PASSANT = ~(ROW_3 | ROW_6);
+// special move related
+constexpr B64 WHITE_CASTLE = ROW_1;
+constexpr B64 BLACK_CASTLE = ROW_8;
+constexpr B64 ALL_EN_PASSANT = ROW_3 | ROW_6;
+constexpr B64 VOID_WHITE_CASTLE = ~WHITE_CASTLE;
+constexpr B64 VOID_BLACK_CASTLE = ~BLACK_CASTLE;
+constexpr B64 VOID_ALL_EN_PASSANT = ~ALL_EN_PASSANT;
 
 // used mainly for board slides, defined here for clarity
 constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY stupid but I WAS calculating that every single call so... yeah
