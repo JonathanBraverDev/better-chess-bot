@@ -24,6 +24,8 @@ private:
     Bitboard special_move_rigths; // en passant AND castle rights for both sides, they can't overlap anyway
     Color current_color;
 
+    static PrecomputedMoves precomputed_moves;
+
     Color getOpponentColor() const;
 
     // moves the pieces could make
