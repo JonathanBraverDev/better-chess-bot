@@ -10,7 +10,7 @@ private:
     B64 lowestBitBoard() const;
 
     // expected to be used on a board with only one active bit
-    Bitboard slide(void (Bitboard::* const direction)(), const Bitboard allPieces);
+    Bitboard slidePath(void (Bitboard::* const direction)(), const Bitboard allPieces);
 
 public:
     Bitboard(); // Default constructor
@@ -45,15 +45,15 @@ public:
     void moveDownRight();
     // note: all directional names are are according to the output of "visualize"
 
-    // aliases for the slide function, set the Bitboeard to all tiles along a path including the first collision
-    Bitboard slideUp(const Bitboard allPieces);
-    Bitboard slideDown(const Bitboard allPieces);
-    Bitboard slideLeft(const Bitboard allPieces);
-    Bitboard slideRight(const Bitboard allPieces);
-    Bitboard slideUpLeft(const Bitboard allPieces);
-    Bitboard slideUpRight(const Bitboard allPieces);
-    Bitboard slideDownLeft(const Bitboard allPieces);
-    Bitboard slideDownRight(const Bitboard allPieces);
+    // aliases for the slidePath function, set the Bitboeard to all tiles along a path including the first collision
+    Bitboard slidePathUp(const Bitboard allPieces);
+    Bitboard slidePathDown(const Bitboard allPieces);
+    Bitboard slidePathLeft(const Bitboard allPieces);
+    Bitboard slidePathRight(const Bitboard allPieces);
+    Bitboard slidePathUpLeft(const Bitboard allPieces);
+    Bitboard slidePathUpRight(const Bitboard allPieces);
+    Bitboard slidePathDownLeft(const Bitboard allPieces);
+    Bitboard slidePathDownRight(const Bitboard allPieces);
 };
 
 // hiding B64 return types, all operations should be done on Bitboard objects

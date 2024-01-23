@@ -33,30 +33,30 @@ void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pi
         switch (pieceType) {
         case PieceType::BISHOP:
             destinations = BitboardOperations::combineBoards(
-                piece.slideUpLeft(allPieces),
-                piece.slideUpRight(allPieces),
-                piece.slideDownLeft(allPieces),
-                piece.slideDownRight(allPieces)
+                piece.slidePathUpLeft(allPieces),
+                piece.slidePathUpRight(allPieces),
+                piece.slidePathDownLeft(allPieces),
+                piece.slidePathDownRight(allPieces)
             );
             break;
         case PieceType::ROOK:
             destinations = BitboardOperations::combineBoards(
-                piece.slideUp(allPieces),
-                piece.slideDown(allPieces),
-                piece.slideLeft(allPieces),
-                piece.slideRight(allPieces)
+                piece.slidePathUp(allPieces),
+                piece.slidePathDown(allPieces),
+                piece.slidePathLeft(allPieces),
+                piece.slidePathRight(allPieces)
             );
             break;
         case PieceType::QUEEN:
             destinations = BitboardOperations::combineBoards(
-                piece.slideUp(allPieces),
-                piece.slideDown(allPieces),
-                piece.slideLeft(allPieces),
-                piece.slideRight(allPieces),
-                piece.slideUpLeft(allPieces),
-                piece.slideUpRight(allPieces),
-                piece.slideDownLeft(allPieces),
-                piece.slideDownRight(allPieces)
+                piece.slidePathUp(allPieces),
+                piece.slidePathDown(allPieces),
+                piece.slidePathLeft(allPieces),
+                piece.slidePathRight(allPieces),
+                piece.slidePathUpLeft(allPieces),
+                piece.slidePathUpRight(allPieces),
+                piece.slidePathDownLeft(allPieces),
+                piece.slidePathDownRight(allPieces)
             );
             break;
         }
