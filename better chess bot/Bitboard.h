@@ -56,7 +56,20 @@ public:
     Bitboard slideDownRight(const Bitboard allPieces);
 };
 
-namespace BitboardOperations {
+// hiding B64 return types, all operations should be done on Bitboard objects
+namespace {
+
+    template <typename T>
+    constexpr bool areAllSame() {
+        return true;
+    }
+
+    // Checks if all types in the variadic template are Bitboards (using another variadic template, C++14 is funny)
+    template <typename T, typename U, typename... Rest>
+    constexpr bool areAllSame() {
+        return std::is_same<T, U>::value&& areAllSame<T, Rest...>();
+    }
+
 
     template <typename T>
     B64 combineBoardsJoiner(T board) {
@@ -68,13 +81,6 @@ namespace BitboardOperations {
         return board.getBoard() | combineBoardsJoiner(boards...);
     }
 
-    // create a board containing all bits from inputs
-    template <typename T, typename... Boards>
-    Bitboard combineBoards(T board, Boards... boards) {
-        return Bitboard(combineBoardsJoiner(board, boards...));
-    }
-
-
     template <typename T>
     B64 findCommonBitsJoiner(T board) {
         return board.getBoard();
@@ -84,10 +90,20 @@ namespace BitboardOperations {
     B64 findCommonBitsJoiner(T board, Boards... boards) {
         return board.getBoard() & findCommonBitsJoiner(boards...);
     }
+}
 
-    // create a bitboard of overlaping bits on all inputs
+namespace BitboardOperations {
+    // Create a board containing all bits from inputs
+    template <typename T, typename... Boards>
+    Bitboard combineBoards(T board, Boards... boards) {
+        static_assert(areAllSame<Bitboard, T, Boards...>(), "All parameters must be of the Bitboard class");
+        return Bitboard(combineBoardsJoiner(board, boards...));
+    }
+
+    // Create a bitboard of overlaping bits on all inputs
     template <typename T, typename... Boards>
     Bitboard findCommonBits(T board, Boards... boards) {
+        static_assert(areAllSame<Bitboard, T, Boards...>(), "All parameters must be of the Bitboard class");
         return Bitboard(findCommonBitsJoiner(board, boards...));
     }
 }
