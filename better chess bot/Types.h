@@ -11,10 +11,3 @@ struct Piece {
     Color color;
     PieceType type;
 };
-
-struct PrecomputedMoves {
-    B64 king_moves[64];
-    B64 knight_moves[64];
-    B64 pawn_moves[64 * 2];
-    B64 pawn_attacks[64 * 2];
-};

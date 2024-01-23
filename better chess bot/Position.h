@@ -5,6 +5,14 @@
 #include "Move.h"
 #include "Enums.h"
 
+// out of types.h cuse codependancy mess
+struct PrecomputedMoves {
+    Bitboard king_moves[64];
+    Bitboard knight_moves[64];
+    Bitboard pawn_moves[64 * 2];
+    Bitboard pawn_attacks[64 * 2];
+};
+
 // all the needed information to make a legal move
 class Position {
 private:
