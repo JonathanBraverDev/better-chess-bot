@@ -4,15 +4,25 @@
 #include "DeBruijn.h"
 
 const DirectionCheck Bitboard::direction_check[] = {
-    // UP/DOWN will be shifted out naturally, masked fully for clarity
-    {BOARD_SIZE, ~ROW_1},                      // UP
-    {-BOARD_SIZE, ~ROW_8},                     // DOWN
-    {-1, ~COLUMN_H},                           // LEFT
-    {1, ~COLUMN_A},                            // RIGHT
-    {BOARD_SIZE - 1, ~(ROW_1 | COLUMN_H)},     // UP_LEFT
-    {BOARD_SIZE + 1, ~(ROW_1 | COLUMN_A)},     // UP_RIGHT
-    {-(BOARD_SIZE + 1), ~(ROW_8 | COLUMN_H)},  // DOWN_LEFT
-    {-(BOARD_SIZE - 1), ~(ROW_8 | COLUMN_A)}   // DOWN_RIGHT
+    // UP and DOWN will be shifted out naturally, masked for consistency
+    {BOARD_SIZE, ~ROW_1},           // UP
+    {-BOARD_SIZE, ~ROW_8},          // DOWN
+    {-1, ~COLUMN_H},                // LEFT
+    {1, ~COLUMN_A},                 // RIGHT
+    {BOARD_SIZE - 1, ~COLUMN_H},    // UP_LEFT
+    {BOARD_SIZE + 1, ~COLUMN_A},    // UP_RIGHT
+    {-(BOARD_SIZE + 1), ~COLUMN_H}, // DOWN_LEFT
+    {-(BOARD_SIZE - 1), ~COLUMN_A}, // DOWN_RIGHT
+
+    // Composite moves for the knight
+    {2 * BOARD_SIZE - 1, ~COLUMN_H},    // KNIGHT_UP_LEFT
+    {2 * BOARD_SIZE + 1, ~COLUMN_A},    // KNIGHT_UP_RIGHT
+    {-2 * BOARD_SIZE - 1, ~COLUMN_H},   // KNIGHT_DOWN_LEFT
+    {-2 * BOARD_SIZE + 1, ~COLUMN_A},   // KNIGHT_DOWN_RIGHT
+    {BOARD_SIZE - 2, ~COLUMN_GH},       // KNIGHT_LEFT_UP
+    {-BOARD_SIZE + 2, ~COLUMN_GH},      // KNIGHT_LEFT_DOWN
+    {BOARD_SIZE - 2, ~COLUMN_AB},       // KNIGHT_RIGHT_UP
+    {-BOARD_SIZE + 2, ~COLUMN_AB}       // KNIGHT_RIGHT_DOWN
 };
 
 // Default constructor initializes data to 0
@@ -25,7 +35,7 @@ Bitboard::Bitboard(B64 initialData) : board(initialData) {}
     board = 0;
 }
 
-void Bitboard::visualize() {
+void Bitboard::visualize() const {
     for (int i = BOARD_SIZE - 1; i >= 0; i--) {
         for (int j = 0; j <= BOARD_SIZE - 1; j++) {
             if (getBit(i * BOARD_SIZE + j)) {
@@ -107,6 +117,10 @@ void Bitboard::move(Direction direction) {
     // Avoid negative shifts by fliping the shift direction and value
     board = (direction >= 0) ? (board << direction) :
                                (board >> (-direction));
+}
+
+void Bitboard::nextTile() {
+    board <<= 1;
 }
 
 Bitboard Bitboard::look(Direction direction) const {

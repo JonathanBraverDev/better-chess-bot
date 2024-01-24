@@ -16,7 +16,7 @@ public:
     Bitboard(B64 initialData); // Constructor with initial data
     void clear();
 
-    void visualize();
+    void visualize() const;
 
     B64 getBoard() const;
     bool getBit(int index) const;
@@ -36,6 +36,10 @@ public:
 
     // Move the entire board one tile in any direction
     void move(Direction direction);
+
+    // ONLY use to 'loop' a piece over the board
+    // popLowestBit should be used where possible
+    void nextTile();
 
     // Return a copy of the entire board moved one tile in any direction
     Bitboard look(Direction direction) const;

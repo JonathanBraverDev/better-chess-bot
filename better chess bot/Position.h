@@ -48,6 +48,9 @@ private:
     void addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const;
     void addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captues) const;
 
+    static void PrepareKingMoves();
+    static void PrepareKnightMoves();
+
 public:
     // allow initialization from string
 
