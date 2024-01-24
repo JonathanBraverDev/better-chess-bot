@@ -3,9 +3,9 @@
 #include <vector>
 #include "Bitboard.h"
 #include "Move.h"
-#include "Enums.h"
+#include "Structs.h"
 
-// out of types.h cuse codependancy mess
+// out of structs.h cuse codependancy mess
 struct PrecomputedMoves {
     Bitboard king_moves[64];
     Bitboard knight_moves[64];

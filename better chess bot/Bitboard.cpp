@@ -1,19 +1,7 @@
 #include <iostream>
 #include "Bitboard.h"
 #include "BoardConstants.h"
-#include "Consts.h"
-
-Bitboard Bitboard::slidePath(void (Bitboard::* const direction)(), const Bitboard allPieces) {
-    Bitboard path;
-
-    do {
-        (this->*direction)(); // call provided member function
-        path.setBitsFrom(board); // add the move to the move board
-    } while (board && !(board & allPieces.getBoard())); // stop if piece is 0 (shifted out) or a collision occurred on the last move
-    // the first colision is added to be contextually figured out by the caller
-
-    return path;
-}
+#include "DeBruijn.h"
 
 // Default constructor initializes data to 0
 Bitboard::Bitboard() : board(0) {}
@@ -26,8 +14,8 @@ Bitboard::Bitboard(B64 initialData) : board(initialData) {}
 }
 
 void Bitboard::visualize() {
-    for (int i = BOARD_SIDE_SUB1; i >= 0; i--) {
-        for (int j = 0; j <= BOARD_SIDE_SUB1; j++) {
+    for (int i = BOARD_SIZE - 1; i >= 0; i--) {
+        for (int j = 0; j <= BOARD_SIZE - 1; j++) {
             if (getBit(i * BOARD_SIZE + j)) {
                 std::cout << "X ";
             }
@@ -72,6 +60,9 @@ bool Bitboard::hasRemainingBits() const {
     return board != 0;
 }
 
+bool Bitboard::isEmpty() const {
+    return board == 0;
+}
 
 void Bitboard::setBit(int index) {
     board |= (1ULL << index); // SHIFT 1 to position, set to OR
@@ -99,20 +90,27 @@ void Bitboard::clearLowestBit() {
     board &= (board - 1); // AND after -1, garantees removal of exactly one lowest bit;
 }
 
-void Bitboard::moveUp() { board = board << BOARD_SIZE; }
-void Bitboard::moveDown() { board = board >> BOARD_SIZE; }
-void Bitboard::moveLeft() { board = (board & COLUMN_H_INV) >> 1; }
-void Bitboard::moveRight() { board = (board & COLUMN_A_INV) << 1; }
-void Bitboard::moveUpLeft() { board = (board & COLUMN_H_INV) << BOARD_SIDE_SUB1; }
-void Bitboard::moveUpRight() { board = (board & COLUMN_A_INV) << BOARD_SIDE_ADD1; }
-void Bitboard::moveDownLeft() { board = (board & COLUMN_H_INV) >> BOARD_SIDE_ADD1; }
-void Bitboard::moveDownRight() { board = (board & COLUMN_A_INV) >> BOARD_SIDE_SUB1; }
+void Bitboard::move(Direction direction) {
+    // Avoid negative shifts by fliping the shift direction and value
+    board = (direction >= 0) ? (board << direction) :
+                               (board >> (-direction));
+}
 
-Bitboard Bitboard::slidePathUp(const Bitboard allPieces) { return slidePath(&Bitboard::moveUp, allPieces); }
-Bitboard Bitboard::slidePathDown(const Bitboard allPieces) { return slidePath(&Bitboard::moveDown, allPieces); }
-Bitboard Bitboard::slidePathLeft(const Bitboard allPieces) { return slidePath(&Bitboard::moveLeft, allPieces); }
-Bitboard Bitboard::slidePathRight(const Bitboard allPieces) { return slidePath(&Bitboard::moveRight, allPieces); }
-Bitboard Bitboard::slidePathUpLeft(const Bitboard allPieces) { return slidePath(&Bitboard::moveUpLeft, allPieces); }
-Bitboard Bitboard::slidePathUpRight(const Bitboard allPieces) { return slidePath(&Bitboard::moveUpRight, allPieces); }
-Bitboard Bitboard::slidePathDownLeft(const Bitboard allPieces) { return slidePath(&Bitboard::moveDownLeft, allPieces); }
-Bitboard Bitboard::slidePathDownRight(const Bitboard allPieces) { return slidePath(&Bitboard::moveDownRight, allPieces); }
+Bitboard Bitboard::look(Direction direction) const {
+    return Bitboard((direction >= 0) ? (board << direction) :
+                                       (board >> (-direction)));
+}
+
+Bitboard Bitboard::slidePath(Direction direction, const Bitboard all_pieces) const {
+    Bitboard piece = board;
+    Bitboard path = Bitboard(0ULL);
+
+    do {
+        piece.move(direction);
+        path.setBitsFrom(piece); // Add the new location to the path
+    } while (piece.hasRemainingBits() && BitboardOperations::combineBoards(piece, all_pieces).isEmpty());
+    // Stop if piece is 0 (shifted out) or a collision occurred on the last move
+    // The first colision is added to be contextually figured out by the caller
+
+    return path;
+}

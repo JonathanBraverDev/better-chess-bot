@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "Enums.h"
 
 class Bitboard {
 private:
@@ -8,9 +8,6 @@ private:
 
     // B64 shouldn't be exposed
     B64 lowestBitBoard() const;
-
-    // expected to be used on a board with only one active bit
-    Bitboard slidePath(void (Bitboard::* const direction)(), const Bitboard allPieces);
 
 public:
     Bitboard(); // Default constructor
@@ -24,6 +21,7 @@ public:
     int countSetBits() const;
     int singleBitIndex() const;
     bool hasRemainingBits() const;
+    bool isEmpty() const;
 
     void setBit(int index);
     void clearBit(int index);
@@ -34,26 +32,15 @@ public:
     // extracts the lowest bit, deleting it from the board
     Bitboard popLowestBit();
 
-    // piece movement assists, with bound protections
-    void moveUp();
-    void moveDown();
-    void moveLeft();
-    void moveRight();
-    void moveUpLeft();
-    void moveUpRight();
-    void moveDownLeft();
-    void moveDownRight();
-    // note: all directional names are are according to the output of "visualize"
+    // Move the entire board one tile in any direction
+    void move(Direction direction);
 
-    // aliases for the slidePath function, set the Bitboeard to all tiles along a path including the first collision
-    Bitboard slidePathUp(const Bitboard allPieces);
-    Bitboard slidePathDown(const Bitboard allPieces);
-    Bitboard slidePathLeft(const Bitboard allPieces);
-    Bitboard slidePathRight(const Bitboard allPieces);
-    Bitboard slidePathUpLeft(const Bitboard allPieces);
-    Bitboard slidePathUpRight(const Bitboard allPieces);
-    Bitboard slidePathDownLeft(const Bitboard allPieces);
-    Bitboard slidePathDownRight(const Bitboard allPieces);
+    // Return a copy of the entire board moved one tile in any direction
+    Bitboard look(Direction direction) const;
+
+    // Traces the path of a sliding piece, including the first colision
+    // Expected to be used on a board with only one active bit
+    Bitboard slidePath(Direction direction, const Bitboard allPieces) const;
 };
 
 // hiding B64 return types, all operations should be done on Bitboard objects
@@ -70,12 +57,12 @@ namespace {
         return std::is_same<T, U>::value&& areAllSame<T, Rest...>();
     }
 
-
+        
     template <typename T>
     B64 combineBoardsJoiner(T board) {
         return board.getBoard();
     }
-    
+
     template <typename T, typename... Boards>
     B64 combineBoardsJoiner(T board, Boards... boards) {
         return board.getBoard() | combineBoardsJoiner(boards...);

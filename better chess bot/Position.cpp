@@ -1,6 +1,6 @@
 #include "Position.h"
 #include "Exceptions.h"
-#include "BoardConstants.h"
+#include "structs.h"
 
 void Position::makeMove(Move move) {
 	// should be mostly a copy from old code
@@ -33,30 +33,30 @@ void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pi
         switch (pieceType) {
         case PieceType::BISHOP:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePathUpLeft(allPieces),
-                piece.slidePathUpRight(allPieces),
-                piece.slidePathDownLeft(allPieces),
-                piece.slidePathDownRight(allPieces)
+                piece.slidePath(Direction::UP_LEFT, allPieces),
+                piece.slidePath(Direction::UP_RIGHT, allPieces),
+                piece.slidePath(Direction::DOWN_LEFT, allPieces),
+                piece.slidePath(Direction::DOWN_RIGHT, allPieces)
             );
             break;
         case PieceType::ROOK:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePathUp(allPieces),
-                piece.slidePathDown(allPieces),
-                piece.slidePathLeft(allPieces),
-                piece.slidePathRight(allPieces)
+                piece.slidePath(Direction::UP, allPieces),
+                piece.slidePath(Direction::DOWN, allPieces),
+                piece.slidePath(Direction::LEFT, allPieces),
+                piece.slidePath(Direction::RIGHT, allPieces)
             );
             break;
         case PieceType::QUEEN:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePathUp(allPieces),
-                piece.slidePathDown(allPieces),
-                piece.slidePathLeft(allPieces),
-                piece.slidePathRight(allPieces),
-                piece.slidePathUpLeft(allPieces),
-                piece.slidePathUpRight(allPieces),
-                piece.slidePathDownLeft(allPieces),
-                piece.slidePathDownRight(allPieces)
+                piece.slidePath(Direction::UP, allPieces),
+                piece.slidePath(Direction::DOWN, allPieces),
+                piece.slidePath(Direction::LEFT, allPieces),
+                piece.slidePath(Direction::RIGHT, allPieces),
+                piece.slidePath(Direction::UP_LEFT, allPieces),
+                piece.slidePath(Direction::UP_RIGHT, allPieces),
+                piece.slidePath(Direction::DOWN_LEFT, allPieces),
+                piece.slidePath(Direction::DOWN_RIGHT, allPieces)
             );
             break;
         }

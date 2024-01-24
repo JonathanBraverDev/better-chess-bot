@@ -172,7 +172,5 @@ constexpr B64 VOID_BLACK_CASTLE = ~BLACK_CASTLE;
 constexpr B64 VOID_ALL_EN_PASSANT = ~ALL_EN_PASSANT;
 
 // used mainly for board slides, defined here for clarity
-constexpr int BOARD_SIDE_ADD1 = BOARD_SIZE + 1; // this honestly feel INCREDIBLY stupid but I WAS calculating that every single call so... yeah
-constexpr int BOARD_SIDE_SUB1 = BOARD_SIZE - 1;
 constexpr B64 COLUMN_A_INV = ~COLUMN_A;
 constexpr B64 COLUMN_H_INV = ~COLUMN_H;

@@ -148,7 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitboard.h" />
-    <ClInclude Include="Consts.h" />
+    <ClInclude Include="DeBruijn.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
     <ClInclude Include="Exceptions.h" />
@@ -159,6 +159,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="BoardConstants.h" />
     <ClInclude Include="Position.h" />
+    <ClInclude Include="Structs.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
