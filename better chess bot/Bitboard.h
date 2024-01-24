@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Enums.h"
+#include "Structs.h"
 
 class Bitboard {
 private:
@@ -8,6 +8,8 @@ private:
 
     // B64 shouldn't be exposed
     B64 lowestBitBoard() const;
+
+    static const DirectionCheck direction_check[];
 
 public:
     Bitboard(); // Default constructor

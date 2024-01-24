@@ -6,3 +6,8 @@ struct Piece {
     Color color;
     PieceType type;
 };
+
+struct DirectionCheck {
+    int shiftAmount;
+    B64 boundCheck;
+};

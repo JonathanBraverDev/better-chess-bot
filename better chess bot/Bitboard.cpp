@@ -3,6 +3,18 @@
 #include "BoardConstants.h"
 #include "DeBruijn.h"
 
+const DirectionCheck Bitboard::direction_check[] = {
+    // UP/DOWN will be shifted out naturally, masked fully for clarity
+    {BOARD_SIZE, ~ROW_1},                      // UP
+    {-BOARD_SIZE, ~ROW_8},                     // DOWN
+    {-1, ~COLUMN_H},                           // LEFT
+    {1, ~COLUMN_A},                            // RIGHT
+    {BOARD_SIZE - 1, ~(ROW_1 | COLUMN_H)},     // UP_LEFT
+    {BOARD_SIZE + 1, ~(ROW_1 | COLUMN_A)},     // UP_RIGHT
+    {-(BOARD_SIZE + 1), ~(ROW_8 | COLUMN_H)},  // DOWN_LEFT
+    {-(BOARD_SIZE - 1), ~(ROW_8 | COLUMN_A)}   // DOWN_RIGHT
+};
+
 // Default constructor initializes data to 0
 Bitboard::Bitboard() : board(0) {}
 
@@ -91,14 +103,16 @@ void Bitboard::clearLowestBit() {
 }
 
 void Bitboard::move(Direction direction) {
+    board = board & direction_check[direction].boundCheck; // stops odd shifting teleportation
     // Avoid negative shifts by fliping the shift direction and value
     board = (direction >= 0) ? (board << direction) :
                                (board >> (-direction));
 }
 
 Bitboard Bitboard::look(Direction direction) const {
-    return Bitboard((direction >= 0) ? (board << direction) :
-                                       (board >> (-direction)));
+    Bitboard copy = Bitboard(board);
+    copy.move(direction);
+    return copy;
 }
 
 Bitboard Bitboard::slidePath(Direction direction, const Bitboard all_pieces) const {
