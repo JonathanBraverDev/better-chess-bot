@@ -139,34 +139,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Attack detection.cpp" />
     <ClCompile Include="better chess bot.cpp" />
-    <ClCompile Include="Boad operations.cpp" />
-    <ClCompile Include="Magic bit boards.cpp" />
-    <ClCompile Include="Move structure.cpp" />
-    <ClCompile Include="Position structure.cpp" />
-    <ClCompile Include="Evaluation.cpp" />
-    <ClCompile Include="Board generation.cpp" />
-    <ClCompile Include="Move handling.cpp" />
-    <ClCompile Include="Move search.cpp" />
-    <ClCompile Include="Position generation.cpp" />
+    <ClCompile Include="Bitboard.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Move.cpp" />
+    <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Attack detection.h" />
-    <ClInclude Include="Board operations.h" />
+    <ClInclude Include="Bitboard.h" />
+    <ClInclude Include="DeBruijn.h" />
+    <ClInclude Include="Enums.h" />
     <ClInclude Include="Evaluation structure.h" />
-    <ClInclude Include="Magic bit boards.h" />
-    <ClInclude Include="Position structure.h" />
-    <ClInclude Include="Evaluation.h" />
-    <ClInclude Include="Board generation.h" />
-    <ClInclude Include="Piece structure.h" />
-    <ClInclude Include="Game constants.h" />
-    <ClInclude Include="Move handling.h" />
-    <ClInclude Include="Move search.h" />
-    <ClInclude Include="Move structure.h" />
-    <ClInclude Include="Position generation.h" />
-    <ClInclude Include="Board structure.h" />
-    <ClInclude Include="Preallocation structure.h" />
+    <ClInclude Include="Exceptions.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="MoveEncoding.h" />
+    <ClInclude Include="Move.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="BoardConstants.h" />
+    <ClInclude Include="Position.h" />
+    <ClInclude Include="Structs.h" />
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
