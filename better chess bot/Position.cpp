@@ -273,3 +273,34 @@ void Position::PrepareKnightMoves() {
         knight.nextTile();
     }
 }
+
+void Position::PrepareWhitePawnMoves() {
+    Bitboard white_pawn = Bitboard(1ULL);
+    for (size_t i = 0; i < 64 * 2; i += 2) {
+        precomputed_moves.pawn_moves[i] = white_pawn.look(Direction::UP);
+
+        precomputed_moves.pawn_attacks[i] = BitboardOperations::combineBoards(white_pawn.look(Direction::UP_LEFT),
+                                                                              white_pawn.look(Direction::UP_RIGHT));
+
+        white_pawn.nextTile();
+    }
+}
+
+void Position::PrepareBlackPawnMoves() {
+    Bitboard black_pawn = Bitboard(1ULL);
+    for (size_t i = 1; i < 64 * 2; i += 2) {
+        precomputed_moves.pawn_moves[i] = black_pawn.look(Direction::DOWN);
+
+        precomputed_moves.pawn_attacks[i] = BitboardOperations::combineBoards(black_pawn.look(Direction::DOWN_LEFT),
+                                                                              black_pawn.look(Direction::DOWN_RIGHT));
+
+        black_pawn.nextTile();
+    }
+}
+
+void Position::InitializeMoves() {
+    PrepareKingMoves();
+    PrepareKnightMoves();
+    PrepareWhitePawnMoves();
+    PrepareBlackPawnMoves();
+}

@@ -50,6 +50,8 @@ private:
 
     static void PrepareKingMoves();
     static void PrepareKnightMoves();
+    static void PrepareWhitePawnMoves();
+    static void PrepareBlackPawnMoves();
 
 public:
     // allow initialization from string
@@ -68,4 +70,6 @@ public:
     Bitboard getOpponentPieces(PieceType type) const;
     Bitboard getAllOwnPieces() const;
     Bitboard getAllOpponentPieces() const;
+
+    static void InitializeMoves();
 };
