@@ -170,7 +170,3 @@ constexpr B64 ALL_EN_PASSANT = ROW_3 | ROW_6;
 constexpr B64 VOID_WHITE_CASTLE = ~WHITE_CASTLE;
 constexpr B64 VOID_BLACK_CASTLE = ~BLACK_CASTLE;
 constexpr B64 VOID_ALL_EN_PASSANT = ~ALL_EN_PASSANT;
-
-// used mainly for board slides, defined here for clarity
-constexpr B64 COLUMN_A_INV = ~COLUMN_A;
-constexpr B64 COLUMN_H_INV = ~COLUMN_H;

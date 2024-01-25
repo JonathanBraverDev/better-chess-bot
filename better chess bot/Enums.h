@@ -12,12 +12,20 @@ enum class GameOverCause { CHECKMATE, RESIGNATION, TIMEOUT, STALEMALTE, INSUFFIC
 
 // All directional names are are according to the output of "visualize"
 enum Direction {
-    UP = BOARD_SIZE,
-    DOWN = -BOARD_SIZE,
-    LEFT = -1,
-    RIGHT = 1,
-    UP_LEFT = BOARD_SIZE - 1,
-    UP_RIGHT = BOARD_SIZE + 1,
-    DOWN_LEFT = -(BOARD_SIZE + 1),
-    DOWN_RIGHT = -(BOARD_SIZE - 1)
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    UP_LEFT,
+    UP_RIGHT,
+    DOWN_LEFT,
+    DOWN_RIGHT,
+    KNIGHT_UP_LEFT,
+    KNIGHT_UP_RIGHT,
+    KNIGHT_DOWN_LEFT,
+    KNIGHT_DOWN_RIGHT,
+    KNIGHT_LEFT_UP,
+    KNIGHT_LEFT_DOWN,
+    KNIGHT_RIGHT_UP,
+    KNIGHT_RIGHT_DOWN,
 };

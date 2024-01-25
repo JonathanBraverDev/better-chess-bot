@@ -241,3 +241,66 @@ Bitboard Position::getAllOpponentPieces() const {
         getOpponentPieces(PieceType::QUEEN),
         getOpponentPieces(PieceType::KING));
 }
+
+void Position::PrepareKingMoves() {
+    Bitboard king = Bitboard(1ULL);
+    // It's not ideal that the board is completly detached from the loop...
+    for (size_t i = 0; i < 64; i++) {
+        precomputed_moves.king_moves[i] = BitboardOperations::combineBoards(king.look(Direction::UP),
+                                                                            king.look(Direction::DOWN),
+                                                                            king.look(Direction::LEFT),
+                                                                            king.look(Direction::RIGHT),
+                                                                            king.look(Direction::UP_LEFT),
+                                                                            king.look(Direction::UP_RIGHT),
+                                                                            king.look(Direction::DOWN_LEFT),
+                                                                            king.look(Direction::DOWN_RIGHT));
+
+        king.nextTile();
+    }
+}
+
+void Position::PrepareKnightMoves() {
+    Bitboard knight = Bitboard(1ULL);
+    for (size_t i = 0; i < 64; i++) {
+        precomputed_moves.knight_moves[i] = BitboardOperations::combineBoards(knight.look(Direction::KNIGHT_UP_LEFT),
+                                                                              knight.look(Direction::KNIGHT_UP_RIGHT),
+                                                                              knight.look(Direction::KNIGHT_DOWN_LEFT),
+                                                                              knight.look(Direction::KNIGHT_DOWN_RIGHT),
+                                                                              knight.look(Direction::KNIGHT_LEFT_UP),
+                                                                              knight.look(Direction::KNIGHT_LEFT_DOWN),
+                                                                              knight.look(Direction::KNIGHT_RIGHT_UP),
+                                                                              knight.look(Direction::KNIGHT_RIGHT_DOWN));
+        knight.nextTile();
+    }
+}
+
+void Position::PrepareWhitePawnMoves() {
+    Bitboard white_pawn = Bitboard(1ULL);
+    for (size_t i = 0; i < 64 * 2; i += 2) {
+        precomputed_moves.pawn_moves[i] = white_pawn.look(Direction::UP);
+
+        precomputed_moves.pawn_attacks[i] = BitboardOperations::combineBoards(white_pawn.look(Direction::UP_LEFT),
+                                                                              white_pawn.look(Direction::UP_RIGHT));
+
+        white_pawn.nextTile();
+    }
+}
+
+void Position::PrepareBlackPawnMoves() {
+    Bitboard black_pawn = Bitboard(1ULL);
+    for (size_t i = 1; i < 64 * 2; i += 2) {
+        precomputed_moves.pawn_moves[i] = black_pawn.look(Direction::DOWN);
+
+        precomputed_moves.pawn_attacks[i] = BitboardOperations::combineBoards(black_pawn.look(Direction::DOWN_LEFT),
+                                                                              black_pawn.look(Direction::DOWN_RIGHT));
+
+        black_pawn.nextTile();
+    }
+}
+
+void Position::InitializeMoves() {
+    PrepareKingMoves();
+    PrepareKnightMoves();
+    PrepareWhitePawnMoves();
+    PrepareBlackPawnMoves();
+}

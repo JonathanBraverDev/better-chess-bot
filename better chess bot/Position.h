@@ -48,6 +48,11 @@ private:
     void addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const;
     void addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captues) const;
 
+    static void PrepareKingMoves();
+    static void PrepareKnightMoves();
+    static void PrepareWhitePawnMoves();
+    static void PrepareBlackPawnMoves();
+
 public:
     // allow initialization from string
 
@@ -65,4 +70,6 @@ public:
     Bitboard getOpponentPieces(PieceType type) const;
     Bitboard getAllOwnPieces() const;
     Bitboard getAllOpponentPieces() const;
+
+    static void InitializeMoves();
 };
