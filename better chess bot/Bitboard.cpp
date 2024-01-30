@@ -11,8 +11,8 @@ const DirectionCheck Bitboard::direction_check[] = {
     {1, ~COLUMN_A},                 // RIGHT
     {BOARD_SIZE - 1, ~COLUMN_H},    // UP_LEFT
     {BOARD_SIZE + 1, ~COLUMN_A},    // UP_RIGHT
-    {-(BOARD_SIZE + 1), ~COLUMN_H}, // DOWN_LEFT
-    {-(BOARD_SIZE - 1), ~COLUMN_A}, // DOWN_RIGHT
+    {-BOARD_SIZE - 1, ~COLUMN_H},   // DOWN_LEFT
+    {-BOARD_SIZE + 1, ~COLUMN_A},   // DOWN_RIGHT
 
     // Composite moves for the knight
     {2 * BOARD_SIZE - 1, ~COLUMN_H},    // KNIGHT_UP_LEFT
@@ -20,8 +20,8 @@ const DirectionCheck Bitboard::direction_check[] = {
     {-2 * BOARD_SIZE - 1, ~COLUMN_H},   // KNIGHT_DOWN_LEFT
     {-2 * BOARD_SIZE + 1, ~COLUMN_A},   // KNIGHT_DOWN_RIGHT
     {BOARD_SIZE - 2, ~COLUMN_GH},       // KNIGHT_LEFT_UP
-    {-BOARD_SIZE + 2, ~COLUMN_GH},      // KNIGHT_LEFT_DOWN
-    {BOARD_SIZE - 2, ~COLUMN_AB},       // KNIGHT_RIGHT_UP
+    {-BOARD_SIZE - 2, ~COLUMN_GH},      // KNIGHT_LEFT_DOWN
+    {BOARD_SIZE + 2, ~COLUMN_AB},       // KNIGHT_RIGHT_UP
     {-BOARD_SIZE + 2, ~COLUMN_AB}       // KNIGHT_RIGHT_DOWN
 };
 
