@@ -2,6 +2,9 @@
 #include "Exceptions.h"
 #include "structs.h"
 
+// empty initizlization of static member
+PrecomputedMoves Position::precomputed_moves;
+
 void Position::makeMove(Move move) {
 	// should be mostly a copy from old code
 }
