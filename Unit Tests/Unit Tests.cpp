@@ -17,7 +17,7 @@ namespace UnitTests {
 
             // Assert
             // Add assertions to check the expected state of the board after the move
-            Assert::AreEqual(B1, testBoard.getBoard());
+            Assert::AreEqual(A2, testBoard.getBoard());
         }
     };
 }

@@ -5,8 +5,8 @@
 
 const DirectionCheck Bitboard::direction_check[] = {
     // UP and DOWN will be shifted out naturally, masked for consistency
-    {BOARD_SIZE, ~ROW_1},           // UP
-    {-BOARD_SIZE, ~ROW_8},          // DOWN
+    {BOARD_SIZE, ~ROW_8},           // UP
+    {-BOARD_SIZE, ~ROW_1},          // DOWN
     {-1, ~COLUMN_H},                // LEFT
     {1, ~COLUMN_A},                 // RIGHT
     {BOARD_SIZE - 1, ~COLUMN_H},    // UP_LEFT
@@ -113,10 +113,11 @@ void Bitboard::clearLowestBit() {
 }
 
 void Bitboard::move(Direction direction) {
+    int shift_amount = direction_check[direction].shiftAmount;
     board = board & direction_check[direction].boundCheck; // stops odd shifting teleportation
     // Avoid negative shifts by fliping the shift direction and value
-    board = (direction >= 0) ? (board << direction) :
-                               (board >> (-direction));
+    board = (shift_amount >= 0) ? (board << shift_amount) :
+                                  (board >> (-shift_amount));
 }
 
 void Bitboard::nextTile() {
