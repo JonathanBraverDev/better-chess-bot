@@ -44,8 +44,8 @@ bool Move::isCapture() const {
     return (encodedMove & IS_CAPTURE_MASK) != 0;
 }
 
-int Move::getMiscMoveType() const {
-    return (encodedMove & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET;
+MoveType Move::getMiscMoveType() const {
+    return static_cast<MoveType>((encodedMove & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET);
 }
 
 
@@ -93,6 +93,6 @@ void Move::setCapture(bool isCapture) {
     }
 }
 
-void Move::setMiscMoveType(int miscType) {
-    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((miscType << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
+void Move::setMiscMoveType(MoveType miscType) {
+    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((static_cast<uint32_t>(miscType) << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
 }

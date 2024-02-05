@@ -21,7 +21,7 @@ public:
     bool isPromotion() const;
     bool isCheck() const;
     bool isCapture() const;
-    int getMiscMoveType() const;
+    MoveType getMiscMoveType() const;
 
     void setOriginIndex(uint8_t index);
     void setDestinationIndex(uint8_t index);
@@ -30,7 +30,7 @@ public:
     void setPromotion(bool isPromote);
     void setCheck(bool isCheck);
     void setCapture(bool isCapture);
-    void setMiscMoveType(int miscType);
+    void setMiscMoveType(MoveType miscType);
 
     // add conversion to text form
 };
