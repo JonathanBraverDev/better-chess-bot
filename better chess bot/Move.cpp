@@ -28,6 +28,10 @@ PieceType Move::getMovingOrPromotedType() const {
     return static_cast<PieceType>((encodedMove & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET);
 }
 
+AttackerType Move::getAttackerType() const {
+    return static_cast<AttackerType>((encodedMove & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET);
+}
+
 PieceType Move::getCapturedType() const {
     return static_cast<PieceType>((encodedMove & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET);
 }
@@ -59,18 +63,21 @@ void Move::setDestinationIndex(uint8_t index) {
 }
 
 void Move::setMovingOrPromotedType(PieceType type) {
-    encodedMove = (encodedMove & ~MOVING_TYPE_MASK) | ((static_cast<uint32_t>(type) << MOVING_TYPE_OFFSET) & MOVING_TYPE_MASK);
+    encodedMove = (encodedMove & ~MOVING_TYPE_MASK) | ((static_cast<uint8_t>(type) << MOVING_TYPE_OFFSET) & MOVING_TYPE_MASK);
+}
+
+void Move::setAttackerType(AttackerType attacker_type) {
+    encodedMove = (encodedMove & ~MOVING_TYPE_MASK) | ((static_cast<uint8_t>(attacker_type) << MOVING_TYPE_OFFSET) & MOVING_TYPE_MASK);
 }
 
 void Move::setCapturedType(PieceType type) {
-    encodedMove = (encodedMove & ~CAPTURED_TYPE_MASK) | ((static_cast<uint32_t>(type) << CAPTURED_TYPE_OFFSET) & CAPTURED_TYPE_MASK);
+    encodedMove = (encodedMove & ~CAPTURED_TYPE_MASK) | ((static_cast<uint8_t>(type) << CAPTURED_TYPE_OFFSET) & CAPTURED_TYPE_MASK);
 }
 
 void Move::setPromotion(bool isPromote) {
     if (isPromote) {
         encodedMove |= IS_PROMOTE_MASK;
-    }
-    else {
+    } else {
         encodedMove &= ~IS_PROMOTE_MASK;
     }
 }
@@ -78,8 +85,7 @@ void Move::setPromotion(bool isPromote) {
 void Move::setCheck(bool isCheck) {
     if (isCheck) {
         encodedMove |= IS_CHECK_MASK;
-    }
-    else {
+    } else {
         encodedMove &= ~IS_CHECK_MASK;
     }
 }
@@ -87,12 +93,11 @@ void Move::setCheck(bool isCheck) {
 void Move::setCapture(bool isCapture) {
     if (isCapture) {
         encodedMove |= IS_CAPTURE_MASK;
-    }
-    else {
+    } else {
         encodedMove &= ~IS_CAPTURE_MASK;
     }
 }
 
 void Move::setMiscMoveType(MoveType miscType) {
-    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((static_cast<uint32_t>(miscType) << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
+    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((static_cast<uint8_t>(miscType) << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
 }

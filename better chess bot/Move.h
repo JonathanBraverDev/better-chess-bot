@@ -17,6 +17,7 @@ public:
     uint8_t getOriginIndex() const;
     uint8_t getDestinationIndex() const;
     PieceType getMovingOrPromotedType() const;
+    AttackerType getAttackerType() const;
     PieceType getCapturedType() const;
     bool isPromotion() const;
     bool isCheck() const;
@@ -26,6 +27,7 @@ public:
     void setOriginIndex(uint8_t index);
     void setDestinationIndex(uint8_t index);
     void setMovingOrPromotedType(PieceType type);
+    void setAttackerType(AttackerType type);
     void setCapturedType(PieceType type);
     void setPromotion(bool isPromote);
     void setCheck(bool isCheck);
