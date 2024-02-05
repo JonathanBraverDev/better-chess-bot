@@ -9,12 +9,11 @@ void Position::makeMove(Move move) {
 	// should be mostly a copy from old code
 }
 
-std::vector<Move> Position::getPotentialMoves() const {
-    std::vector<Move> moves;
-    return moves;
+void Position::getPotentialMoves() {
+    
 }
 
-void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pieceType) const {
+void Position::getSlidingPieceMoves(const PieceType pieceType) {
     Bitboard pieces = getPieces(current_color, pieceType);
     Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
@@ -69,26 +68,26 @@ void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pi
         captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
         destinations.clearBitsFrom(captures);
 
-        addDestinationMoves(moves, moveBase, destinations);
-        addCaptureMoves(moves, moveBase, captures);
+        addDestinationMoves(moveBase, destinations);
+        addCaptureMoves(moveBase, captures);
 
         piece = pieces.popLowestBit();
     }
 }
 
-void Position::getBishopMoves(std::vector<Move>& moves) const {
-    getSlidingPieceMoves(moves, PieceType::BISHOP);
+void Position::getBishopMoves() {
+    getSlidingPieceMoves(PieceType::BISHOP);
 }
 
-void Position::getRookMoves(std::vector<Move>& moves) const {
-    getSlidingPieceMoves(moves, PieceType::ROOK);
+void Position::getRookMoves() {
+    getSlidingPieceMoves(PieceType::ROOK);
 }
 
-void Position::getQueenMoves(std::vector<Move>& moves) const {
-    getSlidingPieceMoves(moves, PieceType::QUEEN);
+void Position::getQueenMoves() {
+    getSlidingPieceMoves(PieceType::QUEEN);
 }
 
-void Position::addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const {
+void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
     Bitboard destination = destinations.popLowestBit();
     Move move;
 
@@ -102,7 +101,7 @@ void Position::addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitb
     }
 }
 
-void Position::addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captures) const {
+void Position::addCaptureMoves(Move baseMove, Bitboard captures) {
     Bitboard capture = captures.popLowestBit();
     Move move;
     int destinationIndex = capture.singleBitIndex();
