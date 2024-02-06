@@ -40,7 +40,7 @@ private:
     Color getOpponentColor() const;
 
     // moves the pieces could make
-    void getPotentialMoves();
+    std::vector<Move> getPotentialMoves();
     void getPawnMoves();
     void getKnightMoves();
     void getSlidingPieceMoves(const PieceType pieceType);

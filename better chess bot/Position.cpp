@@ -9,8 +9,8 @@ void Position::makeMove(Move move) {
 	// should be mostly a copy from old code
 }
 
-void Position::getPotentialMoves() {
-    
+std::vector<Move> Position::getPotentialMoves() {
+    return moves;
 }
 
 void Position::getSlidingPieceMoves(const PieceType pieceType) {

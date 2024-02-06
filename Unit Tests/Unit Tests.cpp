@@ -5,7 +5,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTests {
 
-    TEST_CLASS(MoveTests) {
+    TEST_CLASS(BitboardMovementTests) {
     public:
 
         TEST_METHOD(Up) {
@@ -139,5 +139,10 @@ namespace UnitTests {
 
             Assert::AreEqual(0ULL, testBoard.getBoard());
         }
+    };
+
+    TEST_CLASS(MoveEncodingTests) {
+    public:
+
     };
 }
