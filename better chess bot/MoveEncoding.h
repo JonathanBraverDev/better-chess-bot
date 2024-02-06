@@ -55,10 +55,9 @@ static_assert((IS_PROMOTE_MASK | IS_CHECK_MASK | IS_CAPTURE_MASK | FREE_FLAG_MAS
 // 1 bit promotion flag
 // 1 bit check flag
 // 1 bit capture flag
+// 1 bit FREE FLAG
 // 2 bit misc move types (see emun)
-// total 5 order bits
-// 
-// 9 bits left unused for now (possibly BitRights + 1 additional type indicator)
+// total 6 order bits
 
 // BitRights encoding:
 // 2 bit L/R castle white
