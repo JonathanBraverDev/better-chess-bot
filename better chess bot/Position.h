@@ -30,6 +30,7 @@ private:
     Bitboard black_king; // I swear it's not just discrimination
 
     Bitboard special_move_rigths; // en passant AND castle rights for both sides, they can't overlap anyway
+    // use the bitboard to calculate BitRights and use for all moves from the position
     Color current_color;
 
     // collection of moves possible from the position
