@@ -66,7 +66,7 @@ public:
     Piece getPieceAtIndex(int index) const;
 
     // check that the position representation is not messed up
-    bool validate() const;
+    void validate() const;
 
     std::vector<Move> getLegalMoves() const;
 

@@ -1,5 +1,6 @@
 #include "Move.h"
 #include "MoveEncoding.h"
+#include "Exceptions.h"
 
 // Default constructor initializes data to 0
 Move::Move() : encodedMove(0) {}
@@ -29,27 +30,33 @@ PieceType Move::getMovingOrPromotedType() const {
 }
 
 AttackerType Move::getAttackerType() const {
-    return static_cast<AttackerType>((encodedMove & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET);
+    AttackerType type = static_cast<AttackerType>((encodedMove & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET);
+
+    if (!isCapture()) {
+        throw AttackerWithoutCapture();
+    }
+
+    return type;
 }
 
 PieceType Move::getCapturedType() const {
     return static_cast<PieceType>((encodedMove & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET);
 }
 
-bool Move::isPromotion() const {
-    return (encodedMove & IS_PROMOTE_MASK) != 0;
-}
-
-bool Move::isCheck() const {
-    return (encodedMove & IS_CHECK_MASK) != 0;
+MoveType Move::getMiscMoveType() const {
+    return static_cast<MoveType>((encodedMove & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET);
 }
 
 bool Move::isCapture() const {
     return (encodedMove & IS_CAPTURE_MASK) != 0;
 }
 
-MoveType Move::getMiscMoveType() const {
-    return static_cast<MoveType>((encodedMove & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET);
+bool Move::isCheck() const {
+    return (encodedMove & IS_CHECK_MASK) != 0;
+}
+
+bool Move::isPromotion() const {
+    return (encodedMove & IS_PROMOTE_MASK) != 0;
 }
 
 
@@ -66,7 +73,13 @@ void Move::setMovingOrPromotedType(PieceType type) {
     encodedMove = (encodedMove & ~MOVING_TYPE_MASK) | ((static_cast<uint8_t>(type) << MOVING_TYPE_OFFSET) & MOVING_TYPE_MASK);
 }
 
+void Move::setPromotedType(PieceType type) {
+    setPromotion(true); // can't be a promotion without a... promotion
+    encodedMove = (encodedMove & ~MOVING_TYPE_MASK) | ((static_cast<uint8_t>(type) << MOVING_TYPE_OFFSET) & MOVING_TYPE_MASK);
+}
+
 void Move::setAttackerType(AttackerType attacker_type) {
+    setCapture(true); // can't be an attacker without capture
     encodedMove = (encodedMove & ~MOVING_TYPE_MASK) | ((static_cast<uint8_t>(attacker_type) << MOVING_TYPE_OFFSET) & MOVING_TYPE_MASK);
 }
 
@@ -74,11 +87,15 @@ void Move::setCapturedType(PieceType type) {
     encodedMove = (encodedMove & ~CAPTURED_TYPE_MASK) | ((static_cast<uint8_t>(type) << CAPTURED_TYPE_OFFSET) & CAPTURED_TYPE_MASK);
 }
 
-void Move::setPromotion(bool isPromote) {
-    if (isPromote) {
-        encodedMove |= IS_PROMOTE_MASK;
+void Move::setMiscMoveType(MoveType miscType) {
+    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((static_cast<uint8_t>(miscType) << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
+}
+
+void Move::setCapture(bool isCapture) {
+    if (isCapture) {
+        encodedMove |= IS_CAPTURE_MASK;
     } else {
-        encodedMove &= ~IS_PROMOTE_MASK;
+        encodedMove &= ~IS_CAPTURE_MASK;
     }
 }
 
@@ -90,14 +107,37 @@ void Move::setCheck(bool isCheck) {
     }
 }
 
-void Move::setCapture(bool isCapture) {
-    if (isCapture) {
-        encodedMove |= IS_CAPTURE_MASK;
+void Move::setPromotion(bool isPromote) {
+    if (isPromote) {
+        encodedMove |= IS_PROMOTE_MASK;
     } else {
-        encodedMove &= ~IS_CAPTURE_MASK;
+        encodedMove &= ~IS_PROMOTE_MASK;
     }
 }
 
-void Move::setMiscMoveType(MoveType miscType) {
-    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((static_cast<uint8_t>(miscType) << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
+void Move::validate() const {
+
+    PieceType captured_type = static_cast<PieceType>((encodedMove & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET);
+    PieceType moving_promoted_type = static_cast<PieceType>((encodedMove & MOVING_TYPE_MASK) >> MOVING_TYPE_OFFSET);
+
+    // check that something moved
+    if (moving_promoted_type == PieceType::NONE) {
+        throw PieceTypeCannonBeNone();
+    }
+
+    // check that something actually died (if it was supposed to)
+    if (isCapture() && captured_type == PieceType::NONE) {
+        throw PieceTypeCannonBeNone();
+    }
+
+    // check that the king is NOT dead (long live the king)
+    if (captured_type == PieceType::KING) {
+        throw KingCannonBeCaptured();
+    }
+
+    // check that the promotion result is a promotable piece type
+    if (isPromotion() && moving_promoted_type != PieceType::QUEEN && moving_promoted_type != PieceType::ROOK &&
+                         moving_promoted_type != PieceType::BISHOP && moving_promoted_type != PieceType::KNIGHT) {
+        throw InvalidPromotion();
+    }
 }

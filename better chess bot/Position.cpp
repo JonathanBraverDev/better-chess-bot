@@ -180,7 +180,7 @@ Piece Position::getPieceAtIndex(int index) const {
     }
 }
 
-bool Position::validate() const {
+void Position::validate() const {
     const Bitboard white_pieces = BitboardOperations::combineBoards(white_pawns, white_knights, white_bishops, white_rooks,white_queens);
 
     const Bitboard black_pieces = BitboardOperations::combineBoards(black_pawns, black_knights, black_bishops, black_rooks, black_queens);
@@ -212,8 +212,6 @@ bool Position::validate() const {
     if (Bitboard(special_move_rigths.getBoard() & ALL_EN_PASSANT).countSetBits() <= 1) {
         throw MultipleEnpasants();
     }
-
-    return true;
 }
 
 

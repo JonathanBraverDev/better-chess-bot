@@ -19,20 +19,23 @@ public:
     PieceType getMovingOrPromotedType() const;
     AttackerType getAttackerType() const;
     PieceType getCapturedType() const;
-    bool isPromotion() const;
-    bool isCheck() const;
-    bool isCapture() const;
     MoveType getMiscMoveType() const;
+    bool isCapture() const;
+    bool isCheck() const;
+    bool isPromotion() const;
 
     void setOriginIndex(uint8_t index);
     void setDestinationIndex(uint8_t index);
     void setMovingOrPromotedType(PieceType type);
+    void setPromotedType(PieceType type);
     void setAttackerType(AttackerType type);
     void setCapturedType(PieceType type);
-    void setPromotion(bool isPromote);
-    void setCheck(bool isCheck);
-    void setCapture(bool isCapture);
     void setMiscMoveType(MoveType miscType);
+    void setCapture(bool isCapture);
+    void setCheck(bool isCheck);
+    void setPromotion(bool isPromote);
 
+    // check that the move encode is not messed up
+    void validate() const;
     // add conversion to text form
 };
