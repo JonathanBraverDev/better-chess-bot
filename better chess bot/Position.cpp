@@ -28,7 +28,7 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
         moveBase.clear(); // todo: adapt to change in move strucutre, preserve BitRights
         destinations.clear();
 
-        moveBase.setMovingOrPromotedType(pieceType);
+        moveBase.setMovingType(pieceType);
         moveBase.setOriginIndex(piece.singleBitIndex());
 
         // Update destinations based on piece type

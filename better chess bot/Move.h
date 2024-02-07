@@ -26,8 +26,10 @@ public:
 
     void setOriginIndex(uint8_t index);
     void setDestinationIndex(uint8_t index);
-    void setMovingOrPromotedType(PieceType type);
+    void setMovingType(PieceType type);
+    // Sets promotion flag too
     void setPromotedType(PieceType type);
+    // Sets capture flag too
     void setAttackerType(AttackerType type);
     void setCapturedType(PieceType type);
     void setMiscMoveType(MoveType miscType);
