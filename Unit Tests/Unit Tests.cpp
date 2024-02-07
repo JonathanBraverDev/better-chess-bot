@@ -140,9 +140,4 @@ namespace UnitTests {
             Assert::AreEqual(0ULL, testBoard.getBoard());
         }
     };
-
-    TEST_CLASS(MoveEncodingTests) {
-    public:
-
-    };
 }
