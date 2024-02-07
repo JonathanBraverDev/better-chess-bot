@@ -1,6 +1,7 @@
 #include "Position.h"
 #include "Exceptions.h"
 #include "structs.h"
+#include <cassert>
 
 // empty initizlization of static member
 PrecomputedMoves Position::precomputed_moves;
@@ -125,6 +126,7 @@ Color Position::getOpponentColor() const {
 }
 
 Bitboard Position::getPieces(Color color, PieceType type) const {
+    assert(color != Color::NONE && type != PieceType::NONE);
     switch (color) {
         case Color::WHITE:
             switch (type) {
@@ -134,7 +136,6 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
                 case PieceType::ROOK: return white_rooks;
                 case PieceType::QUEEN: return white_queens;
                 case PieceType::KING: return white_king;
-                default: throw InvalidPieceTypeException();
             }
         case Color::BLACK:
             switch (type) {
@@ -144,9 +145,7 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
                 case PieceType::ROOK: return black_rooks;
                 case PieceType::QUEEN: return black_queens;
                 case PieceType::KING: return black_king;
-                default: throw InvalidPieceTypeException();
             }
-        default: throw InvalidColorException();
     }
 }
 
