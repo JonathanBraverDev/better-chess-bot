@@ -2,6 +2,7 @@
 #include "Bitboard.h"
 #include "BoardConstants.h"
 #include "DeBruijn.h"
+#include <cassert>
 
 const DirectionCheck Bitboard::direction_check[] = {
     // UP and DOWN will be shifted out naturally, masked for consistency
@@ -131,13 +132,17 @@ Bitboard Bitboard::look(Direction direction) const {
 }
 
 Bitboard Bitboard::slidePath(Direction direction, const Bitboard all_pieces) const {
+    assert(direction == Direction::UP || direction == Direction::DOWN ||
+           direction == Direction::LEFT || direction == Direction::RIGHT ||
+           direction == Direction::UP_LEFT || direction == Direction::UP_RIGHT ||
+           direction == Direction::DOWN_LEFT || direction == Direction::DOWN_RIGHT);
     Bitboard piece = board;
     Bitboard path = Bitboard(0ULL);
 
     do {
         piece.move(direction);
         path.setBitsFrom(piece); // Add the new location to the path
-    } while (piece.hasRemainingBits() && BitboardOperations::combineBoards(piece, all_pieces).isEmpty());
+    } while (piece.hasRemainingBits() && BitboardOperations::findCommonBits(piece, all_pieces).isEmpty());
     // Stop if piece is 0 (shifted out) or a collision occurred on the last move
     // The first colision is added to be contextually figured out by the caller
 
