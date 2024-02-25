@@ -46,6 +46,12 @@ jobs:
     - name: Install Visual Studio Test Platform
       run: choco install visualstudio2022testagent -y
 
+    - name: Check folder
+      run: dir "C:\Program Files (x86)\Microsoft Visual Studio\2022\TestAgent\Common7\IDE"
+
+    - name: Add Test Agent to PATH
+      run: $env:PATH += ";C:\Program Files (x86)\Microsoft Visual Studio\2022\TestAgent\Common7\IDE"
+
     - name: Run Tests
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: vstest.console.exe /Logger:trx ${{env.SOLUTION_FILE_PATH}}\UnitTests.dll
