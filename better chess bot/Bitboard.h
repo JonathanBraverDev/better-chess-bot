@@ -18,6 +18,7 @@ public:
 
     void visualize() const;
 
+    // Using this method is unsafe, avoid where possible
     B64 getBoard() const;
     bool getBit(int index) const;
     int countSetBits() const;
