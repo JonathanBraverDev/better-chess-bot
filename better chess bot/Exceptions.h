@@ -43,3 +43,27 @@ class MultipleEnpasants : public std::exception {
         return "Multiple enpasants found";
     }
 };
+
+class InvalidPromotion : public std::exception {
+    const char* what() const throw() {
+        return "Inalid promotion found";
+    }
+};
+
+class AttackerWithoutCapture : public std::exception {
+    const char* what() const throw() {
+        return "Attacker requested without capture";
+    }
+};
+
+class PieceTypeCannonBeNone : public std::exception {
+    const char* what() const throw() {
+        return "Piece Type cannot be NONE";
+    }
+};
+
+class KingCannonBeCaptured : public std::exception {
+    const char* what() const throw() {
+        return "King cannot be captured";
+    }
+};

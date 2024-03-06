@@ -30,23 +30,27 @@ private:
     Bitboard black_king; // I swear it's not just discrimination
 
     Bitboard special_move_rigths; // en passant AND castle rights for both sides, they can't overlap anyway
+    // use the bitboard to calculate BitRights and use for all moves from the position
     Color current_color;
+
+    // collection of moves possible from the position
+    std::vector<Move> moves;
 
     static PrecomputedMoves precomputed_moves;
 
     Color getOpponentColor() const;
 
     // moves the pieces could make
-    std::vector<Move> getPotentialMoves() const;
-    void getPawnMoves(std::vector<Move>& moves) const;
-    void getKnightMoves(std::vector<Move>& moves) const;
-    void getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pieceType) const;
-    void getBishopMoves(std::vector<Move>& moves) const;
-    void getRookMoves(std::vector<Move>& moves) const;
-    void getQueenMoves(std::vector<Move>& moves) const;
-    void getKingMoves(std::vector<Move>& moves) const;
-    void addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const;
-    void addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captues) const;
+    std::vector<Move> getPotentialMoves();
+    void getPawnMoves();
+    void getKnightMoves();
+    void getSlidingPieceMoves(const PieceType pieceType);
+    void getBishopMoves();
+    void getRookMoves();
+    void getQueenMoves();
+    void getKingMoves();
+    void addDestinationMoves(Move baseMove, Bitboard destinations);
+    void addCaptureMoves(Move baseMove, Bitboard captues);
 
     static void PrepareKingMoves();
     static void PrepareKnightMoves();
@@ -62,7 +66,7 @@ public:
     Piece getPieceAtIndex(int index) const;
 
     // check that the position representation is not messed up
-    bool validate() const;
+    void validate() const;
 
     std::vector<Move> getLegalMoves() const;
 

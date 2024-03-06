@@ -1,17 +1,20 @@
 #include "Position.h"
 #include "Exceptions.h"
 #include "structs.h"
+#include <cassert>
+
+// empty initizlization of static member
+PrecomputedMoves Position::precomputed_moves;
 
 void Position::makeMove(Move move) {
 	// should be mostly a copy from old code
 }
 
-std::vector<Move> Position::getPotentialMoves() const {
-    std::vector<Move> moves;
+std::vector<Move> Position::getPotentialMoves() {
     return moves;
 }
 
-void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pieceType) const {
+void Position::getSlidingPieceMoves(const PieceType pieceType) {
     Bitboard pieces = getPieces(current_color, pieceType);
     Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
@@ -23,10 +26,10 @@ void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pi
     Bitboard piece = pieces.popLowestBit(); // focus on the next piece
 
     while (piece.hasRemainingBits()) {
-        moveBase.clear();
+        moveBase.clear(); // todo: adapt to change in move strucutre, preserve BitRights
         destinations.clear();
 
-        moveBase.setMovingOrPromotedType(pieceType);
+        moveBase.setMovingType(pieceType);
         moveBase.setOriginIndex(piece.singleBitIndex());
 
         // Update destinations based on piece type
@@ -66,26 +69,26 @@ void Position::getSlidingPieceMoves(std::vector<Move>& moves, const PieceType pi
         captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
         destinations.clearBitsFrom(captures);
 
-        addDestinationMoves(moves, moveBase, destinations);
-        addCaptureMoves(moves, moveBase, captures);
+        addDestinationMoves(moveBase, destinations);
+        addCaptureMoves(moveBase, captures);
 
         piece = pieces.popLowestBit();
     }
 }
 
-void Position::getBishopMoves(std::vector<Move>& moves) const {
-    getSlidingPieceMoves(moves, PieceType::BISHOP);
+void Position::getBishopMoves() {
+    getSlidingPieceMoves(PieceType::BISHOP);
 }
 
-void Position::getRookMoves(std::vector<Move>& moves) const {
-    getSlidingPieceMoves(moves, PieceType::ROOK);
+void Position::getRookMoves() {
+    getSlidingPieceMoves(PieceType::ROOK);
 }
 
-void Position::getQueenMoves(std::vector<Move>& moves) const {
-    getSlidingPieceMoves(moves, PieceType::QUEEN);
+void Position::getQueenMoves() {
+    getSlidingPieceMoves(PieceType::QUEEN);
 }
 
-void Position::addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitboard destinations) const {
+void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
     Bitboard destination = destinations.popLowestBit();
     Move move;
 
@@ -99,7 +102,7 @@ void Position::addDestinationMoves(std::vector<Move>& moves, Move baseMove, Bitb
     }
 }
 
-void Position::addCaptureMoves(std::vector<Move>& moves, Move baseMove, Bitboard captures) const {
+void Position::addCaptureMoves(Move baseMove, Bitboard captures) {
     Bitboard capture = captures.popLowestBit();
     Move move;
     int destinationIndex = capture.singleBitIndex();
@@ -123,6 +126,7 @@ Color Position::getOpponentColor() const {
 }
 
 Bitboard Position::getPieces(Color color, PieceType type) const {
+    assert(color != Color::NONE && type != PieceType::NONE);
     switch (color) {
         case Color::WHITE:
             switch (type) {
@@ -132,7 +136,6 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
                 case PieceType::ROOK: return white_rooks;
                 case PieceType::QUEEN: return white_queens;
                 case PieceType::KING: return white_king;
-                default: throw InvalidPieceTypeException();
             }
         case Color::BLACK:
             switch (type) {
@@ -142,9 +145,7 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
                 case PieceType::ROOK: return black_rooks;
                 case PieceType::QUEEN: return black_queens;
                 case PieceType::KING: return black_king;
-                default: throw InvalidPieceTypeException();
             }
-        default: throw InvalidColorException();
     }
 }
 
@@ -178,7 +179,7 @@ Piece Position::getPieceAtIndex(int index) const {
     }
 }
 
-bool Position::validate() const {
+void Position::validate() const {
     const Bitboard white_pieces = BitboardOperations::combineBoards(white_pawns, white_knights, white_bishops, white_rooks,white_queens);
 
     const Bitboard black_pieces = BitboardOperations::combineBoards(black_pawns, black_knights, black_bishops, black_rooks, black_queens);
@@ -210,8 +211,6 @@ bool Position::validate() const {
     if (Bitboard(special_move_rigths.getBoard() & ALL_EN_PASSANT).countSetBits() <= 1) {
         throw MultipleEnpasants();
     }
-
-    return true;
 }
 
 
