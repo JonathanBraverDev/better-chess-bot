@@ -18,7 +18,6 @@ void Position::getKnightMoves() {
     Bitboard knights = getPieces(current_color, PieceType::KNIGHT);
     Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
-    Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
     Bitboard destinations;
     Bitboard captures;
     Move moveBase;
@@ -109,6 +108,23 @@ void Position::getRookMoves() {
 
 void Position::getQueenMoves() {
     getSlidingPieceMoves(PieceType::QUEEN);
+}
+
+void Position::getKingMoves() {
+    Bitboard king = getPieces(current_color, PieceType::KNIGHT);
+    Bitboard ownPieces = getAllOwnPieces();
+    Bitboard opponentPieces = getAllOpponentPieces();
+    Bitboard destinations;
+    Bitboard captures;
+    Move moveBase;
+
+    moveBase.setMovingType(PieceType::KNIGHT);
+    moveBase.setOriginIndex(king.singleBitIndex());
+
+    destinations = precomputed_moves.king_moves[king.singleBitIndex()];
+    destinations.clearBitsFrom(ownPieces);
+
+    finalizeMoves(destinations, ownPieces, opponentPieces, moveBase);
 }
 
 // filters out 'frienly fire' and saves the moves from the destination board
