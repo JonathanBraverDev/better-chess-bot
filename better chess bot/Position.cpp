@@ -150,29 +150,30 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
 }
 
 Piece Position::getPieceAtIndex(int index) const {
-    if (white_pawns.getBoard() & (1ULL << index)) {
+    Bitboard tile_board = (1ULL << index);
+    if (BitboardOperations::findCommonBits(white_pawns, tile_board).hasRemainingBits()) {
         return { Color::WHITE, PieceType::PAWN };
-    } else if (black_pawns.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(black_pawns, tile_board).hasRemainingBits()) {
         return { Color::BLACK, PieceType::PAWN };
-    } else if (white_knights.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(white_knights, tile_board).hasRemainingBits()) {
         return { Color::WHITE, PieceType::KNIGHT };
-    } else if (black_knights.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(black_knights, tile_board).hasRemainingBits()) {
         return { Color::BLACK, PieceType::KNIGHT };
-    } else if (white_bishops.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(white_bishops, tile_board).hasRemainingBits()) {
         return { Color::WHITE, PieceType::BISHOP };
-    } else if (black_bishops.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(black_bishops, tile_board).hasRemainingBits()) {
         return { Color::BLACK, PieceType::BISHOP };
-    } else if (white_rooks.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(white_rooks, tile_board).hasRemainingBits()) {
         return { Color::WHITE, PieceType::ROOK };
-    } else if (black_rooks.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(black_rooks, tile_board).hasRemainingBits()) {
         return { Color::BLACK, PieceType::ROOK };
-    } else if (white_queens.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(white_queens, tile_board).hasRemainingBits()) {
         return { Color::WHITE, PieceType::QUEEN };
-    } else if (black_queens.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(black_queens, tile_board).hasRemainingBits()) {
         return { Color::BLACK, PieceType::QUEEN };
-    } else if (white_king.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(white_king, tile_board).hasRemainingBits()) {
         return { Color::WHITE, PieceType::KING };
-    } else if (black_king.getBoard() & (1ULL << index)) {
+    } else if (BitboardOperations::findCommonBits(black_king, tile_board).hasRemainingBits()) {
         return { Color::BLACK, PieceType::KING };
     } else {
         return { Color::NONE, PieceType::NONE };
