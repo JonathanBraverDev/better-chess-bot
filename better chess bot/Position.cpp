@@ -14,13 +14,40 @@ std::vector<Move> Position::getPotentialMoves() {
     return moves;
 }
 
-void Position::getSlidingPieceMoves(const PieceType pieceType) {
-    Bitboard pieces = getPieces(current_color, pieceType);
+void Position::getKnightMoves() {
+    Bitboard knights = getPieces(current_color, PieceType::KNIGHT);
     Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
     Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
     Bitboard destinations;
     Bitboard captures;
+    Move moveBase;
+
+    Bitboard knight = knights.popLowestBit(); // focus on the next piece
+
+    while (knight.hasRemainingBits()) {
+        moveBase.clearMoveData(); // todo: adapt to change in move strucutre, preserve BitRights
+        destinations.clear();
+
+        moveBase.setMovingType(PieceType::KNIGHT);
+        moveBase.setOriginIndex(knight.singleBitIndex());
+
+        destinations = precomputed_moves.knight_moves[knight.singleBitIndex()];
+        destinations.clearBitsFrom(ownPieces);
+
+        finalizeMoves(destinations, ownPieces, opponentPieces, moveBase);
+
+        knight = knights.popLowestBit();
+    }
+}
+        
+void Position::getSlidingPieceMoves(const PieceType pieceType) {
+    Bitboard pieces = getPieces(current_color, pieceType);
+    // this part repeats, shoud it be split off and passed around?
+    Bitboard ownPieces = getAllOwnPieces();
+    Bitboard opponentPieces = getAllOpponentPieces();
+    Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
+    Bitboard destinations;
     Move moveBase;
 
     Bitboard piece = pieces.popLowestBit(); // focus on the next piece
@@ -66,11 +93,7 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
 
         destinations.clearBitsFrom(ownPieces);
 
-        captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
-        destinations.clearBitsFrom(captures);
-
-        addDestinationMoves(moveBase, destinations);
-        addCaptureMoves(moveBase, captures);
+        finalizeMoves(destinations, ownPieces, opponentPieces, moveBase);
 
         piece = pieces.popLowestBit();
     }
@@ -86,6 +109,17 @@ void Position::getRookMoves() {
 
 void Position::getQueenMoves() {
     getSlidingPieceMoves(PieceType::QUEEN);
+}
+
+// filters out 'frienly fire' and saves the moves from the destination board
+void Position::finalizeMoves(Bitboard destinations, Bitboard ownPieces, Bitboard opponentPieces, Move moveBase) {
+    destinations.clearBitsFrom(ownPieces);
+
+    Bitboard captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
+    destinations.clearBitsFrom(captures);
+
+    addDestinationMoves(moveBase, destinations);
+    addCaptureMoves(moveBase, captures);
 }
 
 void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
