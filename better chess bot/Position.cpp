@@ -26,7 +26,7 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
     Bitboard piece = pieces.popLowestBit(); // focus on the next piece
 
     while (piece.hasRemainingBits()) {
-        moveBase.clear(); // todo: adapt to change in move strucutre, preserve BitRights
+        moveBase.clearMoveData();
         destinations.clear();
 
         moveBase.setMovingType(pieceType);

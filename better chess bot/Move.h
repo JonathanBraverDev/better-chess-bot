@@ -10,7 +10,12 @@ private:
 public:
     Move();
     Move(BitMove encoded);
-    void clear();
+
+    // clears most components of the move, leaving BitRights intact
+    void clearMoveData();
+
+    // resets ALL componets of the move, use sparingly
+    void fullClear();
 
     BitMove getEncodedMove() const;
 

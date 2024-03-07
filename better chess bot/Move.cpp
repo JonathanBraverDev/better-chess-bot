@@ -8,7 +8,11 @@ Move::Move() : encodedMove(0) {}
 // Constructor with initial data
 Move::Move(BitMove encoded) : encodedMove(encoded) {}
 
-void Move::clear() {
+void Move::clearMoveData() {
+    encodedMove &= BIT_RIGHTS_MASK;
+}
+
+void Move::fullClear() {
     encodedMove = 0;
 }
 
