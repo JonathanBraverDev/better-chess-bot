@@ -166,7 +166,15 @@ constexpr B64 TILE_WHITE = 0x5555555555555555ULL;
 // special move related
 constexpr B64 WHITE_CASTLE = ROW_1;
 constexpr B64 BLACK_CASTLE = ROW_8;
-constexpr B64 ALL_EN_PASSANT = ROW_3 | ROW_6;
+constexpr B64 WHITE_EN_PASSANT = ROW_3;
+constexpr B64 BLACK_EN_PASSANT = ROW_6;
+constexpr B64 ALL_EN_PASSANT = WHITE_EN_PASSANT | BLACK_EN_PASSANT;
 constexpr B64 VOID_WHITE_CASTLE = ~WHITE_CASTLE;
 constexpr B64 VOID_BLACK_CASTLE = ~BLACK_CASTLE;
 constexpr B64 VOID_ALL_EN_PASSANT = ~ALL_EN_PASSANT;
+
+constexpr int PAWN_INITIAL_ROW = 2;
+// the row FROM which an enpassant can potentially be played
+constexpr int PAWN_ENPASSANT_ROW = BOARD_SIZE - (PAWN_INITIAL_ROW + 1);
+constexpr int PAWN_PRE_PROMOTION_ROW = BOARD_SIZE - 1;
+constexpr int PAWN_PROMOTION_ROW = BOARD_SIZE;
