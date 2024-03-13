@@ -31,6 +31,7 @@ public:
     void clearLowestBit();
     void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);
+    Bitboard invertedCopy() const;
 
     // extracts the lowest bit, deleting it from the board
     Bitboard popLowestBit();

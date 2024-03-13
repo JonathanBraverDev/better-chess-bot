@@ -104,6 +104,10 @@ void Bitboard::clearBitsFrom(Bitboard otherBoard) {
     board &= ~otherBoard.getBoard();
 }
 
+Bitboard Bitboard::invertedCopy() const {
+    return ~board;
+}
+
 Bitboard Bitboard::popLowestBit() {
     B64 lowest = lowestBitBoard();
     clearLowestBit();
