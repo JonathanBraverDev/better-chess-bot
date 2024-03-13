@@ -14,6 +14,60 @@ std::vector<Move> Position::getPotentialMoves() {
     return moves;
 }
 
+void Position::getPawnMoves() {
+    Bitboard pawns = getPieces(current_color, PieceType::PAWN);
+    Bitboard ownPieces = getAllOwnPieces();
+    Bitboard opponentPieces = getAllOpponentPieces();
+    Bitboard empty_tiles = BitboardOperations::combineBoards(ownPieces, opponentPieces).invertedCopy();
+    Bitboard step;
+    Bitboard jump;
+    Bitboard captures;
+    Move moveBase = currentBitRights();
+    Direction adjusted_direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
+    int color_offset = (current_color == Color::WHITE ? 0 : 1);
+    int pawn_index;
+    int adjusted_pawn_row;
+
+    Bitboard pawn = pawns.popLowestBit(); // focus on the next piece
+
+    while (pawn.hasRemainingBits()) {
+        moveBase.clearMoveData();
+        step.clear();
+        jump.clear();
+        captures.clear();
+
+
+
+        pawn_index = pawn.singleBitIndex();
+        adjusted_pawn_row = (current_color == Color::WHITE ? pawn_index / BOARD_SIZE : BOARD_SIZE - (pawn_index / BOARD_SIZE));
+
+        step = BitboardOperations::findCommonBits(precomputed_moves.pawn_moves[color_offset + 2 * pawn_index],
+                                                  empty_tiles);
+        captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
+                                                      opponentPieces);
+
+        moveBase.setOriginIndex(pawn_index); // the only thing that can be set
+
+        switch (adjusted_pawn_row) {
+        case PAWN_INITIAL_ROW:
+            moveBase.setMovingType(PieceType::PAWN);
+            // if move possible, check jump
+            break;
+        case PAWN_ENPASSANT_ROW:
+            // check enpassant
+            break;
+        case PAWN_PRE_PROMOTION_ROW:
+            // all moves are converted to all possible promotions
+            break;
+        default:
+            // no special mess whatsoever, yey
+            break;
+        }
+
+        pawn = pawns.popLowestBit();
+    }
+}
+
 void Position::getKnightMoves() {
     Bitboard knights = getPieces(current_color, PieceType::KNIGHT);
     Bitboard ownPieces = getAllOwnPieces();
