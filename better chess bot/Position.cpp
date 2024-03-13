@@ -16,12 +16,12 @@ std::vector<Move> Position::getPotentialMoves() {
 
 void Position::getPawnMoves() {
     Bitboard pawns = getPieces(current_color, PieceType::PAWN);
-    Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
-    Bitboard empty_tiles = BitboardOperations::combineBoards(ownPieces, opponentPieces).invertedCopy();
+    Bitboard empty_tiles = BitboardOperations::combineBoards(getAllOwnPieces(), opponentPieces).invertedCopy();
+    Bitboard opponent_en_passant = (current_color == Color::WHITE ? BLACK_EN_PASSANT : WHITE_EN_PASSANT);
     Bitboard step;
-    Bitboard jump;
     Bitboard captures;
+    Bitboard special_move; // either a jump OR en-passant. never both.
     Move moveBase = currentBitRights();
     Direction adjusted_direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
     int color_offset = (current_color == Color::WHITE ? 0 : 1);
@@ -33,10 +33,8 @@ void Position::getPawnMoves() {
     while (pawn.hasRemainingBits()) {
         moveBase.clearMoveData();
         step.clear();
-        jump.clear();
         captures.clear();
-
-
+        special_move.clear();
 
         pawn_index = pawn.singleBitIndex();
         adjusted_pawn_row = (current_color == Color::WHITE ? pawn_index / BOARD_SIZE : BOARD_SIZE - (pawn_index / BOARD_SIZE));
@@ -46,21 +44,37 @@ void Position::getPawnMoves() {
         captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
                                                       opponentPieces);
 
-        moveBase.setOriginIndex(pawn_index); // the only thing that can be set
+        moveBase.setOriginIndex(pawn_index); // the only thing that can be set for sure
 
         switch (adjusted_pawn_row) {
         case PAWN_INITIAL_ROW:
-            moveBase.setMovingType(PieceType::PAWN);
-            // if move possible, check jump
+            if (step.hasRemainingBits()) {
+                // check jump is a step is possible
+                special_move = BitboardOperations::findCommonBits(step.look(adjusted_direction_forward),
+                                                          empty_tiles);
+
+                if (special_move.hasRemainingBits()) {
+                    // explicitly add jump move
+                }
+            }
+            // add regular move and normal attacks like usual
+
             break;
         case PAWN_ENPASSANT_ROW:
-            // check enpassant
+            // check if en-passant is possible
+            special_move = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
+                                                              opponent_en_passant);
+            if (special_move.hasRemainingBits()) {
+                // explicitly add en-passant move
+            }
+            // add regular move and normal attacks like usual
+
             break;
         case PAWN_PRE_PROMOTION_ROW:
-            // all moves are converted to all possible promotions
+            // almost the normal situation, but each move is promoted to every possible piece
             break;
         default:
-            // no special mess whatsoever, yey
+            // add regular move and normal attacks like usual
             break;
         }
 
