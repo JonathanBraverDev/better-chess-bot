@@ -63,10 +63,10 @@ static_assert((WHITE_CASTLE_MASK | BLACK_CASTLE_MASK | VALID_EN_PASSANT_MASK | E
 // 1 bit promotion flag
 // 1 bit check flag
 // 1 bit capture flag
-// 1 bit FREE FLAG
+// 1 bit FREE FLAG (currently unused)
 // 2 bit misc move types (see emun)
 // total 6 order bits
-// note that everything but the special move right is 100% reversibe as is
+// note that everything but the special move rights is 100% reversibe as is
 
 // BitRights encoding: (all avalible before the move)
 // 2 bit L/R castle white
