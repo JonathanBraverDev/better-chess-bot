@@ -8,6 +8,10 @@ Move::Move() : encodedMove(0) {}
 // Constructor with initial data
 Move::Move(BitMove encoded) : encodedMove(encoded) {}
 
+Move Move::copy() const {
+    return Move(encodedMove);
+}
+
 void Move::clearMoveData() {
     encodedMove &= BIT_RIGHTS_MASK;
 }
