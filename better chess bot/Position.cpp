@@ -73,13 +73,12 @@ void Position::getKnightMoves() {
     Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
     Bitboard destinations;
-    Bitboard captures;
     Move moveBase;
 
     Bitboard knight = knights.popLowestBit(); // focus on the next piece
 
     while (knight.hasRemainingBits()) {
-        moveBase.clearMoveData(); // todo: adapt to change in move strucutre, preserve BitRights
+        moveBase.clearMoveData();
         destinations.clear();
 
         moveBase.setMovingType(PieceType::KNIGHT);
@@ -169,7 +168,6 @@ void Position::getKingMoves() {
     Bitboard ownPieces = getAllOwnPieces();
     Bitboard opponentPieces = getAllOpponentPieces();
     Bitboard destinations;
-    Bitboard captures;
     Move moveBase;
 
     moveBase.setMovingType(PieceType::KNIGHT);
