@@ -21,8 +21,9 @@ void Position::getPawnMoves() {
     Bitboard opponent_en_passant = (current_color == Color::WHITE ? BLACK_EN_PASSANT : WHITE_EN_PASSANT);
     Bitboard step;
     Bitboard captures;
-    Bitboard special_move; // either a jump OR en-passant. never both.
-    Move moveBase = currentBitRights();
+    Bitboard special_move_board; // either a jump OR en-passant. never both.
+    Move move_base = currentBitRights();
+    Move special_move;
     Direction adjusted_direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
     int color_offset = (current_color == Color::WHITE ? 0 : 1);
     int pawn_index;
@@ -31,10 +32,10 @@ void Position::getPawnMoves() {
     Bitboard pawn = pawns.popLowestBit(); // focus on the next piece
 
     while (pawn.hasRemainingBits()) {
-        moveBase.clearMoveData();
+        move_base.clearMoveData();
         step.clear();
         captures.clear();
-        special_move.clear();
+        special_move_board.clear();
 
         pawn_index = pawn.singleBitIndex();
         adjusted_pawn_row = (current_color == Color::WHITE ? pawn_index / BOARD_SIZE : BOARD_SIZE - (pawn_index / BOARD_SIZE));
@@ -44,16 +45,23 @@ void Position::getPawnMoves() {
         captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
                                                       opponentPieces);
 
-        moveBase.setOriginIndex(pawn_index); // the only thing that can be set for sure
+        move_base.setOriginIndex(pawn_index); // the only thing that can be set for sure
 
         switch (adjusted_pawn_row) {
         case PAWN_INITIAL_ROW:
             if (step.hasRemainingBits()) {
                 // check jump is a step is possible
-                special_move = BitboardOperations::findCommonBits(step.look(adjusted_direction_forward),
+                special_move_board = BitboardOperations::findCommonBits(step.look(adjusted_direction_forward),
                                                           empty_tiles);
 
-                if (special_move.hasRemainingBits()) {
+                if (special_move_board.hasRemainingBits()) {
+                    special_move = move_base.copy();
+
+                    special_move.setMovingType(PieceType::PAWN);
+                    special_move.setMiscMoveType(MoveType::PAWN_UNIQE);
+                    special_move.setDestinationIndex(special_move_board.singleBitIndex());
+
+                    moves.push_back(special_move);
                     // explicitly add jump move
                 }
             }
@@ -62,10 +70,15 @@ void Position::getPawnMoves() {
             break;
         case PAWN_ENPASSANT_ROW:
             // check if en-passant is possible
-            special_move = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
+            special_move_board = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
                                                               opponent_en_passant);
-            if (special_move.hasRemainingBits()) {
-                // explicitly add en-passant move
+            if (special_move_board.hasRemainingBits()) {
+                special_move = move_base.copy();
+
+                special_move.setAttackerType(AttackerType::PAWN);
+                special_move.setMiscMoveType(MoveType::PAWN_UNIQE);
+                special_move.setCapturedType(PieceType::PAWN);
+                special_move.setDestinationIndex(special_move_board.singleBitIndex());
             }
             // add regular move and normal attacks like usual
 
