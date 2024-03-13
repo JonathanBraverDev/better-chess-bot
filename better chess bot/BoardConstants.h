@@ -166,7 +166,9 @@ constexpr B64 TILE_WHITE = 0x5555555555555555ULL;
 // special move related
 constexpr B64 WHITE_CASTLE = ROW_1;
 constexpr B64 BLACK_CASTLE = ROW_8;
+// the row to which white writes en-passants
 constexpr B64 WHITE_EN_PASSANT = ROW_3;
+// the row to which black writes en-passants
 constexpr B64 BLACK_EN_PASSANT = ROW_6;
 constexpr B64 ALL_EN_PASSANT = WHITE_EN_PASSANT | BLACK_EN_PASSANT;
 constexpr B64 VOID_WHITE_CASTLE = ~WHITE_CASTLE;

@@ -42,7 +42,5 @@ public:
     void setCheck(bool isCheck);
     void setPromotion(bool isPromote);
 
-    // check that the move encode is not messed up
-    void validate() const;
     // add conversion to text form
 };
