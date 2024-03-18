@@ -50,11 +50,12 @@ void Position::getPawnMoves() {
         switch (adjusted_pawn_row) {
         case PAWN_INITIAL_ROW:
             if (step.hasRemainingBits()) {
-                // check jump is a step is possible
+                // check jump if a step is possible
                 special_move_board = BitboardOperations::findCommonBits(step.look(adjusted_direction_forward),
                                                           empty_tiles);
 
                 if (special_move_board.hasRemainingBits()) {
+                    // explicitly add jump move
                     special_move = move_base.copy();
 
                     special_move.setMovingType(PieceType::PAWN);
@@ -73,6 +74,7 @@ void Position::getPawnMoves() {
             special_move_board = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
                                                               opponent_en_passant);
             if (special_move_board.hasRemainingBits()) {
+                // explicitly add enpassant move
                 special_move = move_base.copy();
 
                 special_move.setAttackerType(AttackerType::PAWN);
@@ -92,6 +94,31 @@ void Position::getPawnMoves() {
         }
 
         pawn = pawns.popLowestBit();
+    }
+}
+
+void Position::addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures) {
+    // base_move is expected to have the origin set
+    // note that the passed move is never safely reset
+
+    Bitboard capture = captures.popLowestBit();
+
+    if (step.hasRemainingBits()) {
+        // add step
+        base_move.setMovingType(PieceType::PAWN);
+        base_move.setDestinationIndex(step.singleBitIndex());
+
+        moves.push_back(base_move);
+    }
+
+    while (capture.hasRemainingBits()) {
+        // add capture
+        base_move.setAttackerType(AttackerType::PAWN);
+        base_move.setDestinationIndex(capture.singleBitIndex());
+        base_move.setCapturedType(getPieceAtTile(capture).type);
+
+        moves.push_back(base_move);
+        capture = captures.popLowestBit();
     }
 }
 
@@ -234,19 +261,17 @@ void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
 void Position::addCaptureMoves(Move baseMove, Bitboard captures) {
     Bitboard capture = captures.popLowestBit();
     Move move;
-    int destinationIndex = capture.singleBitIndex();
 
     while (capture.hasRemainingBits()) {
         move = baseMove; // reset the move
 
-        move.setDestinationIndex(destinationIndex);
-        move.setCapturedType(getPieceAtIndex(destinationIndex).type);
+        move.setDestinationIndex(capture.singleBitIndex());
+        move.setCapturedType(getPieceAtTile(capture).type);
         move.setCapture(true); // very similar functions to "DestinationMoves" but saves the check on every tile
 
         moves.push_back(move);
 
         capture = captures.popLowestBit();
-        destinationIndex = capture.singleBitIndex();
     }
 }
 
@@ -279,30 +304,34 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
 }
 
 Piece Position::getPieceAtIndex(int index) const {
-    Bitboard tile_board = (1ULL << index);
-    if (BitboardOperations::findCommonBits(white_pawns, tile_board).hasRemainingBits()) {
+    Bitboard tile = (1ULL << index);
+    return getPieceAtTile(tile);
+}
+
+Piece Position::getPieceAtTile(Bitboard tile) const {
+    if (BitboardOperations::findCommonBits(white_pawns, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::PAWN };
-    } else if (BitboardOperations::findCommonBits(black_pawns, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(black_pawns, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::PAWN };
-    } else if (BitboardOperations::findCommonBits(white_knights, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(white_knights, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::KNIGHT };
-    } else if (BitboardOperations::findCommonBits(black_knights, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(black_knights, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::KNIGHT };
-    } else if (BitboardOperations::findCommonBits(white_bishops, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(white_bishops, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::BISHOP };
-    } else if (BitboardOperations::findCommonBits(black_bishops, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(black_bishops, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::BISHOP };
-    } else if (BitboardOperations::findCommonBits(white_rooks, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(white_rooks, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::ROOK };
-    } else if (BitboardOperations::findCommonBits(black_rooks, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(black_rooks, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::ROOK };
-    } else if (BitboardOperations::findCommonBits(white_queens, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(white_queens, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::QUEEN };
-    } else if (BitboardOperations::findCommonBits(black_queens, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(black_queens, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::QUEEN };
-    } else if (BitboardOperations::findCommonBits(white_king, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(white_king, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::KING };
-    } else if (BitboardOperations::findCommonBits(black_king, tile_board).hasRemainingBits()) {
+    } else if (BitboardOperations::findCommonBits(black_king, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::KING };
     } else {
         return { Color::NONE, PieceType::NONE };
