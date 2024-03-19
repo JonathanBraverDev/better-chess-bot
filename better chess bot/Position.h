@@ -79,4 +79,7 @@ public:
     Bitboard getAllOpponentPieces() const;
 
     static void InitializeMoves();
+
+    // Converts the special move board to a bitmove containig the appropriate BitRights
+    BitMove currentBitRights();
 };
