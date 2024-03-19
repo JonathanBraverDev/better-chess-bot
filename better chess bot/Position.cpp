@@ -265,7 +265,7 @@ void Position::finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboar
     destinations.clearBitsFrom(captures);
 
     addDestinationMoves(move_base, destinations);
-    addCaptureMoves(moveBase, captures);
+    move_base.setAttackerType(pieceTypeToAttackerMap[move_base.getMovingOrPromotedType()]);
     addCaptureMoves(move_base, captures);
 }
 
