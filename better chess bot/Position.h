@@ -50,7 +50,7 @@ private:
     void getRookMoves();
     void getQueenMoves();
     void getKingMoves();
-    void finalizeMoves(Bitboard destinations, Bitboard ownPieces, Bitboard opponentPieces, Move moveBase);
+    void finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboard opponent_pieces, Move move_base);
     void addDestinationMoves(Move baseMove, Bitboard destinations);
     void addCaptureMoves(Move baseMove, Bitboard captues);
 

@@ -16,8 +16,8 @@ std::vector<Move> Position::getPotentialMoves() {
 
 void Position::getPawnMoves() {
     Bitboard pawns = getPieces(current_color, PieceType::PAWN);
-    Bitboard opponentPieces = getAllOpponentPieces();
-    Bitboard empty_tiles = BitboardOperations::combineBoards(getAllOwnPieces(), opponentPieces).invertedCopy();
+    Bitboard opponent_pieces = getAllOpponentPieces();
+    Bitboard empty_tiles = BitboardOperations::combineBoards(getAllOwnPieces(), opponent_pieces).invertedCopy();
     Bitboard opponent_en_passant = (current_color == Color::WHITE ? BLACK_EN_PASSANT : WHITE_EN_PASSANT);
     Bitboard step;
     Bitboard captures;
@@ -43,7 +43,7 @@ void Position::getPawnMoves() {
         step = BitboardOperations::findCommonBits(precomputed_moves.pawn_moves[color_offset + 2 * pawn_index],
                                                   empty_tiles);
         captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
-                                                      opponentPieces);
+                                                      opponent_pieces);
 
         move_base.setOriginIndex(pawn_index); // the only thing that can be set for sure
 
@@ -148,24 +148,24 @@ void Position::addNormalPawnMoves(Move move_base, Bitboard step, Bitboard captur
 
 void Position::getKnightMoves() {
     Bitboard knights = getPieces(current_color, PieceType::KNIGHT);
-    Bitboard ownPieces = getAllOwnPieces();
-    Bitboard opponentPieces = getAllOpponentPieces();
+    Bitboard own_pieces = getAllOwnPieces();
+    Bitboard opponent_pieces = getAllOpponentPieces();
     Bitboard destinations;
-    Move moveBase;
+    Move move_base;
 
     Bitboard knight = knights.popLowestBit(); // focus on the next piece
 
     while (knight.hasRemainingBits()) {
-        moveBase.clearMoveData();
+        move_base.clearMoveData();
         destinations.clear();
 
-        moveBase.setMovingType(PieceType::KNIGHT);
-        moveBase.setOriginIndex(knight.singleBitIndex());
+        move_base.setMovingType(PieceType::KNIGHT);
+        move_base.setOriginIndex(knight.singleBitIndex());
 
         destinations = precomputed_moves.knight_moves[knight.singleBitIndex()];
-        destinations.clearBitsFrom(ownPieces);
+        destinations.clearBitsFrom(own_pieces);
 
-        finalizeMoves(destinations, ownPieces, opponentPieces, moveBase);
+        finalizeMoves(destinations, own_pieces, opponent_pieces, move_base);
 
         knight = knights.popLowestBit();
     }
@@ -174,56 +174,56 @@ void Position::getKnightMoves() {
 void Position::getSlidingPieceMoves(const PieceType pieceType) {
     Bitboard pieces = getPieces(current_color, pieceType);
     // this part repeats, shoud it be split off and passed around?
-    Bitboard ownPieces = getAllOwnPieces();
-    Bitboard opponentPieces = getAllOpponentPieces();
-    Bitboard allPieces = BitboardOperations::combineBoards(ownPieces, opponentPieces);
+    Bitboard own_pieces = getAllOwnPieces();
+    Bitboard opponent_pieces = getAllOpponentPieces();
+    Bitboard all_pieces = BitboardOperations::combineBoards(own_pieces, opponent_pieces);
     Bitboard destinations;
-    Move moveBase;
+    Move move_base;
 
     Bitboard piece = pieces.popLowestBit(); // focus on the next piece
 
     while (piece.hasRemainingBits()) {
-        moveBase.clearMoveData();
+        move_base.clearMoveData();
         destinations.clear();
 
-        moveBase.setMovingType(pieceType);
-        moveBase.setOriginIndex(piece.singleBitIndex());
+        move_base.setMovingType(pieceType);
+        move_base.setOriginIndex(piece.singleBitIndex());
 
         // Update destinations based on piece type
         switch (pieceType) {
         case PieceType::BISHOP:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePath(Direction::UP_LEFT, allPieces),
-                piece.slidePath(Direction::UP_RIGHT, allPieces),
-                piece.slidePath(Direction::DOWN_LEFT, allPieces),
-                piece.slidePath(Direction::DOWN_RIGHT, allPieces)
+                piece.slidePath(Direction::UP_LEFT, all_pieces),
+                piece.slidePath(Direction::UP_RIGHT, all_pieces),
+                piece.slidePath(Direction::DOWN_LEFT, all_pieces),
+                piece.slidePath(Direction::DOWN_RIGHT, all_pieces)
             );
             break;
         case PieceType::ROOK:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePath(Direction::UP, allPieces),
-                piece.slidePath(Direction::DOWN, allPieces),
-                piece.slidePath(Direction::LEFT, allPieces),
-                piece.slidePath(Direction::RIGHT, allPieces)
+                piece.slidePath(Direction::UP, all_pieces),
+                piece.slidePath(Direction::DOWN, all_pieces),
+                piece.slidePath(Direction::LEFT, all_pieces),
+                piece.slidePath(Direction::RIGHT, all_pieces)
             );
             break;
         case PieceType::QUEEN:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePath(Direction::UP, allPieces),
-                piece.slidePath(Direction::DOWN, allPieces),
-                piece.slidePath(Direction::LEFT, allPieces),
-                piece.slidePath(Direction::RIGHT, allPieces),
-                piece.slidePath(Direction::UP_LEFT, allPieces),
-                piece.slidePath(Direction::UP_RIGHT, allPieces),
-                piece.slidePath(Direction::DOWN_LEFT, allPieces),
-                piece.slidePath(Direction::DOWN_RIGHT, allPieces)
+                piece.slidePath(Direction::UP, all_pieces),
+                piece.slidePath(Direction::DOWN, all_pieces),
+                piece.slidePath(Direction::LEFT, all_pieces),
+                piece.slidePath(Direction::RIGHT, all_pieces),
+                piece.slidePath(Direction::UP_LEFT, all_pieces),
+                piece.slidePath(Direction::UP_RIGHT, all_pieces),
+                piece.slidePath(Direction::DOWN_LEFT, all_pieces),
+                piece.slidePath(Direction::DOWN_RIGHT, all_pieces)
             );
             break;
         }
 
-        destinations.clearBitsFrom(ownPieces);
+        destinations.clearBitsFrom(own_pieces);
 
-        finalizeMoves(destinations, ownPieces, opponentPieces, moveBase);
+        finalizeMoves(destinations, own_pieces, opponent_pieces, move_base);
 
         piece = pieces.popLowestBit();
     }
@@ -243,29 +243,30 @@ void Position::getQueenMoves() {
 
 void Position::getKingMoves() {
     Bitboard king = getPieces(current_color, PieceType::KNIGHT);
-    Bitboard ownPieces = getAllOwnPieces();
-    Bitboard opponentPieces = getAllOpponentPieces();
+    Bitboard own_pieces = getAllOwnPieces();
+    Bitboard opponent_pieces = getAllOpponentPieces();
     Bitboard destinations;
-    Move moveBase;
+    Move move_base;
 
-    moveBase.setMovingType(PieceType::KNIGHT);
-    moveBase.setOriginIndex(king.singleBitIndex());
+    move_base.setMovingType(PieceType::KNIGHT);
+    move_base.setOriginIndex(king.singleBitIndex());
 
     destinations = precomputed_moves.king_moves[king.singleBitIndex()];
-    destinations.clearBitsFrom(ownPieces);
+    destinations.clearBitsFrom(own_pieces);
 
-    finalizeMoves(destinations, ownPieces, opponentPieces, moveBase);
+    finalizeMoves(destinations, own_pieces, opponent_pieces, move_base);
 }
 
 // filters out 'frienly fire' and saves the moves from the destination board
-void Position::finalizeMoves(Bitboard destinations, Bitboard ownPieces, Bitboard opponentPieces, Move moveBase) {
-    destinations.clearBitsFrom(ownPieces);
+void Position::finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboard opponent_pieces, Move move_base) {
+    destinations.clearBitsFrom(own_pieces);
 
-    Bitboard captures = BitboardOperations::findCommonBits(destinations, opponentPieces);
+    Bitboard captures = BitboardOperations::findCommonBits(destinations, opponent_pieces);
     destinations.clearBitsFrom(captures);
 
-    addDestinationMoves(moveBase, destinations);
+    addDestinationMoves(move_base, destinations);
     addCaptureMoves(moveBase, captures);
+    addCaptureMoves(move_base, captures);
 }
 
 void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
