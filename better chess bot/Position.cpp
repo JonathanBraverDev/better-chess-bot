@@ -63,10 +63,9 @@ void Position::getPawnMoves() {
                     special_move.setDestinationIndex(special_move_board.singleBitIndex());
 
                     moves.push_back(special_move);
-                    // explicitly add jump move
                 }
             }
-            // add regular move and normal attacks like usual
+            addNormalPawnMoves(move_base, step, captures);
 
             break;
         case PAWN_ENPASSANT_ROW:
@@ -82,14 +81,39 @@ void Position::getPawnMoves() {
                 special_move.setCapturedType(PieceType::PAWN);
                 special_move.setDestinationIndex(special_move_board.singleBitIndex());
             }
-            // add regular move and normal attacks like usual
+            addNormalPawnMoves(move_base, step, captures);
 
             break;
         case PAWN_PRE_PROMOTION_ROW:
-            // almost the normal situation, but each move is promoted to every possible piece
+            if (step.hasRemainingBits()) {
+                // add step promotions
+                move_base.setDestinationIndex(step.singleBitIndex());
+
+                for (PieceType promotionType : {PieceType::QUEEN, PieceType::ROOK, PieceType::BISHOP, PieceType::KNIGHT}) {
+                    move_base.setMovingType(promotionType);
+                    moves.push_back(move_base);
+                }
+            }
+
+            special_move_board = captures.popLowestBit();
+            while (special_move_board.hasRemainingBits()) {
+                // add capture promotions
+                move_base.setDestinationIndex(special_move_board.singleBitIndex());
+                move_base.setCapturedType(getPieceAtTile(special_move_board).type);
+                move_base.setCapture(true); 
+
+                // note that captures do NOT use attacker type to prioritize high promotions
+                // this allows sorting by int value but complicates decode a bit
+                for (PieceType promotionType : {PieceType::QUEEN, PieceType::ROOK, PieceType::BISHOP, PieceType::KNIGHT}) {
+                    move_base.setMovingType(promotionType);
+                    moves.push_back(move_base);
+                }
+
+                special_move_board = captures.popLowestBit();
+            }
             break;
         default:
-            // add regular move and normal attacks like usual
+            addNormalPawnMoves(move_base, step, captures);
             break;
         }
 
@@ -97,7 +121,7 @@ void Position::getPawnMoves() {
     }
 }
 
-void Position::addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures) {
+void Position::addNormalPawnMoves(Move move_base, Bitboard step, Bitboard captures) {
     // base_move is expected to have the origin set
     // note that the passed move is never safely reset
 
@@ -105,19 +129,19 @@ void Position::addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captur
 
     if (step.hasRemainingBits()) {
         // add step
-        base_move.setMovingType(PieceType::PAWN);
-        base_move.setDestinationIndex(step.singleBitIndex());
+        move_base.setMovingType(PieceType::PAWN);
+        move_base.setDestinationIndex(step.singleBitIndex());
 
-        moves.push_back(base_move);
+        moves.push_back(move_base);
     }
 
     while (capture.hasRemainingBits()) {
         // add capture
-        base_move.setAttackerType(AttackerType::PAWN);
-        base_move.setDestinationIndex(capture.singleBitIndex());
-        base_move.setCapturedType(getPieceAtTile(capture).type);
+        move_base.setAttackerType(AttackerType::PAWN);
+        move_base.setDestinationIndex(capture.singleBitIndex());
+        move_base.setCapturedType(getPieceAtTile(capture).type);
 
-        moves.push_back(base_move);
+        moves.push_back(move_base);
         capture = captures.popLowestBit();
     }
 }
