@@ -11,6 +11,12 @@ void Position::makeMove(Move move) {
 }
 
 std::vector<Move> Position::getPotentialMoves() {
+    getPawnMoves();
+    getKnightMoves();
+    getBishopMoves();
+    getRookMoves();
+    getQueenMoves();
+    getKingMoves();
     return moves;
 }
 
@@ -189,34 +195,45 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
         move_base.setMovingType(pieceType);
         move_base.setOriginIndex(piece.singleBitIndex());
 
-        // Update destinations based on piece type
+        destinations = getSlideDestinations(piece, pieceType, all_pieces);
+        destinations.clearBitsFrom(own_pieces);
+
+        finalizeMoves(destinations, own_pieces, opponent_pieces, move_base);
+
+        piece = pieces.popLowestBit();
+    }
+}
+
+Bitboard Position::getSlideDestinations(const Bitboard piece, const PieceType pieceType, const Bitboard blockers) const {
+    Bitboard destinations;
+
         switch (pieceType) {
         case PieceType::BISHOP:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePath(Direction::UP_LEFT, all_pieces),
-                piece.slidePath(Direction::UP_RIGHT, all_pieces),
-                piece.slidePath(Direction::DOWN_LEFT, all_pieces),
-                piece.slidePath(Direction::DOWN_RIGHT, all_pieces)
+            piece.slidePath(Direction::UP_LEFT, blockers),
+            piece.slidePath(Direction::UP_RIGHT, blockers),
+            piece.slidePath(Direction::DOWN_LEFT, blockers),
+            piece.slidePath(Direction::DOWN_RIGHT, blockers)
             );
             break;
         case PieceType::ROOK:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePath(Direction::UP, all_pieces),
-                piece.slidePath(Direction::DOWN, all_pieces),
-                piece.slidePath(Direction::LEFT, all_pieces),
-                piece.slidePath(Direction::RIGHT, all_pieces)
+            piece.slidePath(Direction::UP, blockers),
+            piece.slidePath(Direction::DOWN, blockers),
+            piece.slidePath(Direction::LEFT, blockers),
+            piece.slidePath(Direction::RIGHT, blockers)
             );
             break;
         case PieceType::QUEEN:
             destinations = BitboardOperations::combineBoards(
-                piece.slidePath(Direction::UP, all_pieces),
-                piece.slidePath(Direction::DOWN, all_pieces),
-                piece.slidePath(Direction::LEFT, all_pieces),
-                piece.slidePath(Direction::RIGHT, all_pieces),
-                piece.slidePath(Direction::UP_LEFT, all_pieces),
-                piece.slidePath(Direction::UP_RIGHT, all_pieces),
-                piece.slidePath(Direction::DOWN_LEFT, all_pieces),
-                piece.slidePath(Direction::DOWN_RIGHT, all_pieces)
+            piece.slidePath(Direction::UP, blockers),
+            piece.slidePath(Direction::DOWN, blockers),
+            piece.slidePath(Direction::LEFT, blockers),
+            piece.slidePath(Direction::RIGHT, blockers),
+            piece.slidePath(Direction::UP_LEFT, blockers),
+            piece.slidePath(Direction::UP_RIGHT, blockers),
+            piece.slidePath(Direction::DOWN_LEFT, blockers),
+            piece.slidePath(Direction::DOWN_RIGHT, blockers)
             );
             break;
         }
@@ -269,12 +286,12 @@ void Position::finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboar
     addCaptureMoves(move_base, captures);
 }
 
-void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
+void Position::addDestinationMoves(Move move_base, Bitboard destinations) {
     Bitboard destination = destinations.popLowestBit();
     Move move;
 
     while (destination.hasRemainingBits()) {
-        move = baseMove; // reset the move
+        move = move_base; // reset the move
 
         move.setDestinationIndex(destination.singleBitIndex());
         moves.push_back(move);
@@ -283,12 +300,12 @@ void Position::addDestinationMoves(Move baseMove, Bitboard destinations) {
     }
 }
 
-void Position::addCaptureMoves(Move baseMove, Bitboard captures) {
+void Position::addCaptureMoves(Move move_base, Bitboard captures) {
     Bitboard capture = captures.popLowestBit();
     Move move;
 
     while (capture.hasRemainingBits()) {
-        move = baseMove; // reset the move
+        move = move_base; // reset the move
 
         move.setDestinationIndex(capture.singleBitIndex());
         move.setCapturedType(getPieceAtTile(capture).type);
