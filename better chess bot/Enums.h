@@ -7,7 +7,7 @@ enum class Color { NONE, WHITE, BLACK };
 enum class PieceType { NONE, KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN };
 enum class AttackerType { NONE, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN }; // inverted value for capturing piece
 
-std::map<PieceType, AttackerType> pieceTypeToAttackerMap = {
+const std::map<PieceType, AttackerType> pieceTypeToAttackerMap = {
   {PieceType::NONE, AttackerType::NONE},
   {PieceType::KING, AttackerType::KING},
   {PieceType::PAWN, AttackerType::PAWN},
@@ -17,7 +17,7 @@ std::map<PieceType, AttackerType> pieceTypeToAttackerMap = {
   {PieceType::QUEEN, AttackerType::QUEEN},
 };
 
-std::map<AttackerType, PieceType> attackerTypeToPieceTypeMap = {
+const std::map<AttackerType, PieceType> attackerTypeToPieceTypeMap = {
   {AttackerType::NONE, PieceType::NONE},
   {AttackerType::KING, PieceType::KING},
   {AttackerType::PAWN, PieceType::PAWN},

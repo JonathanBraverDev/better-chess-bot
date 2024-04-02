@@ -46,13 +46,14 @@ private:
     void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
     void getKnightMoves();
     void getSlidingPieceMoves(const PieceType pieceType);
+    Bitboard getSlideDestinations(const Bitboard piece, const PieceType pieceType, const Bitboard blockers) const;
     void getBishopMoves();
     void getRookMoves();
     void getQueenMoves();
     void getKingMoves();
     void finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboard opponent_pieces, Move move_base);
-    void addDestinationMoves(Move baseMove, Bitboard destinations);
-    void addCaptureMoves(Move baseMove, Bitboard captues);
+    void addDestinationMoves(Move move_base, Bitboard destinations);
+    void addCaptureMoves(Move move_base, Bitboard captues);
 
     static void PrepareKingMoves();
     static void PrepareKnightMoves();
