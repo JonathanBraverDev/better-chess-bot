@@ -237,14 +237,7 @@ Bitboard Position::getSlideDestinations(const Bitboard piece, const PieceType pi
             );
             break;
         }
-
-        destinations.clearBitsFrom(own_pieces);
-
-        finalizeMoves(destinations, own_pieces, opponent_pieces, move_base);
-
-        piece = pieces.popLowestBit();
     }
-}
 
 void Position::getBishopMoves() {
     getSlidingPieceMoves(PieceType::BISHOP);
@@ -272,6 +265,8 @@ void Position::getKingMoves() {
     destinations.clearBitsFrom(own_pieces);
 
     finalizeMoves(destinations, own_pieces, opponent_pieces, move_base);
+
+    // add castles
 }
 
 // filters out 'frienly fire' and saves the moves from the destination board
@@ -503,4 +498,14 @@ void Position::InitializeMoves() {
     PrepareKnightMoves();
     PrepareWhitePawnMoves();
     PrepareBlackPawnMoves();
+}
+
+BitMove Position::currentBitRights() {
+    // check if white king has castle rights
+    // find both white rooks, check if they have castle rights
+    // check if black king has rights
+    // check if black roosk have rights
+    // check correct en passant row to ne non 0
+    // check index of active en passant bit if any
+    return BitMove();
 }
