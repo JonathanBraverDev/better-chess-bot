@@ -43,14 +43,17 @@ private:
     // moves the pieces could make
     std::vector<Move> getPotentialMoves();
     void getPawnMoves();
+    void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
     void getKnightMoves();
     void getSlidingPieceMoves(const PieceType pieceType);
+    Bitboard getSlideDestinations(const Bitboard piece, const PieceType pieceType, const Bitboard blockers) const;
     void getBishopMoves();
     void getRookMoves();
     void getQueenMoves();
     void getKingMoves();
-    void addDestinationMoves(Move baseMove, Bitboard destinations);
-    void addCaptureMoves(Move baseMove, Bitboard captues);
+    void finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboard opponent_pieces, Move move_base);
+    void addDestinationMoves(Move move_base, Bitboard destinations);
+    void addCaptureMoves(Move move_base, Bitboard captues);
 
     static void PrepareKingMoves();
     static void PrepareKnightMoves();
@@ -64,6 +67,7 @@ public:
 
     Bitboard getPieces(Color color, PieceType type) const;
     Piece getPieceAtIndex(int index) const;
+    Piece getPieceAtTile(Bitboard tile) const;
 
     // check that the position representation is not messed up
     void validate() const;
@@ -76,4 +80,7 @@ public:
     Bitboard getAllOpponentPieces() const;
 
     static void InitializeMoves();
+
+    // Converts the special move board to a bitmove containig the appropriate BitRights
+    BitMove currentBitRights();
 };

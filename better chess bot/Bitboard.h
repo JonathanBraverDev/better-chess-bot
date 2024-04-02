@@ -31,6 +31,7 @@ public:
     void clearLowestBit();
     void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);
+    Bitboard invertedCopy() const;
 
     // extracts the lowest bit, deleting it from the board
     Bitboard popLowestBit();
@@ -47,7 +48,10 @@ public:
 
     // Traces the path of a sliding piece, including the first colision
     // Expected to be used on a board with only one active bit
-    Bitboard slidePath(Direction direction, const Bitboard allPieces) const;
+    Bitboard slidePath(Direction direction, const Bitboard all_pieces) const;
+
+    Bitboard lowerThanSingleBit() const;
+    Bitboard higherThanSingleBit() const;
 };
 
 // hiding B64 return types, all operations should be done on Bitboard objects

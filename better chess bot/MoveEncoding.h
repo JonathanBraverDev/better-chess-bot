@@ -58,20 +58,19 @@ static_assert((WHITE_CASTLE_MASK | BLACK_CASTLE_MASK | VALID_EN_PASSANT_MASK | E
 // 3 bit moving/promoted type - must, logic help. when promote flag is on look as promotion
 // 3 bit captured type - logic help
 // total 18 bit move
-// 
-// note that everything but the special move right is 100% reversibe as is
-// 
-// Move type / order hints
+
+// Move type flags:
 // 1 bit promotion flag
 // 1 bit check flag
 // 1 bit capture flag
-// 1 bit FREE FLAG
+// 1 bit FREE FLAG (currently unused)
 // 2 bit misc move types (see emun)
 // total 6 order bits
+// note that everything but the special move rights is 100% reversibe as is
 
-// BitRights encoding:
+// BitRights encoding: (all avalible before the move)
 // 2 bit L/R castle white
 // 2 bit L/R castle black
 // 1 bit valid en passant
 // 3 bit en passant index
-// all avalible before the move
+// total 8 BitRights bits

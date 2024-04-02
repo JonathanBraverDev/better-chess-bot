@@ -10,7 +10,14 @@ private:
 public:
     Move();
     Move(BitMove encoded);
-    void clear();
+    // returns a copy of the move
+    Move copy() const;
+
+    // clears most components of the move, leaving BitRights intact
+    void clearMoveData();
+
+    // resets ALL componets of the move, use sparingly
+    void fullClear();
 
     BitMove getEncodedMove() const;
 
@@ -37,7 +44,5 @@ public:
     void setCheck(bool isCheck);
     void setPromotion(bool isPromote);
 
-    // check that the move encode is not messed up
-    void validate() const;
     // add conversion to text form
 };

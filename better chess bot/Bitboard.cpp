@@ -74,7 +74,8 @@ int Bitboard::countSetBits() const {
     return count;
 }
 
-// use only on SINGLE BIT boards
+// returns the index of the active bit
+// useble only on boards with a single active bit
 int Bitboard::singleBitIndex() const {
     return DeBruijnPositionLookup[((board * DeBruijnMultiplier)) >> 58];
 }
@@ -101,6 +102,10 @@ void Bitboard::setBitsFrom(Bitboard otherBoard) {
 
 void Bitboard::clearBitsFrom(Bitboard otherBoard) {
     board &= ~otherBoard.getBoard();
+}
+
+Bitboard Bitboard::invertedCopy() const {
+    return ~board;
 }
 
 Bitboard Bitboard::popLowestBit() {
@@ -147,4 +152,16 @@ Bitboard Bitboard::slidePath(Direction direction, const Bitboard all_pieces) con
     // The first colision is added to be contextually figured out by the caller
 
     return path;
+}
+
+// returns a Bitboard of all bits lower than the active bit
+// useble only on boards with a single active bit
+Bitboard Bitboard::lowerThanSingleBit() const {
+    return Bitboard(board - 1); // similar to clearLowestBit
+}
+
+// returns a Bitboard of all bits higher than the active bit
+// useble only on boards with a single active bit
+Bitboard Bitboard::higherThanSingleBit() const {
+    return Bitboard(~(board - 1) ^ board); // INVERT lowerThanSingleBit, XOR with the single bit to remove it
 }

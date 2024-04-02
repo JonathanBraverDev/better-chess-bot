@@ -1,10 +1,31 @@
 #pragma once
 
+#include <map>
 #include "BoardConstants.h"
 
 enum class Color { NONE, WHITE, BLACK };
 enum class PieceType { NONE, KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN };
 enum class AttackerType { NONE, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN }; // inverted value for capturing piece
+
+const std::map<PieceType, AttackerType> pieceTypeToAttackerMap = {
+  {PieceType::NONE, AttackerType::NONE},
+  {PieceType::KING, AttackerType::KING},
+  {PieceType::PAWN, AttackerType::PAWN},
+  {PieceType::KNIGHT, AttackerType::KNIGHT},
+  {PieceType::BISHOP, AttackerType::BISHOP},
+  {PieceType::ROOK, AttackerType::ROOK},
+  {PieceType::QUEEN, AttackerType::QUEEN},
+};
+
+const std::map<AttackerType, PieceType> attackerTypeToPieceTypeMap = {
+  {AttackerType::NONE, PieceType::NONE},
+  {AttackerType::KING, PieceType::KING},
+  {AttackerType::PAWN, PieceType::PAWN},
+  {AttackerType::KNIGHT, PieceType::KNIGHT},
+  {AttackerType::BISHOP, PieceType::BISHOP},
+  {AttackerType::ROOK, PieceType::ROOK},
+  {AttackerType::QUEEN, PieceType::QUEEN},
+};
 
 enum class MoveType { NORMAL, PAWN_UNIQE, CASTLE_LONG, CASTLE_SHORT };
 
