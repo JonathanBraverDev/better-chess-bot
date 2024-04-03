@@ -55,6 +55,8 @@ private:
     void addDestinationMoves(Move move_base, Bitboard destinations);
     void addCaptureMoves(Move move_base, Bitboard captues);
 
+    bool selfCheckCheck(Move proposed_move);
+
     static void PrepareKingMoves();
     static void PrepareKnightMoves();
     static void PrepareWhitePawnMoves();

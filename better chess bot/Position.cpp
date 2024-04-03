@@ -312,6 +312,49 @@ void Position::addCaptureMoves(Move move_base, Bitboard captures) {
     }
 }
 
+// check if the move results in a self check
+bool Position::selfCheckCheck(Move proposed_move) {
+
+    Bitboard king = getPieces(current_color, PieceType::KING);
+    Bitboard all_pieces = BitboardOperations::combineBoards(getAllOpponentPieces(), getAllOwnPieces());
+    Bitboard rook_slide;
+    Bitboard bishop_slide;
+    Bitboard slide_attackers;
+    Bitboard knight_jumps;
+    Bitboard pawn_attacks;
+    Bitboard origin(0);
+    Bitboard destination(0);
+
+    origin.setBit(proposed_move.getOriginIndex());
+    destination.setBit(proposed_move.getDestinationIndex());
+
+    // the the next line is not ideal, the attack/type mappings differ but king has the same value
+    if (proposed_move.getMovingOrPromotedType() != PieceType::KING) {
+        rook_slide = getSlideDestinations(king, PieceType::ROOK, all_pieces);
+        slide_attackers = BitboardOperations::combineBoards(getOpponentPieces(PieceType::ROOK), getOpponentPieces(PieceType::QUEEN));
+        if (BitboardOperations::findCommonBits(slide_attackers, rook_slide).hasRemainingBits()) {
+            return true;
+        }
+
+        bishop_slide = getSlideDestinations(king, PieceType::BISHOP, all_pieces);
+        slide_attackers = BitboardOperations::combineBoards(getOpponentPieces(PieceType::BISHOP), getOpponentPieces(PieceType::QUEEN));
+        if (BitboardOperations::findCommonBits(slide_attackers, bishop_slide).hasRemainingBits()) {
+            return true;
+        }
+        // queens by either of the two
+        // pawns by an allied pawn attack from the king
+        // knigths by a knight move from the king
+        // king by king moves
+    } else {
+        // 'ray' is any square or piece a queen can see in one directing WITH THE MOVING PIECE REMOVED
+        // if the move origin isn't on a 'ray', NO check. (piece cant uncover an attack)
+        // if both origin and destination are on the same 'ray', NO check. (piece moving to or away from king)
+        // if the piece leaves a 'ray' with a hostile piece that can see the origin, YES check. (pinned piece leaves pin)
+    }
+
+    return false;
+}
+
 Color Position::getOpponentColor() const {
     return (current_color == Color::WHITE ? Color::BLACK : Color::WHITE);
 }
