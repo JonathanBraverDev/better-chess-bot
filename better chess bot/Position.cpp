@@ -316,36 +316,29 @@ void Position::addCaptureMoves(Move move_base, Bitboard captures) {
 bool Position::selfCheckCheck(Move proposed_move) {
 
     Bitboard king = getPieces(current_color, PieceType::KING);
+    uint8_t king_index;
     Bitboard all_pieces = BitboardOperations::combineBoards(getAllOpponentPieces(), getAllOwnPieces());
-    Bitboard rook_slide;
-    Bitboard bishop_slide;
-    Bitboard slide_attackers;
-    Bitboard knight_jumps;
-    Bitboard pawn_attacks;
     Bitboard origin(0);
     Bitboard destination(0);
 
-    origin.setBit(proposed_move.getOriginIndex());
-    destination.setBit(proposed_move.getDestinationIndex());
-
-    // the the next line is not ideal, the attack/type mappings differ but king has the same value
-    if (proposed_move.getMovingOrPromotedType() != PieceType::KING) {
-        rook_slide = getSlideDestinations(king, PieceType::ROOK, all_pieces);
-        slide_attackers = BitboardOperations::combineBoards(getOpponentPieces(PieceType::ROOK), getOpponentPieces(PieceType::QUEEN));
-        if (BitboardOperations::findCommonBits(slide_attackers, rook_slide).hasRemainingBits()) {
+    if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
+        if (isAttackedBySlidePattern(king, PieceType::ROOK, all_pieces) ||
+            isAttackedBySlidePattern(king, PieceType::BISHOP, all_pieces)) {
             return true;
         }
 
-        bishop_slide = getSlideDestinations(king, PieceType::BISHOP, all_pieces);
-        slide_attackers = BitboardOperations::combineBoards(getOpponentPieces(PieceType::BISHOP), getOpponentPieces(PieceType::QUEEN));
-        if (BitboardOperations::findCommonBits(slide_attackers, bishop_slide).hasRemainingBits()) {
+        king_index = king.singleBitIndex();
+
+        if (isAttackedByJumpPattern(king_index, PieceType::KNIGHT) ||
+            isAttackedByJumpPattern(king_index, PieceType::PAWN) || 
+            isAttackedByJumpPattern(king_index, PieceType::KING)) {
             return true;
         }
-        // queens by either of the two
-        // pawns by an allied pawn attack from the king
-        // knigths by a knight move from the king
-        // king by king moves
+
     } else {
+        origin.setBit(proposed_move.getOriginIndex());
+        destination.setBit(proposed_move.getDestinationIndex());
+
         // 'ray' is any square or piece a queen can see in one directing WITH THE MOVING PIECE REMOVED
         // if the move origin isn't on a 'ray', NO check. (piece cant uncover an attack)
         // if both origin and destination are on the same 'ray', NO check. (piece moving to or away from king)
@@ -353,6 +346,27 @@ bool Position::selfCheckCheck(Move proposed_move) {
     }
 
     return false;
+}
+
+bool Position::isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const {
+    assert(pattern == PieceType::ROOK || pattern == PieceType::BISHOP);
+    Bitboard slide_path = getSlideDestinations(target, PieceType::ROOK, blockers);
+    Bitboard slide_attackers = BitboardOperations::combineBoards(getOpponentPieces(PieceType::ROOK), getOpponentPieces(PieceType::QUEEN));
+    return BitboardOperations::findCommonBits(slide_attackers, slide_path).hasRemainingBits();
+}
+
+bool Position::isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const {
+    assert(pattern == PieceType::KNIGHT || pattern == PieceType::PAWN || pattern == PieceType::KING);
+    Bitboard jump_origins;
+    switch (pattern) {
+    case PieceType::KNIGHT:
+        jump_origins = precomputed_moves.knight_moves[target_index];
+    case PieceType::PAWN:
+        jump_origins = precomputed_moves.pawn_attacks[2 * target_index + (current_color == Color::WHITE ? 0 : 1)];
+    case PieceType::KING:
+        jump_origins = precomputed_moves.king_moves[target_index];
+    }
+    return BitboardOperations::findCommonBits(jump_origins, getOpponentPieces(pattern)).hasRemainingBits();
 }
 
 Color Position::getOpponentColor() const {

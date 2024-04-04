@@ -47,6 +47,8 @@ private:
     void getKnightMoves();
     void getSlidingPieceMoves(const PieceType pieceType);
     Bitboard getSlideDestinations(const Bitboard piece, const PieceType pieceType, const Bitboard blockers) const;
+    bool isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const;
+    bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
     void getBishopMoves();
     void getRookMoves();
     void getQueenMoves();

@@ -47,6 +47,16 @@ AttackerType Move::getAttackerType() const {
     return attacker_type;
 }
 
+// interpret the moving piece data to its "absolute value" piece type
+PieceType Move::getAbsoluteMovingType() const {
+    if (!isCapture() || isPromotion()) { // promotions use the regular types to aid with move ordering
+        return getMovingOrPromotedType();
+    } else {
+        return attackerTypeToPieceTypeMap.at(getAttackerType());
+    }
+    return PieceType();
+}
+
 PieceType Move::getCapturedType() const {
     PieceType type = static_cast<PieceType>((encodedMove & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET);
     assert(type != PieceType::NONE && type != PieceType::KING);
