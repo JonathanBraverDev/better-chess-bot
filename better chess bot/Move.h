@@ -7,6 +7,10 @@ class Move {
 private:
     BitMove encodedMove;
 
+    // leaving potential coding mistakes localzied to the class
+    PieceType getMovingOrPromotedType() const;
+    AttackerType getAttackerType() const;
+
 public:
     Move();
     Move(BitMove encoded);
@@ -23,8 +27,7 @@ public:
 
     uint8_t getOriginIndex() const;
     uint8_t getDestinationIndex() const;
-    PieceType getMovingOrPromotedType() const;
-    AttackerType getAttackerType() const;
+    PieceType getAbsoluteMovingType() const;
     PieceType getCapturedType() const;
     MoveType getMiscMoveType() const;
     bool isCapture() const;
