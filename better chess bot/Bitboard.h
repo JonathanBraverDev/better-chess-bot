@@ -20,14 +20,14 @@ public:
 
     // Using this method is unsafe, avoid where possible
     B64 getBoard() const;
-    bool getBit(int index) const;
+    bool getBit(uint8_t index) const;
     int countSetBits() const;
-    int singleBitIndex() const;
+    uint8_t singleBitIndex() const;
     bool hasRemainingBits() const;
     bool isEmpty() const;
 
-    void setBit(int index);
-    void clearBit(int index);
+    void setBit(uint8_t index);
+    void clearBit(uint8_t index);
     void clearLowestBit();
     void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);

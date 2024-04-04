@@ -58,7 +58,7 @@ B64 Bitboard::getBoard() const {
     return board;
 }
 
-bool Bitboard::getBit(int index) const {
+bool Bitboard::getBit(uint8_t index) const {
     return (board & (1ULL << index)) != 0; // SHIFT 1 to position, use AND to extract the bit
 }
 
@@ -76,7 +76,7 @@ int Bitboard::countSetBits() const {
 
 // returns the index of the active bit
 // useble only on boards with a single active bit
-int Bitboard::singleBitIndex() const {
+uint8_t Bitboard::singleBitIndex() const {
     return DeBruijnPositionLookup[((board * DeBruijnMultiplier)) >> 58];
 }
 
@@ -88,11 +88,11 @@ bool Bitboard::isEmpty() const {
     return board == 0;
 }
 
-void Bitboard::setBit(int index) {
+void Bitboard::setBit(uint8_t index) {
     board |= (1ULL << index); // SHIFT 1 to position, set to OR
 }
 
-void Bitboard::clearBit(int index) {
+void Bitboard::clearBit(uint8_t index) {
     board &= ~(1ULL << index); // SHIFT 1 to position, INVERT, set to AND
 }
 

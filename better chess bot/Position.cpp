@@ -32,7 +32,7 @@ void Position::getPawnMoves() {
     Move special_move;
     Direction adjusted_direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
     int color_offset = (current_color == Color::WHITE ? 0 : 1);
-    int pawn_index;
+    uint8_t pawn_index;
     int adjusted_pawn_row;
 
     Bitboard pawn = pawns.popLowestBit(); // focus on the next piece
@@ -397,7 +397,7 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
     }
 }
 
-Piece Position::getPieceAtIndex(int index) const {
+Piece Position::getPieceAtIndex(uint8_t index) const {
     Bitboard tile = (1ULL << index);
     return getPieceAtTile(tile);
 }

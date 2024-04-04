@@ -70,7 +70,7 @@ public:
     void makeMove(Move move);
 
     Bitboard getPieces(Color color, PieceType type) const;
-    Piece getPieceAtIndex(int index) const;
+    Piece getPieceAtIndex(uint8_t index) const;
     Piece getPieceAtTile(Bitboard tile) const;
 
     // check that the position representation is not messed up
