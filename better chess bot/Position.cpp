@@ -1,5 +1,4 @@
 #include "Position.h"
-#include "Exceptions.h"
 #include "structs.h"
 #include <cassert>
 
@@ -434,42 +433,14 @@ Piece Position::getPieceAtTile(Bitboard tile) const {
     }
 }
 
-void Position::validate() const {
-    const Bitboard white_pieces = BitboardOperations::combineBoards(white_pawns, white_knights, white_bishops,
-                                                                    white_rooks,white_queens);
-
-    const Bitboard black_pieces = BitboardOperations::combineBoards(black_pawns, black_knights, black_bishops,
-                                                                    black_rooks, black_queens);
-
-    // Check if there is only one king for each color
-    if (white_king.countSetBits() != 1 || black_king.countSetBits() != 1) {
-        throw MultipleKingsException();
+std::vector<Move> Position::getLegalMoves() {
+    // run through the moves returned by getPotentialMoves
+    //  look if the move causes a self check for moves ORIGINATING from a square on a queen pattern from the player king
+    //  look for pieces LANDING on the queen pattern from the enemy king for check flag update (and knights)
+    //  update the check flag 
+    //  ?? run a similar check on sliding pieces for uncoverd attacks or something like that
+    return std::vector<Move>();
     }
-
-    // Check if there are no more than 15 pieces for each color (king already checked)
-    if (white_pieces.countSetBits() > 15 || black_pieces.countSetBits() > 15) {
-        throw InvalidPieceCountException();
-    }
-
-    // Check for overlaps between all piece types (overkill)
-    if (BitboardOperations::findCommonBits(white_pawns, white_knights, white_bishops, white_rooks, white_queens,
-                                           black_pawns, black_knights, black_bishops, black_rooks, black_queens).hasRemainingBits()) {
-        throw OverlappingPiecesException();
-    }
-
-    // check that there are no 'floating' castle rights without a rook/king
-    Bitboard castalbles = BitboardOperations::combineBoards(white_king, white_rooks, black_king, black_rooks);
-    if ((special_move_rigths.getBoard() & (WHITE_CASTLE | BLACK_CASTLE)) != castalbles.getBoard()) {
-        throw InvalidCastlingRights();
-        // check that king is in the middle of rook rights?
-    }
-
-    // check that no more than one enpasant exists
-    if (Bitboard(special_move_rigths.getBoard() & ALL_EN_PASSANT).countSetBits() <= 1) {
-        throw MultipleEnpasants();
-    }
-}
-
 
 
 Bitboard Position::getOwnPieces(PieceType type) const {

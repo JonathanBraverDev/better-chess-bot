@@ -73,10 +73,7 @@ public:
     Piece getPieceAtIndex(uint8_t index) const;
     Piece getPieceAtTile(Bitboard tile) const;
 
-    // check that the position representation is not messed up
-    void validate() const;
-
-    std::vector<Move> getLegalMoves() const;
+    std::vector<Move> getLegalMoves();
 
     Bitboard getOwnPieces(PieceType type) const;
     Bitboard getOpponentPieces(PieceType type) const;
