@@ -79,6 +79,7 @@ public:
     Bitboard getOpponentPieces(PieceType type) const;
     Bitboard getAllOwnPieces() const;
     Bitboard getAllOpponentPieces() const;
+    Bitboard getAllPieces() const;
 
     static void InitializeMoves();
 

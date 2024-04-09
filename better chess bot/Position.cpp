@@ -469,6 +469,12 @@ Bitboard Position::getAllOpponentPieces() const {
         getOpponentPieces(PieceType::KING));
 }
 
+Bitboard Position::getAllPieces() const
+{
+    return BitboardOperations::combineBoards(getAllOwnPieces(), 
+                                             getAllOpponentPieces());
+}
+
 void Position::PrepareKingMoves() {
     Bitboard king = Bitboard(1ULL);
     // It's not ideal that the board is completly detached from the loop...
