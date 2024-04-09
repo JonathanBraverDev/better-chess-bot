@@ -434,20 +434,21 @@ Piece Position::getPieceAtTile(Bitboard tile) const {
 }
 
 std::vector<Move> Position::getLegalMoves() {
-    std::vector<Move> legal_moves;
+    if (!are_moves_valid) {
+        getAllOwnPieces();
+        getAllOpponentPieces();
 
-    Bitboard own_pieces = getAllOwnPieces();
-    Bitboard opponent_pieces = getAllOpponentPieces();
-    Bitboard all_pieces = BitboardOperations::combineBoards(own_pieces, opponent_pieces);
+        getPawnMoves();
+        getKnightMoves();
+        getBishopMoves();
+        getRookMoves();
+        getQueenMoves();
+        getKingMoves();
 
-    getPawnMoves();
-    getKnightMoves();
-    getBishopMoves();
-    getRookMoves();
-    getQueenMoves();
-    getKingMoves();
+        are_moves_valid = true;
+    }
 
-    return std::vector<Move>();
+    return legal_moves;
 }
 
 
