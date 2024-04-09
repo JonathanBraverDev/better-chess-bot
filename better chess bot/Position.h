@@ -33,31 +33,37 @@ private:
     // use the bitboard to calculate BitRights and use for all moves from the position
     Color current_color;
 
-    // collection of moves possible from the position
-    std::vector<Move> moves;
+    // greatly reducing cluttered calls during move generation
+    // remember to wipe when ANYTHING changes on the board
+    Bitboard own_pieces;
+    Bitboard opponent_pieces;
+    std::vector<Move> legal_moves;
+    bool are_moves_valid;
 
     static PrecomputedMoves precomputed_moves;
 
     Color getOpponentColor() const;
 
     // moves the pieces could make
-    std::vector<Move> getPotentialMoves();
     void getPawnMoves();
     void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
     void getKnightMoves();
+    void getKingMoves();
+    inline void getBishopMoves();
+    inline void getRookMoves();
+    inline void getQueenMoves();
     void getSlidingPieceMoves(const PieceType pieceType);
-    Bitboard getSlideDestinations(const Bitboard piece, const PieceType pieceType, const Bitboard blockers) const;
+    Bitboard getSlideDestinations(const Bitboard piece, const PieceType pieceType) const;
+
+    void finalizeMoves(Bitboard destinations, Move move_base);
+    void addDestinationMoves(Bitboard destinations, Move move_base);
+    void addCaptureMoves(Bitboard captures, Move move_base);
+
+    void CheckAndSaveMove(Move proposed_move);
+    bool selfCheckCheck(Move proposed_move);
     bool isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const;
     bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
-    void getBishopMoves();
-    void getRookMoves();
-    void getQueenMoves();
-    void getKingMoves();
-    void finalizeMoves(Bitboard destinations, Bitboard own_pieces, Bitboard opponent_pieces, Move move_base);
-    void addDestinationMoves(Move move_base, Bitboard destinations);
-    void addCaptureMoves(Move move_base, Bitboard captues);
-
-    bool selfCheckCheck(Move proposed_move);
+    bool enemyCheckCheck(Move proposed_move);
 
     static void PrepareKingMoves();
     static void PrepareKnightMoves();
@@ -66,6 +72,8 @@ private:
 
 public:
     // allow initialization from string
+
+    // constructor that takes a vector of moves and created a position following them
 
     void makeMove(Move move);
 
@@ -77,9 +85,9 @@ public:
 
     Bitboard getOwnPieces(PieceType type) const;
     Bitboard getOpponentPieces(PieceType type) const;
-    Bitboard getAllOwnPieces() const;
-    Bitboard getAllOpponentPieces() const;
-    Bitboard getAllPieces() const;
+    Bitboard getAllOwnPieces();
+    Bitboard getAllOpponentPieces();
+    Bitboard getAllPieces();
 
     static void InitializeMoves();
 
