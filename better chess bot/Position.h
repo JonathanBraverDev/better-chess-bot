@@ -46,6 +46,9 @@ private:
 
     // moves the pieces could make
     void getPawnMoves();
+    void checkAndAddPawnJump();
+    void checkAndAddEnPassant();
+    void addPromotionMoves();
     void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
     void getKnightMoves();
     void getKingMoves();
@@ -60,10 +63,10 @@ private:
     void addCaptureMoves(Bitboard captures, Move move_base);
 
     void CheckAndSaveMove(Move proposed_move);
-    bool selfCheckCheck(Move proposed_move);
+    bool selfCheckCheck(Move proposed_move) const;
     bool isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const;
     bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
-    bool enemyCheckCheck(Move proposed_move);
+    bool enemyCheckCheck(Move proposed_move) const;
 
     static void PrepareKingMoves();
     static void PrepareKnightMoves();

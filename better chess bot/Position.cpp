@@ -18,9 +18,10 @@ void Position::getPawnMoves() {
     Bitboard special_move_board; // either a jump OR en-passant. never both.
     Move move_base = currentBitRights();
     Move special_move;
-    Direction adjusted_direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
+    Direction direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
     int color_offset = (current_color == Color::WHITE ? 0 : 1);
     uint8_t pawn_index;
+    int pawn_move_index;
     int adjusted_pawn_row;
 
     Bitboard pawn = pawns.popLowestBit(); // focus on the next piece
@@ -32,11 +33,13 @@ void Position::getPawnMoves() {
         special_move_board.clear();
 
         pawn_index = pawn.singleBitIndex();
-        adjusted_pawn_row = (current_color == Color::WHITE ? pawn_index / BOARD_SIZE : BOARD_SIZE - (pawn_index / BOARD_SIZE));
+        pawn_move_index = 2 * pawn_index + color_offset;
+        adjusted_pawn_row = (current_color == Color::WHITE ? pawn_index / BOARD_SIZE
+                                                           : BOARD_SIZE - (pawn_index / BOARD_SIZE));
 
-        step = BitboardOperations::findCommonBits(precomputed_moves.pawn_moves[color_offset + 2 * pawn_index],
+        step = BitboardOperations::findCommonBits(precomputed_moves.pawn_moves[pawn_move_index],
                                                   empty_tiles);
-        captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
+        captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
                                                       opponent_pieces);
 
         move_base.setOriginIndex(pawn_index); // the only thing that can be set for sure
@@ -45,7 +48,7 @@ void Position::getPawnMoves() {
         case PAWN_INITIAL_ROW:
             if (step.hasRemainingBits()) {
                 // check jump if a step is possible
-                special_move_board = BitboardOperations::findCommonBits(step.look(adjusted_direction_forward),
+                special_move_board = BitboardOperations::findCommonBits(step.look(direction_forward),
                                                                         empty_tiles);
 
                 if (special_move_board.hasRemainingBits()) {
@@ -64,7 +67,7 @@ void Position::getPawnMoves() {
             break;
         case PAWN_ENPASSANT_ROW:
             // check if en-passant is possible
-            special_move_board = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[color_offset + 2 * pawn_index],
+            special_move_board = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
                                                                     opponent_en_passant);
             if (special_move_board.hasRemainingBits()) {
                 // explicitly add enpassant move
@@ -165,7 +168,6 @@ void Position::getKnightMoves() {
 
 void Position::getSlidingPieceMoves(const PieceType pieceType) {
     Bitboard pieces = getPieces(current_color, pieceType);
-    // this part repeats, shoud it be split off and passed around?
     Bitboard destinations;
     Move move_base;
 
@@ -296,18 +298,18 @@ void Position::addCaptureMoves(Bitboard captures, Move move_base) {
     }
 }
 
-// saves only legal moves, updates flags.
+// saves only legal moves, updates flags
 // use this instead of directly pusning to vector
 void Position::CheckAndSaveMove(Move proposed_move) {
     if (!selfCheckCheck(proposed_move)) {
-        // move is legal, run additional flag cheks like check and FREE FLAG
+        // move is legal, run additional flag checks like check and FREE FLAG
 
         legal_moves.push_back(proposed_move);
     }
 }
 
 // check if the move results in a self check
-bool Position::selfCheckCheck(Move proposed_move) {
+bool Position::selfCheckCheck(Move proposed_move) const{
 
     Bitboard king = getPieces(current_color, PieceType::KING);
     uint8_t king_index;
@@ -366,7 +368,7 @@ bool Position::isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) 
 }
 
 // checks if the move puts the enemy in check
-bool Position::enemyCheckCheck(Move proposed_move) {
+bool Position::enemyCheckCheck(Move proposed_move) const {
 
 }
 
