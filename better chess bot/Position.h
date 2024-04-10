@@ -46,9 +46,9 @@ private:
 
     // moves the pieces could make
     void getPawnMoves();
-    void checkAndAddPawnJump();
-    void checkAndAddEnPassant();
-    void addPromotionMoves();
+    void checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move move_base, Direction forward);
+    void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index, Move move_base);
+    void addPromotionMoves(Bitboard step, Bitboard captures, Move move_base);
     void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
     void getKnightMoves();
     void getKingMoves();
