@@ -43,6 +43,7 @@ private:
     static PrecomputedMoves precomputed_moves;
 
     Color getOpponentColor() const;
+    Bitboard getOpponentEnPassant() const;
 
     // moves the pieces could make
     void getPawnMoves();
@@ -94,6 +95,6 @@ public:
 
     static void InitializeMoves();
 
-    // Converts the special move board to a bitmove containig the appropriate BitRights
-    BitMove currentBitRights();
+    // Converts the special move board to a Move containig the appropriate BitRights
+    Move currentBitRights() const;
 };

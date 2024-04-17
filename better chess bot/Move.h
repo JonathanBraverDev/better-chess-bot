@@ -47,14 +47,17 @@ public:
     void setAttackerType(AttackerType type);
     void setCapturedType(PieceType type);
     void setMiscMoveType(MoveType miscType);
-    void setCapture(bool isCapture);
-    void setCheck(bool isCheck);
-    void setPromotion(bool isPromote);
+    void setCapture(bool is_capture);
+    void setCheck(bool is_check);
+    void setPromotion(bool is_promote);
 
-    void setWhiteCastleRights(CastleRights castle_rights);
-    void setBlackCastleRights(CastleRights castle_rights);
+    void setWhiteShortCastleRight(bool can_castle);
+    void setWhiteLongCastleRight(bool can_castle);
+    void setBlackShortCastleRight(bool can_castle);
+    void setBlackLongCastleRight(bool can_castle);
     void setValidEnPassant(bool isValid);
     // index is within the row, 0-7
+    // also sets valid en passant
     void setEnPassantIndex(uint8_t index);
 
     // add conversion to text form

@@ -119,36 +119,60 @@ void Move::setMiscMoveType(MoveType miscType) {
     setProperty(MISC_MOVE_TYPE_MASK, MISC_MOVE_TYPE_OFFSET, miscType);
 }
 
-void Move::setCapture(bool isCapture) {
-    if (isCapture) {
+void Move::setCapture(bool is_capture) {
+    if (is_capture) {
         encodedMove |= IS_CAPTURE_MASK;
     } else {
         encodedMove &= ~IS_CAPTURE_MASK;
     }
 }
 
-void Move::setCheck(bool isCheck) {
-    if (isCheck) {
+void Move::setCheck(bool is_check) {
+    if (is_check) {
         encodedMove |= IS_CHECK_MASK;
     } else {
         encodedMove &= ~IS_CHECK_MASK;
     }
 }
 
-void Move::setPromotion(bool isPromote) {
-    if (isPromote) {
+void Move::setPromotion(bool is_promote) {
+    if (is_promote) {
         encodedMove |= IS_PROMOTE_MASK;
     } else {
         encodedMove &= ~IS_PROMOTE_MASK;
     }
 }
 
-void Move::setWhiteCastleRights(CastleRights castle_rights) {
-    setProperty(WHITE_CASTLE_RIGHTS_MASK, WHITE_CASTLE_RIGHTS_OFFSET, castle_rights);
+void Move::setWhiteShortCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_SHORT_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_SHORT_CASTLE_MASK;
+    }
 }
 
-void Move::setBlackCastleRights(CastleRights castle_rights) {
-    setProperty(BLACK_CASTLE_RIGHTS_MASK, WHITE_CASTLE_RIGHTS_OFFSET, castle_rights);
+void Move::setWhiteLongCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_LONG_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+    }
+}
+
+void Move::setBlackShortCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_LONG_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+    }
+}
+
+void Move::setBlackLongCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_LONG_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+    }
 }
 
 void Move::setValidEnPassant(bool isValid) {
@@ -161,5 +185,6 @@ void Move::setValidEnPassant(bool isValid) {
 
 void Move::setEnPassantIndex(uint8_t index) {
     assert(index <= 7);
-    setProperty(EN_PASSANT_INDEX_MASK, WHITE_CASTLE_RIGHTS_OFFSET, index);
+    setValidEnPassant(true);
+    setProperty(EN_PASSANT_INDEX_MASK, EN_PASSANT_INDEX_OFFSET, index);
 }

@@ -380,6 +380,11 @@ Color Position::getOpponentColor() const {
     return (current_color == Color::WHITE ? Color::BLACK : Color::WHITE);
 }
 
+Bitboard Position::getOpponentEnPassant() const {
+    return Bitboard((current_color == Color::WHITE ? BLACK_EN_PASSANT
+                                                   : WHITE_EN_PASSANT));
+}
+
 Bitboard Position::getPieces(Color color, PieceType type) const {
     assert(color != Color::NONE && type != PieceType::NONE);
     switch (color) {
@@ -558,12 +563,37 @@ void Position::InitializeMoves() {
     PrepareBlackPawnMoves();
 }
 
-BitMove Position::currentBitRights() {
-    // check if white king has castle rights
-    // find both white rooks, check if they have castle rights
-    // check if black king has rights
-    // check if black roosk have rights
-    // check correct en passant row to ne non 0
-    // check index of active en passant bit if any
-    return BitMove();
+Move Position::currentBitRights() const {
+    Move rights(0);
+
+    // operating directly regardless of color
+    if (BitboardOperations::findCommonBits(white_king,
+                                           special_move_rigths).hasRemainingBits()) {
+        rights.setWhiteLongCastleRight(BitboardOperations::findCommonBits(white_king.lowerThanSingleBit(),
+                                                                          white_rooks,
+                                                                          special_move_rigths).hasRemainingBits());
+
+        rights.setWhiteShortCastleRight(BitboardOperations::findCommonBits(white_king.higherThanSingleBit(),
+                                                                           white_rooks,
+                                                                           special_move_rigths).hasRemainingBits());      
+    }
+
+    if (BitboardOperations::findCommonBits(black_king,
+                                           special_move_rigths).hasRemainingBits()) {
+        rights.setBlackLongCastleRight(BitboardOperations::findCommonBits(black_king.lowerThanSingleBit(),
+                                                                          black_rooks,
+                                                                          special_move_rigths).hasRemainingBits());
+
+        rights.setBlackShortCastleRight(BitboardOperations::findCommonBits(black_king.higherThanSingleBit(),
+                                                                           black_rooks,
+                                                                           special_move_rigths).hasRemainingBits());
+    }
+
+    if (BitboardOperations::findCommonBits(getOpponentEnPassant(),
+                                            special_move_rigths).hasRemainingBits()) {
+        rights.setEnPassantIndex(BitboardOperations::findCommonBits(Bitboard(ALL_EN_PASSANT),
+                                                                    special_move_rigths).singleBitIndex() % 8);
+    }
+
+    return Move(0);
 }

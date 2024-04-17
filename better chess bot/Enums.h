@@ -32,8 +32,6 @@ enum class MoveType { NORMAL, PAWN_UNIQE, CASTLE_LONG, CASTLE_SHORT };
 enum class GameOverCause { CHECKMATE, RESIGNATION, TIMEOUT, STALEMALTE, INSUFFICENT_MATERIAL,
                            FIFTY_MOVE_RULE, REPETITION, AGREED_DRAW };
 
-enum class CastleRights { NONE, SHORT, LONG, BOTH };
-
 // All directional names are are according to the output of "visualize"
 enum Direction {
     UP,
