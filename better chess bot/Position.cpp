@@ -242,13 +242,13 @@ void Position::getQueenMoves() {
 }
 
 void Position::getKingMoves() {
-    Bitboard king = getPieces(current_color, PieceType::KNIGHT);
+    Bitboard king = getPieces(current_color, PieceType::KING);
     Bitboard own_pieces = getAllOwnPieces();
     Bitboard opponent_pieces = getAllOpponentPieces();
     Bitboard destinations;
     Move move_base;
 
-    move_base.setMovingType(PieceType::KNIGHT);
+    move_base.setMovingType(PieceType::KING);
     move_base.setOriginIndex(king.singleBitIndex());
 
     destinations = precomputed_moves.king_moves[king.singleBitIndex()];
@@ -595,5 +595,5 @@ Move Position::currentBitRights() const {
                                                                     special_move_rigths).singleBitIndex() % 8);
     }
 
-    return Move(0);
+    return rights;
 }
