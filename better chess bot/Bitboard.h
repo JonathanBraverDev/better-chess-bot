@@ -101,4 +101,12 @@ public:
         static_assert(areAllSame<Bitboard, T, Boards...>(), "All parameters must be of the Bitboard class");
         return Bitboard(findCommonBitsJoiner(board, boards...));
     }
+
+    bool operator==(const Bitboard& other) const {
+        return board == other.board;
+    }
+
+    bool operator!=(const Bitboard& other) const {
+        return board != other.board;
+    }
 };
