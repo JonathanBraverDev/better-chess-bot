@@ -371,6 +371,35 @@ bool Position::isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) 
     return Bitboard::findCommonBits(jump_origins, getOpponentPieces(pattern)).hasRemainingBits();
 }
 
+bool Position::isAttackedByAnyPattern(Bitboard targets, Bitboard blockers) const {
+    uint8_t target_index;
+    Bitboard target = targets.popLowestBit(); // focus on the next target bit
+
+    // Check for sliding piece attacks
+    if (isAttackedBySlidePattern(targets, PieceType::ROOK, blockers) ||
+        isAttackedBySlidePattern(targets, PieceType::BISHOP, blockers)) {
+        return true;
+    }
+
+    while (target.hasRemainingBits()) {
+        // Get the index of the current target
+        target_index = target.singleBitIndex();
+
+        // Check for jumping piece attacks
+        if (isAttackedByJumpPattern(target_index, PieceType::KNIGHT) ||
+            isAttackedByJumpPattern(target_index, PieceType::PAWN) ||
+            isAttackedByJumpPattern(target_index, PieceType::KING)) {
+            return true;
+        }
+
+        // Focus on the next target bit
+        target = targets.popLowestBit();
+    }
+
+    // If none of the target positions are under attack, return false
+    return false;
+}
+
 // checks if the move puts the enemy in check
 bool Position::enemyCheckCheck(Move proposed_move) const {
 
