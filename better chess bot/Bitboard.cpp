@@ -104,8 +104,16 @@ void Bitboard::clearBitsFrom(Bitboard otherBoard) {
     board &= ~otherBoard.getBoard();
 }
 
-Bitboard Bitboard::invertedCopy() const {
+Bitboard Bitboard::getInvertedCopy() const {
     return ~board;
+}
+
+Bitboard Bitboard::getCommonBitsWith(Bitboard otherBoard) const {
+    return board & otherBoard.getBoard();
+}
+
+Bitboard Bitboard::getCombinedWith(Bitboard otherBoard) const {
+    return Bitboard();
 }
 
 Bitboard Bitboard::popLowestBit() {
@@ -147,7 +155,7 @@ Bitboard Bitboard::slidePath(Direction direction, const Bitboard all_pieces) con
     do {
         piece.move(direction);
         path.setBitsFrom(piece); // Add the new location to the path
-    } while (piece.hasRemainingBits() && BitboardOperations::findCommonBits(piece, all_pieces).isEmpty());
+    } while (piece.hasRemainingBits() && Bitboard::findCommonBits(piece, all_pieces).isEmpty());
     // Stop if piece is 0 (shifted out) or a collision occurred on the last move
     // The first colision is added to be contextually figured out by the caller
 
@@ -164,4 +172,14 @@ Bitboard Bitboard::lowerThanSingleBit() const {
 // useble only on boards with a single active bit
 Bitboard Bitboard::higherThanSingleBit() const {
     return Bitboard(~(board - 1) ^ board); // INVERT lowerThanSingleBit, XOR with the single bit to remove it
+}
+
+
+Bitboard Bitboard::sameRowPathTo(Bitboard destination) const {
+    assert(countSetBits() == 1 && destination.countSetBits() == 1);
+    if (board < destination.getBoard()) {
+        return higherThanSingleBit().getCommonBitsWith(destination.lowerThanSingleBit());
+    } else {
+        return lowerThanSingleBit().getCommonBitsWith(destination.higherThanSingleBit());
+    }
 }

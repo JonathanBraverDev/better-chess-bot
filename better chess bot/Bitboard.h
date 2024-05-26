@@ -11,6 +11,37 @@ private:
 
     static const DirectionCheck direction_check[];
 
+    // Helpers for public functions
+    template <typename T>
+    static constexpr bool areAllSame() {
+        return true;
+    }
+
+    template <typename T, typename U, typename... Rest>
+    static constexpr bool areAllSame() {
+        return std::is_same<T, U>::value&& areAllSame<T, Rest...>();
+    }
+
+    template <typename T>
+    static B64 combineBoardsJoiner(T board) {
+        return board.getBoard();
+    }
+
+    template <typename T, typename... Boards>
+    static B64 combineBoardsJoiner(T board, Boards... boards) {
+        return board.getBoard() | combineBoardsJoiner(boards...);
+    }
+
+    template <typename T>
+    static B64 findCommonBitsJoiner(T board) {
+        return board.getBoard();
+    }
+
+    template <typename T, typename... Boards>
+    static B64 findCommonBitsJoiner(T board, Boards... boards) {
+        return board.getBoard() & findCommonBitsJoiner(boards...);
+    }
+
 public:
     Bitboard(); // Default constructor
     Bitboard(B64 initialData); // Constructor with initial data
@@ -27,11 +58,13 @@ public:
     bool isEmpty() const;
 
     void setBit(uint8_t index);
+    void setBitsFrom(Bitboard otherBoard);
     void clearBit(uint8_t index);
     void clearLowestBit();
-    void setBitsFrom(Bitboard otherBoard);
     void clearBitsFrom(Bitboard otherBoard);
-    Bitboard invertedCopy() const;
+    Bitboard getInvertedCopy() const;
+    Bitboard getCommonBitsWith(Bitboard otherBoard) const;
+    Bitboard getCombinedWith(Bitboard otherBoard) const;
 
     // extracts the lowest bit, deleting it from the board
     Bitboard popLowestBit();
@@ -52,56 +85,20 @@ public:
 
     Bitboard lowerThanSingleBit() const;
     Bitboard higherThanSingleBit() const;
-};
 
-// hiding B64 return types, all operations should be done on Bitboard objects
-namespace {
-
-    template <typename T>
-    constexpr bool areAllSame() {
-        return true;
-    }
-
-    // Checks if all types in the variadic template are Bitboards (using another variadic template, C++14 is funny)
-    template <typename T, typename U, typename... Rest>
-    constexpr bool areAllSame() {
-        return std::is_same<T, U>::value&& areAllSame<T, Rest...>();
-    }
-
-        
-    template <typename T>
-    B64 combineBoardsJoiner(T board) {
-        return board.getBoard();
-    }
+    // Returns linear path on a single row to destination
+    // Expected to be used on a board with only one active bit
+    Bitboard sameRowPathTo(Bitboard destination) const;
 
     template <typename T, typename... Boards>
-    B64 combineBoardsJoiner(T board, Boards... boards) {
-        return board.getBoard() | combineBoardsJoiner(boards...);
-    }
-
-    template <typename T>
-    B64 findCommonBitsJoiner(T board) {
-        return board.getBoard();
-    }
-
-    template <typename T, typename... Boards>
-    B64 findCommonBitsJoiner(T board, Boards... boards) {
-        return board.getBoard() & findCommonBitsJoiner(boards...);
-    }
-}
-
-namespace BitboardOperations {
-    // Create a board containing all bits from inputs
-    template <typename T, typename... Boards>
-    Bitboard combineBoards(T board, Boards... boards) {
+    static Bitboard combineBoards(T board, Boards... boards) {
         static_assert(areAllSame<Bitboard, T, Boards...>(), "All parameters must be of the Bitboard class");
         return Bitboard(combineBoardsJoiner(board, boards...));
     }
 
-    // Create a bitboard of overlaping bits on all inputs
     template <typename T, typename... Boards>
-    Bitboard findCommonBits(T board, Boards... boards) {
+    static Bitboard findCommonBits(T board, Boards... boards) {
         static_assert(areAllSame<Bitboard, T, Boards...>(), "All parameters must be of the Bitboard class");
         return Bitboard(findCommonBitsJoiner(board, boards...));
     }
-}
+};

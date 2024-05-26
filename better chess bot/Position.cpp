@@ -11,7 +11,7 @@ void Position::makeMove(Move move) {
 
 void Position::getPawnMoves() {
     Bitboard pawns = getPieces(current_color, PieceType::PAWN);
-    Bitboard empty_tiles = BitboardOperations::combineBoards(own_pieces, opponent_pieces).invertedCopy();
+    Bitboard empty_tiles = Bitboard::combineBoards(own_pieces, opponent_pieces).getInvertedCopy();
     Bitboard opponent_en_passant = (current_color == Color::WHITE ? BLACK_EN_PASSANT : WHITE_EN_PASSANT);
     Bitboard step;
     Bitboard captures;
@@ -34,9 +34,9 @@ void Position::getPawnMoves() {
         adjusted_pawn_row = (current_color == Color::WHITE ? pawn_index / BOARD_SIZE
                                                            : BOARD_SIZE - (pawn_index / BOARD_SIZE));
 
-        step = BitboardOperations::findCommonBits(precomputed_moves.pawn_moves[pawn_move_index],
+        step = Bitboard::findCommonBits(precomputed_moves.pawn_moves[pawn_move_index],
                                                   empty_tiles);
-        captures = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
+        captures = Bitboard::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
                                                       opponent_pieces);
 
         move_base.setOriginIndex(pawn_index); // the only thing that can be set for sure
@@ -67,7 +67,7 @@ void Position::getPawnMoves() {
 void Position::checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move move_base, Direction forward) {
     if (step.hasRemainingBits()) {
         // check jump if a step is possible
-        Bitboard jump = BitboardOperations::findCommonBits(step.look(forward),
+        Bitboard jump = Bitboard::findCommonBits(step.look(forward),
                                                            empty_tiles);
 
         if (jump.hasRemainingBits()) {
@@ -82,7 +82,7 @@ void Position::checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move mov
 
 void Position::checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index, Move move_base) {
     // check if en-passant is possible
-    Bitboard en_passant = BitboardOperations::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
+    Bitboard en_passant = Bitboard::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
                                                              possible_en_passant);
 
     if (en_passant.hasRemainingBits()) {
@@ -195,11 +195,11 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
 
 Bitboard Position::getSlideDestinations(const Bitboard piece, const PieceType pieceType) const {
     Bitboard destinations;
-    Bitboard blockers = BitboardOperations::combineBoards(own_pieces, opponent_pieces);
+    Bitboard blockers = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
     switch (pieceType) {
     case PieceType::BISHOP:
-        destinations = BitboardOperations::combineBoards(
+        destinations = Bitboard::combineBoards(
             piece.slidePath(Direction::UP_LEFT, blockers),
             piece.slidePath(Direction::UP_RIGHT, blockers),
             piece.slidePath(Direction::DOWN_LEFT, blockers),
@@ -207,7 +207,7 @@ Bitboard Position::getSlideDestinations(const Bitboard piece, const PieceType pi
         );
         break;
     case PieceType::ROOK:
-        destinations = BitboardOperations::combineBoards(
+        destinations = Bitboard::combineBoards(
             piece.slidePath(Direction::UP, blockers),
             piece.slidePath(Direction::DOWN, blockers),
             piece.slidePath(Direction::LEFT, blockers),
@@ -215,7 +215,7 @@ Bitboard Position::getSlideDestinations(const Bitboard piece, const PieceType pi
         );
         break;
     case PieceType::QUEEN:
-        destinations = BitboardOperations::combineBoards(
+        destinations = Bitboard::combineBoards(
             piece.slidePath(Direction::UP, blockers),
             piece.slidePath(Direction::DOWN, blockers),
             piece.slidePath(Direction::LEFT, blockers),
@@ -263,7 +263,7 @@ void Position::getKingMoves() {
 void Position::finalizeMoves(Bitboard destinations, Move move_base) {
     destinations.clearBitsFrom(own_pieces);
 
-    Bitboard captures = BitboardOperations::findCommonBits(destinations, opponent_pieces);
+    Bitboard captures = Bitboard::findCommonBits(destinations, opponent_pieces);
     destinations.clearBitsFrom(captures);
 
     addDestinationMoves(destinations, move_base);
@@ -317,7 +317,7 @@ bool Position::selfCheckCheck(Move proposed_move) const{
 
     Bitboard king = getPieces(current_color, PieceType::KING);
     uint8_t king_index;
-    Bitboard all_pieces = BitboardOperations::combineBoards(own_pieces, opponent_pieces);
+    Bitboard all_pieces = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
     if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
         if (isAttackedBySlidePattern(king, PieceType::ROOK, all_pieces) ||
@@ -351,9 +351,9 @@ bool Position::selfCheckCheck(Move proposed_move) const{
 bool Position::isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const {
     assert(pattern == PieceType::ROOK || pattern == PieceType::BISHOP);
     Bitboard slide_path = getSlideDestinations(target, PieceType::ROOK);
-    Bitboard slide_attackers = BitboardOperations::combineBoards(getOpponentPieces(PieceType::ROOK),
+    Bitboard slide_attackers = Bitboard::combineBoards(getOpponentPieces(PieceType::ROOK),
                                                                  getOpponentPieces(PieceType::QUEEN));
-    return BitboardOperations::findCommonBits(slide_attackers, slide_path).hasRemainingBits();
+    return Bitboard::findCommonBits(slide_attackers, slide_path).hasRemainingBits();
 }
 
 bool Position::isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const {
@@ -368,7 +368,7 @@ bool Position::isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) 
     case PieceType::KING:
         jump_origins = precomputed_moves.king_moves[target_index];
     }
-    return BitboardOperations::findCommonBits(jump_origins, getOpponentPieces(pattern)).hasRemainingBits();
+    return Bitboard::findCommonBits(jump_origins, getOpponentPieces(pattern)).hasRemainingBits();
 }
 
 // checks if the move puts the enemy in check
@@ -415,29 +415,29 @@ Piece Position::getPieceAtIndex(uint8_t index) const {
 }
 
 Piece Position::getPieceAtTile(Bitboard tile) const {
-    if (BitboardOperations::findCommonBits(white_pawns, tile).hasRemainingBits()) {
+    if (Bitboard::findCommonBits(white_pawns, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::PAWN };
-    } else if (BitboardOperations::findCommonBits(black_pawns, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(black_pawns, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::PAWN };
-    } else if (BitboardOperations::findCommonBits(white_knights, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(white_knights, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::KNIGHT };
-    } else if (BitboardOperations::findCommonBits(black_knights, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(black_knights, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::KNIGHT };
-    } else if (BitboardOperations::findCommonBits(white_bishops, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(white_bishops, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::BISHOP };
-    } else if (BitboardOperations::findCommonBits(black_bishops, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(black_bishops, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::BISHOP };
-    } else if (BitboardOperations::findCommonBits(white_rooks, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(white_rooks, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::ROOK };
-    } else if (BitboardOperations::findCommonBits(black_rooks, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(black_rooks, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::ROOK };
-    } else if (BitboardOperations::findCommonBits(white_queens, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(white_queens, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::QUEEN };
-    } else if (BitboardOperations::findCommonBits(black_queens, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(black_queens, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::QUEEN };
-    } else if (BitboardOperations::findCommonBits(white_king, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(white_king, tile).hasRemainingBits()) {
         return { Color::WHITE, PieceType::KING };
-    } else if (BitboardOperations::findCommonBits(black_king, tile).hasRemainingBits()) {
+    } else if (Bitboard::findCommonBits(black_king, tile).hasRemainingBits()) {
         return { Color::BLACK, PieceType::KING };
     } else {
         return { Color::NONE, PieceType::NONE };
@@ -473,7 +473,7 @@ Bitboard Position::getOpponentPieces(PieceType type) const {
 
 Bitboard Position::getAllOwnPieces() {
     if (own_pieces.isEmpty()) {
-        own_pieces = BitboardOperations::combineBoards(getOwnPieces(PieceType::PAWN),
+        own_pieces = Bitboard::combineBoards(getOwnPieces(PieceType::PAWN),
             getOwnPieces(PieceType::KNIGHT),
             getOwnPieces(PieceType::BISHOP),
             getOwnPieces(PieceType::ROOK),
@@ -485,7 +485,7 @@ Bitboard Position::getAllOwnPieces() {
 
 Bitboard Position::getAllOpponentPieces() {
     if (opponent_pieces.isEmpty()) {
-        opponent_pieces = BitboardOperations::combineBoards(getOpponentPieces(PieceType::PAWN),
+        opponent_pieces = Bitboard::combineBoards(getOpponentPieces(PieceType::PAWN),
             getOpponentPieces(PieceType::KNIGHT),
             getOpponentPieces(PieceType::BISHOP),
             getOpponentPieces(PieceType::ROOK),
@@ -496,7 +496,7 @@ Bitboard Position::getAllOpponentPieces() {
 }
 
 Bitboard Position::getAllPieces() {
-    return BitboardOperations::combineBoards(getAllOwnPieces(), 
+    return Bitboard::combineBoards(getAllOwnPieces(), 
                                              getAllOpponentPieces());
 }
 
@@ -504,7 +504,7 @@ void Position::PrepareKingMoves() {
     Bitboard king = Bitboard(1ULL);
     // It's not ideal that the board is completly detached from the loop...
     for (size_t i = 0; i < 64; i++) {
-        precomputed_moves.king_moves[i] = BitboardOperations::combineBoards(king.look(Direction::UP),
+        precomputed_moves.king_moves[i] = Bitboard::combineBoards(king.look(Direction::UP),
                                                                             king.look(Direction::DOWN),
                                                                             king.look(Direction::LEFT),
                                                                             king.look(Direction::RIGHT),
@@ -520,7 +520,7 @@ void Position::PrepareKingMoves() {
 void Position::PrepareKnightMoves() {
     Bitboard knight = Bitboard(1ULL);
     for (size_t i = 0; i < 64; i++) {
-        precomputed_moves.knight_moves[i] = BitboardOperations::combineBoards(knight.look(Direction::KNIGHT_UP_LEFT),
+        precomputed_moves.knight_moves[i] = Bitboard::combineBoards(knight.look(Direction::KNIGHT_UP_LEFT),
                                                                               knight.look(Direction::KNIGHT_UP_RIGHT),
                                                                               knight.look(Direction::KNIGHT_DOWN_LEFT),
                                                                               knight.look(Direction::KNIGHT_DOWN_RIGHT),
@@ -537,7 +537,7 @@ void Position::PrepareWhitePawnMoves() {
     for (size_t i = 0; i < 64 * 2; i += 2) {
         precomputed_moves.pawn_moves[i] = white_pawn.look(Direction::UP);
 
-        precomputed_moves.pawn_attacks[i] = BitboardOperations::combineBoards(white_pawn.look(Direction::UP_LEFT),
+        precomputed_moves.pawn_attacks[i] = Bitboard::combineBoards(white_pawn.look(Direction::UP_LEFT),
                                                                               white_pawn.look(Direction::UP_RIGHT));
 
         white_pawn.nextTile();
@@ -549,7 +549,7 @@ void Position::PrepareBlackPawnMoves() {
     for (size_t i = 1; i < 64 * 2; i += 2) {
         precomputed_moves.pawn_moves[i] = black_pawn.look(Direction::DOWN);
 
-        precomputed_moves.pawn_attacks[i] = BitboardOperations::combineBoards(black_pawn.look(Direction::DOWN_LEFT),
+        precomputed_moves.pawn_attacks[i] = Bitboard::combineBoards(black_pawn.look(Direction::DOWN_LEFT),
                                                                               black_pawn.look(Direction::DOWN_RIGHT));
 
         black_pawn.nextTile();
@@ -567,31 +567,31 @@ Move Position::currentBitRights() const {
     Move rights(0);
 
     // operating directly regardless of color
-    if (BitboardOperations::findCommonBits(white_king,
+    if (Bitboard::findCommonBits(white_king,
                                            special_move_rigths).hasRemainingBits()) {
-        rights.setWhiteLongCastleRight(BitboardOperations::findCommonBits(white_king.lowerThanSingleBit(),
+        rights.setWhiteLongCastleRight(Bitboard::findCommonBits(white_king.lowerThanSingleBit(),
                                                                           white_rooks,
                                                                           special_move_rigths).hasRemainingBits());
 
-        rights.setWhiteShortCastleRight(BitboardOperations::findCommonBits(white_king.higherThanSingleBit(),
+        rights.setWhiteShortCastleRight(Bitboard::findCommonBits(white_king.higherThanSingleBit(),
                                                                            white_rooks,
                                                                            special_move_rigths).hasRemainingBits());      
     }
 
-    if (BitboardOperations::findCommonBits(black_king,
+    if (Bitboard::findCommonBits(black_king,
                                            special_move_rigths).hasRemainingBits()) {
-        rights.setBlackLongCastleRight(BitboardOperations::findCommonBits(black_king.lowerThanSingleBit(),
+        rights.setBlackLongCastleRight(Bitboard::findCommonBits(black_king.lowerThanSingleBit(),
                                                                           black_rooks,
                                                                           special_move_rigths).hasRemainingBits());
 
-        rights.setBlackShortCastleRight(BitboardOperations::findCommonBits(black_king.higherThanSingleBit(),
+        rights.setBlackShortCastleRight(Bitboard::findCommonBits(black_king.higherThanSingleBit(),
                                                                            black_rooks,
                                                                            special_move_rigths).hasRemainingBits());
     }
 
-    if (BitboardOperations::findCommonBits(getOpponentEnPassant(),
+    if (Bitboard::findCommonBits(getOpponentEnPassant(),
                                             special_move_rigths).hasRemainingBits()) {
-        rights.setEnPassantIndex(BitboardOperations::findCommonBits(Bitboard(ALL_EN_PASSANT),
+        rights.setEnPassantIndex(Bitboard::findCommonBits(Bitboard(ALL_EN_PASSANT),
                                                                     special_move_rigths).singleBitIndex() % 8);
     }
 
