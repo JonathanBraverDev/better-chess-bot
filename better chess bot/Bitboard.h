@@ -62,9 +62,10 @@ public:
     void clearBit(uint8_t index);
     void clearLowestBit();
     void clearBitsFrom(Bitboard otherBoard);
-    Bitboard getInvertedCopy() const;
+    Bitboard getInverted() const;
     Bitboard getCommonBitsWith(Bitboard otherBoard) const;
     Bitboard getCombinedWith(Bitboard otherBoard) const;
+    Bitboard getWithoutBitsFrom(Bitboard otherBoard) const;
 
     // extracts the lowest bit, deleting it from the board
     Bitboard popLowestBit();

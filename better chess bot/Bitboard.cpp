@@ -104,7 +104,7 @@ void Bitboard::clearBitsFrom(Bitboard otherBoard) {
     board &= ~otherBoard.getBoard();
 }
 
-Bitboard Bitboard::getInvertedCopy() const {
+Bitboard Bitboard::getInverted() const {
     return ~board;
 }
 
@@ -113,7 +113,11 @@ Bitboard Bitboard::getCommonBitsWith(Bitboard otherBoard) const {
 }
 
 Bitboard Bitboard::getCombinedWith(Bitboard otherBoard) const {
-    return Bitboard();
+    return board | otherBoard.getBoard();
+}
+
+Bitboard Bitboard::getWithoutBitsFrom(Bitboard otherBoard) const {
+    return board & otherBoard.getInverted().getBoard();
 }
 
 Bitboard Bitboard::popLowestBit() {

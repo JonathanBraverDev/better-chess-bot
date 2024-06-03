@@ -11,7 +11,7 @@ void Position::makeMove(Move move) {
 
 void Position::getPawnMoves() {
     Bitboard pawns = getPieces(current_color, PieceType::PAWN);
-    Bitboard empty_tiles = Bitboard::combineBoards(own_pieces, opponent_pieces).getInvertedCopy();
+    Bitboard empty_tiles = Bitboard::combineBoards(own_pieces, opponent_pieces).getInverted();
     Bitboard opponent_en_passant = (current_color == Color::WHITE ? BLACK_EN_PASSANT : WHITE_EN_PASSANT);
     Bitboard step;
     Bitboard captures;
