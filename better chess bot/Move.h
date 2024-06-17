@@ -12,8 +12,10 @@ private:
     AttackerType getAttackerType() const;
 
     // mask and offset MUST match
-    template <typename T>
-    void setProperty(BitMove mask, int offset, T value);
+    template<typename T>
+    inline void setProperty(BitMove mask, int offset, T value) {
+        encodedMove = (encodedMove & ~mask) | ((static_cast<uint8_t>(value) << offset) & mask);
+    }
 
 public:
     Move();
@@ -62,8 +64,3 @@ public:
 
     // add conversion to text form
 };
-
-template<typename T>
-inline void Move::setProperty(BitMove mask, int offset, T value) {
-    encodedMove = (encodedMove & ~mask) | ((static_cast<uint8_t>(value) << offset) & mask);
-}

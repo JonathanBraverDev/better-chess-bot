@@ -277,10 +277,24 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base
 
     // Long castling
     if (canCastle(king, long_rook, long_king_dest, long_rook_dest, getAllPieces())) {
+        Move long_castle_move(move_base);
+        long_castle_move.setOriginIndex(king.singleBitIndex());
+        long_castle_move.setDestinationIndex(long_rook.singleBitIndex());
+        long_castle_move.setMovingType(PieceType::KING);
+        long_castle_move.setMiscMoveType(MoveType::CASTLE_LONG);
+
+        legal_moves.push_back(long_castle_move);
     }
 
     // Short castling
     if (canCastle(king, short_rook, short_king_dest, short_rook_dest, getAllPieces())) {
+        Move short_castle_move(move_base);
+        short_castle_move.setOriginIndex(king.singleBitIndex());
+        short_castle_move.setDestinationIndex(short_rook.singleBitIndex());
+        short_castle_move.setMovingType(PieceType::KING);
+        short_castle_move.setMiscMoveType(MoveType::CASTLE_SHORT);
+
+        legal_moves.push_back(short_castle_move);
     }
 }
 
@@ -580,7 +594,7 @@ Bitboard Position::getAllOpponentPieces() {
 
 Bitboard Position::getAllPieces() {
     return Bitboard::combineBoards(getAllOwnPieces(), 
-                                             getAllOpponentPieces());
+                                   getAllOpponentPieces());
 }
 
 void Position::PrepareKingMoves() {
