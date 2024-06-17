@@ -259,6 +259,60 @@ void Position::getKingMoves() {
     // add castles
 }
 
+void Position::getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base) {
+    if (!Bitboard::findCommonBits(king, special_move_rights).hasRemainingBits()) {
+        // No castling rights for the king
+        return;
+    }
+
+    Bitboard own_rooks = getOwnPieces(PieceType::ROOK);
+    Bitboard own_castle_row = (current_color == Color::WHITE ? WHITE_CASTLE_ROW : BLACK_CASTLE_ROW);
+    Bitboard long_rook = Bitboard::findCommonBits(king.lowerThanSingleBit(), own_rooks, special_move_rights);
+    Bitboard short_rook = Bitboard::findCommonBits(king.higherThanSingleBit(), own_rooks, special_move_rights);
+
+    Bitboard long_king_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_KING_COLUMN));
+    Bitboard long_rook_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_ROOK_COLUMN));
+    Bitboard short_king_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_KING_COLUMN));
+    Bitboard short_rook_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_ROOK_COLUMN));
+
+    // Long castling
+    if (canCastle(king, long_rook, long_king_dest, long_rook_dest, getAllPieces())) {
+    }
+
+    // Short castling
+    if (canCastle(king, short_rook, short_king_dest, short_rook_dest, getAllPieces())) {
+    }
+}
+
+bool Position::canCastle(const Bitboard king, const Bitboard rook, const Bitboard king_dest, const Bitboard rook_dest, const Bitboard all_pieces) {
+    // Check if the rook can castle, cross ref to rights included in call
+    if (!rook.hasRemainingBits()) {
+        return false;
+    }
+
+    Bitboard king_path = king.sameRowPathTo(king_dest);
+    Bitboard rook_path = rook.sameRowPathTo(rook_dest);
+    Bitboard castling_pieces = Bitboard::combineBoards(king, rook);
+    Bitboard interfering_pieces = Bitboard::combineBoards(
+        Bitboard::findCommonBits(all_pieces, rook_path),
+        Bitboard::findCommonBits(all_pieces, king_path)
+    );
+
+    // NOTE: this does not check the king's origin. that should happen early on in the king check.
+    if (isAttackedByAnyPattern(king_path, all_pieces.getWithoutBitsFrom(castling_pieces))) {
+        // The king is passing through or ending in a check
+        return false;
+    }
+
+    if (interfering_pieces != Bitboard::combineBoards(king, rook)) {
+        // A third piece is in the way of either the rook or the king
+        return false;
+    }
+
+    return true;
+}
+
+
 // filters out 'frienly fire' and saves the moves from the destination board
 void Position::finalizeMoves(Bitboard destinations, Move move_base) {
     destinations.clearBitsFrom(own_pieces);
@@ -597,31 +651,31 @@ Move Position::currentBitRights() const {
 
     // operating directly regardless of color
     if (Bitboard::findCommonBits(white_king,
-                                           special_move_rigths).hasRemainingBits()) {
+                                           special_move_rights).hasRemainingBits()) {
         rights.setWhiteLongCastleRight(Bitboard::findCommonBits(white_king.lowerThanSingleBit(),
                                                                           white_rooks,
-                                                                          special_move_rigths).hasRemainingBits());
+                                                                          special_move_rights).hasRemainingBits());
 
         rights.setWhiteShortCastleRight(Bitboard::findCommonBits(white_king.higherThanSingleBit(),
                                                                            white_rooks,
-                                                                           special_move_rigths).hasRemainingBits());      
+                                                                           special_move_rights).hasRemainingBits());      
     }
 
     if (Bitboard::findCommonBits(black_king,
-                                           special_move_rigths).hasRemainingBits()) {
+                                           special_move_rights).hasRemainingBits()) {
         rights.setBlackLongCastleRight(Bitboard::findCommonBits(black_king.lowerThanSingleBit(),
                                                                           black_rooks,
-                                                                          special_move_rigths).hasRemainingBits());
+                                                                          special_move_rights).hasRemainingBits());
 
         rights.setBlackShortCastleRight(Bitboard::findCommonBits(black_king.higherThanSingleBit(),
                                                                            black_rooks,
-                                                                           special_move_rigths).hasRemainingBits());
+                                                                           special_move_rights).hasRemainingBits());
     }
 
     if (Bitboard::findCommonBits(getOpponentEnPassant(),
-                                            special_move_rigths).hasRemainingBits()) {
+                                            special_move_rights).hasRemainingBits()) {
         rights.setEnPassantIndex(Bitboard::findCommonBits(Bitboard(ALL_EN_PASSANT),
-                                                                    special_move_rigths).singleBitIndex() % 8);
+                                                                    special_move_rights).singleBitIndex() % 8);
     }
 
     return rights;

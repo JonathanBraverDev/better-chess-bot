@@ -29,7 +29,7 @@ private:
     Bitboard black_queens;
     Bitboard black_king; // I swear it's not just discrimination
 
-    Bitboard special_move_rigths; // en passant AND castle rights for both sides, they can't overlap anyway
+    Bitboard special_move_rights; // en passant AND castle rights for both sides, they can't overlap anyway
     // use the bitboard to calculate BitRights and use for all moves from the position
     Color current_color;
 
@@ -53,6 +53,8 @@ private:
     void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
     void getKnightMoves();
     void getKingMoves();
+    void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base);
+    bool canCastle(const Bitboard king, const Bitboard rook, const Bitboard king_dest, const Bitboard rook_dest, const Bitboard all_pieces);
     inline void getBishopMoves();
     inline void getRookMoves();
     inline void getQueenMoves();
@@ -67,6 +69,7 @@ private:
     bool selfCheckCheck(Move proposed_move) const;
     bool isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const;
     bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
+    bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
     bool enemyCheckCheck(Move proposed_move) const;
 
     static void PrepareKingMoves();
