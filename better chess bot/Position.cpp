@@ -260,8 +260,10 @@ void Position::getKingMoves() {
 }
 
 void Position::getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base) {
-    if (!Bitboard::findCommonBits(king, special_move_rights).hasRemainingBits()) {
-        // No castling rights for the king
+    if (!Bitboard::findCommonBits(king, special_move_rights).hasRemainingBits() ||
+        isAttackedByAnyPattern(king, getAllPieces())) {
+        // No castling rights for the king OR
+        // King initially under attack
         return;
     }
 
@@ -274,27 +276,24 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base
     Bitboard long_rook_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_ROOK_COLUMN));
     Bitboard short_king_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_KING_COLUMN));
     Bitboard short_rook_dest = Bitboard::findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_ROOK_COLUMN));
+    Move move_base = currentBitRights();
+    move_base.setOriginIndex(king.singleBitIndex());
+    move_base.setMovingType(PieceType::KING);
 
     // Long castling
     if (canCastle(king, long_rook, long_king_dest, long_rook_dest, getAllPieces())) {
-        Move long_castle_move(move_base);
-        long_castle_move.setOriginIndex(king.singleBitIndex());
-        long_castle_move.setDestinationIndex(long_rook.singleBitIndex());
-        long_castle_move.setMovingType(PieceType::KING);
-        long_castle_move.setMiscMoveType(MoveType::CASTLE_LONG);
+        move_base.setDestinationIndex(long_rook.singleBitIndex());
+        move_base.setMiscMoveType(MoveType::CASTLE_LONG);
 
-        legal_moves.push_back(long_castle_move);
+        legal_moves.push_back(move_base);
     }
 
     // Short castling
     if (canCastle(king, short_rook, short_king_dest, short_rook_dest, getAllPieces())) {
-        Move short_castle_move(move_base);
-        short_castle_move.setOriginIndex(king.singleBitIndex());
-        short_castle_move.setDestinationIndex(short_rook.singleBitIndex());
-        short_castle_move.setMovingType(PieceType::KING);
-        short_castle_move.setMiscMoveType(MoveType::CASTLE_SHORT);
+        move_base.setDestinationIndex(short_rook.singleBitIndex());
+        move_base.setMiscMoveType(MoveType::CASTLE_SHORT);
 
-        legal_moves.push_back(short_castle_move);
+        legal_moves.push_back(move_base);
     }
 }
 
@@ -312,7 +311,7 @@ bool Position::canCastle(const Bitboard king, const Bitboard rook, const Bitboar
         Bitboard::findCommonBits(all_pieces, king_path)
     );
 
-    // NOTE: this does not check the king's origin. that should happen early on in the king check.
+    // NOTE: this does not check the king's origin. that was handled in the caller.
     if (isAttackedByAnyPattern(king_path, all_pieces.getWithoutBitsFrom(castling_pieces))) {
         // The king is passing through or ending in a check
         return false;

@@ -37,7 +37,7 @@ private:
     // remember to wipe when ANYTHING changes on the board
     Bitboard own_pieces;
     Bitboard opponent_pieces;
-    std::vector<Move> legal_moves;
+    std::vector<Move> legal_moves; // moves that get should be legal, not semi. past self check.
     bool are_moves_valid;
 
     static PrecomputedMoves precomputed_moves;
