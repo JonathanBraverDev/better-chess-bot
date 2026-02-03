@@ -1,103 +1,118 @@
 #pragma once
 
-#include <vector>
 #include "Bitboard.h"
 #include "Move.h"
 #include "Structs.h"
+#include <vector>
 
 // out of structs.h cuse codependancy mess
 struct PrecomputedMoves {
-    Bitboard king_moves[64];
-    Bitboard knight_moves[64];
-    Bitboard pawn_moves[64 * 2];
-    Bitboard pawn_attacks[64 * 2];
+  Bitboard king_moves[64];
+  Bitboard knight_moves[64];
+  Bitboard pawn_moves[64 * 2];
+  Bitboard pawn_attacks[64 * 2];
 };
 
 // all the needed information to make a legal move
 class Position {
 private:
-    Bitboard white_pawns;
-    Bitboard white_knights;
-    Bitboard white_bishops;
-    Bitboard white_rooks;
-    Bitboard white_queens;
-    Bitboard white_king; // no 's' this time, budget cuts
-    Bitboard black_pawns;
-    Bitboard black_knights;
-    Bitboard black_bishops;
-    Bitboard black_rooks;
-    Bitboard black_queens;
-    Bitboard black_king; // I swear it's not just discrimination
+  Bitboard white_pawns;
+  Bitboard white_knights;
+  Bitboard white_bishops;
+  Bitboard white_rooks;
+  Bitboard white_queens;
+  Bitboard white_king; // no 's' this time, budget cuts
+  Bitboard black_pawns;
+  Bitboard black_knights;
+  Bitboard black_bishops;
+  Bitboard black_rooks;
+  Bitboard black_queens;
+  Bitboard black_king; // I swear it's not just discrimination
 
     Bitboard special_move_rights; // en passant AND castle rights for both sides, they can't overlap anyway
     // use the bitboard to calculate BitRights and use for all moves from the position
-    Color current_color;
+  Color current_color;
 
-    // greatly reducing cluttered calls during move generation
-    // remember to wipe when ANYTHING changes on the board
-    Bitboard own_pieces;
-    Bitboard opponent_pieces;
-    std::vector<Move> legal_moves; // moves that get should be legal, not semi. past self check.
-    bool are_moves_valid;
+  // greatly reducing cluttered calls during move generation
+  // remember to wipe when ANYTHING changes on the board
+  Bitboard own_pieces;
+  Bitboard opponent_pieces;
+  std::vector<Move> legal_moves; // moves that get here should be fully legal.
+  bool are_moves_valid;
 
-    static PrecomputedMoves precomputed_moves;
+  static PrecomputedMoves precomputed_moves;
 
-    Color getOpponentColor() const;
-    Bitboard getOpponentEnPassant() const;
+  Color getOpponentColor() const;
+  Bitboard getOpponentEnPassant() const;
 
-    // moves the pieces could make
-    void getPawnMoves();
-    void checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move move_base, Direction forward);
-    void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index, Move move_base);
-    void addPromotionMoves(Bitboard step, Bitboard captures, Move move_base);
-    void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
-    void getKnightMoves();
-    void getKingMoves();
-    void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base);
-    bool canCastle(const Bitboard king, const Bitboard rook, const Bitboard king_dest, const Bitboard rook_dest, const Bitboard all_pieces);
-    inline void getBishopMoves();
-    inline void getRookMoves();
-    inline void getQueenMoves();
-    void getSlidingPieceMoves(const PieceType pieceType);
-    Bitboard getSlideDestinations(const Bitboard piece, const PieceType pieceType) const;
+  // moves the pieces could make
+  void getPawnMoves();
+  void checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move move_base,
+                           Direction forward);
+  void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index,
+                            Move move_base);
+  void addPromotionMoves(Bitboard step, Bitboard captures, Move move_base);
+  void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
+  void getKnightMoves();
+  void getKingMoves();
+  void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base);
+  bool canCastle(const Bitboard king, const Bitboard rook,
+                 const Bitboard king_dest, const Bitboard rook_dest,
+                 const Bitboard all_pieces);
+  inline void getBishopMoves();
+  inline void getRookMoves();
+  inline void getQueenMoves();
+  void getSlidingPieceMoves(const PieceType pieceType);
+  Bitboard getSlideDestinations(const Bitboard piece,
+                                const PieceType pieceType) const;
 
-    void finalizeMoves(Bitboard destinations, Move move_base);
-    void addDestinationMoves(Bitboard destinations, Move move_base);
-    void addCaptureMoves(Bitboard captures, Move move_base);
+  void finalizeMoves(Bitboard destinations, Move move_base);
+  void addDestinationMoves(Bitboard destinations, Move move_base);
+  void addCaptureMoves(Bitboard captures, Move move_base);
 
-    void CheckAndSaveMove(Move proposed_move);
-    bool selfCheckCheck(Move proposed_move) const;
-    bool isAttackedBySlidePattern(Bitboard target, PieceType pattern, Bitboard blockers) const;
-    bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
-    bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
-    bool enemyCheckCheck(Move proposed_move) const;
+  void CheckAndSaveMove(Move proposed_move);
+  bool selfCheckCheck(Move proposed_move) const;
+  bool isAttackedBySlidePattern(Bitboard target, PieceType pattern,
+                                Bitboard blockers) const;
+  bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
+  bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
+  bool enemyCheckCheck(Move proposed_move) const;
 
-    static void PrepareKingMoves();
-    static void PrepareKnightMoves();
-    static void PrepareWhitePawnMoves();
-    static void PrepareBlackPawnMoves();
+  static void PrepareKingMoves();
+  static void PrepareKnightMoves();
+  static void PrepareWhitePawnMoves();
+  static void PrepareBlackPawnMoves();
+
+  // Helpers for make/undo move
+  Bitboard &getPieceBoard(Color color, PieceType type);
+  void toggleCastle(const Move move);
+  void toggleMove(const Move move);
+  void toggleCaptured(const Move move);
+  void togglePromotion(const Move move);
+  void updateSpecialMoveRights(const Move move);
 
 public:
-    // allow initialization from string
+  // allow initialization from string
 
     // constructor that takes a vector of moves and created a position following them
 
-    void makeMove(Move move);
+  void makeMove(Move move);
+  void undoMove(Move move);
 
-    Bitboard getPieces(Color color, PieceType type) const;
-    Piece getPieceAtIndex(uint8_t index) const;
-    Piece getPieceAtTile(Bitboard tile) const;
+  Bitboard getPieces(Color color, PieceType type) const;
+  Piece getPieceAtIndex(uint8_t index) const;
+  Piece getPieceAtTile(Bitboard tile) const;
 
-    std::vector<Move> getLegalMoves();
+  std::vector<Move> getLegalMoves();
 
-    Bitboard getOwnPieces(PieceType type) const;
-    Bitboard getOpponentPieces(PieceType type) const;
-    Bitboard getAllOwnPieces();
-    Bitboard getAllOpponentPieces();
-    Bitboard getAllPieces();
+  Bitboard getOwnPieces(PieceType type) const;
+  Bitboard getOpponentPieces(PieceType type) const;
+  Bitboard getAllOwnPieces();
+  Bitboard getAllOpponentPieces();
+  Bitboard getAllPieces();
 
-    static void InitializeMoves();
+  static void InitializeMoves();
 
     // Converts the special move board to a Move containig the appropriate BitRights
-    Move currentBitRights() const;
+  Move currentBitRights() const;
 };
