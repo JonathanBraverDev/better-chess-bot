@@ -1,4 +1,5 @@
 #include "Position.h"
+#include "Enums.h"
 #include "structs.h"
 #include <cassert>
 
@@ -204,6 +205,8 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
 
 Bitboard Position::getSlideDestinations(const Bitboard piece,
                                         const PieceType pieceType) const {
+  assert(pieceType == PieceType::BISHOP || pieceType == PieceType::ROOK ||
+         pieceType == PieceType::QUEEN);
   Bitboard destinations;
   Bitboard blockers = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
@@ -234,6 +237,7 @@ Bitboard Position::getSlideDestinations(const Bitboard piece,
         piece.slidePath(Direction::DOWN_RIGHT, blockers));
     break;
   }
+  return Bitboard(0); // TODO: check if ineed this compilation placeholder
 }
 
 void Position::getBishopMoves() { getSlidingPieceMoves(PieceType::BISHOP); }
@@ -433,17 +437,17 @@ bool Position::selfCheckCheck(Move proposed_move) const {
 
 bool Position::isAttackedBySlidePattern(Bitboard target, PieceType pattern,
                                         Bitboard blockers) const {
-  assert(pattern == PieceType::ROOK || pattern == PieceType::BISHOP);
-  Bitboard slide_path = getSlideDestinations(target, PieceType::ROOK);
+  assert(pattern == PieceType::BISHOP || pattern == PieceType::ROOK);
+  Bitboard slide_path = getSlideDestinations(target, pattern);
   Bitboard slide_attackers = Bitboard::combineBoards(
-      getOpponentPieces(PieceType::ROOK), getOpponentPieces(PieceType::QUEEN));
+      getOpponentPieces(pattern), getOpponentPieces(PieceType::QUEEN));
   return Bitboard::findCommonBits(slide_attackers, slide_path)
       .hasRemainingBits();
 }
 
 bool Position::isAttackedByJumpPattern(uint8_t target_index,
                                        PieceType pattern) const {
-  assert(pattern == PieceType::KNIGHT || pattern == PieceType::PAWN ||
+  assert(pattern == PieceType::PAWN || pattern == PieceType::KNIGHT ||
          pattern == PieceType::KING);
   Bitboard jump_origins;
   switch (pattern) {
@@ -491,7 +495,10 @@ bool Position::isAttackedByAnyPattern(Bitboard targets,
 }
 
 // checks if the move puts the enemy in check
-bool Position::enemyCheckCheck(Move proposed_move) const {}
+bool Position::enemyCheckCheck(Move proposed_move) const {
+  // TODO: implement
+  return false;
+}
 
 Color Position::getOpponentColor() const {
   return (current_color == Color::WHITE ? Color::BLACK : Color::WHITE);
