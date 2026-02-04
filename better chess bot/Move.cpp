@@ -80,6 +80,10 @@ bool Move::isPromotion() const {
     return (encodedMove & IS_PROMOTE_MASK) != 0;
 }
 
+bool Move::isCastle() const {
+  MoveType type = getMiscMoveType();
+  return type == MoveType::CASTLE_SHORT || type == MoveType::CASTLE_LONG;
+}
 
 // for all setters, wipe the target data with the inverted mask and set the requested value
 void Move::setOriginIndex(uint8_t index) {
