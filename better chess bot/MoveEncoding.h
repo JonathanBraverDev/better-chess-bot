@@ -90,7 +90,7 @@ static_assert((CASTLE_RIGHTS_FLAGS_MASK | VALID_EN_PASSANT_MASK | EN_PASSANT_IND
 // total 6 order bits
 // note that everything but the special move rights is 100% reversibe as is
 
-// BitRights encoding: (all avalible before the move)
+// BitRights encoding: (avalible before the move)
 // 2 bit L/R castle white
 // 2 bit L/R castle black
 // 1 bit valid en passant
