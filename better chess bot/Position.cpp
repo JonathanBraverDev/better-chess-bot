@@ -36,7 +36,7 @@ void Position::getPawnMoves() {
     pawn_index = pawn.singleBitIndex();
     pawn_move_index = 2 * pawn_index + color_offset;
     adjusted_pawn_row = (current_color == Color::WHITE
-                             ? pawn_index / BOARD_SIZE
+                             ? (pawn_index / BOARD_SIZE) + 1
                              : BOARD_SIZE - (pawn_index / BOARD_SIZE));
 
     step = Bitboard::findCommonBits(
@@ -85,11 +85,12 @@ void Position::checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles,
   }
 }
 
-void Position::checkAndAddEnPassant(Bitboard possible_en_passant,
+void Position::checkAndAddEnPassant(Bitboard potential_en_passant,
                                     int pawn_move_index, Move move_base) {
   // check if en-passant is possible
-  Bitboard en_passant = Bitboard::findCommonBits(
-      precomputed_moves.pawn_attacks[pawn_move_index], possible_en_passant);
+  Bitboard en_passant =
+      Bitboard::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
+                               potential_en_passant, special_move_rights);
 
   if (en_passant.hasRemainingBits()) {
     move_base.setAttackerType(AttackerType::PAWN);
@@ -425,7 +426,7 @@ bool Position::selfCheckCheck(Move proposed_move) const {
     all_pieces.clearBit(proposed_move.getOriginIndex());
     all_pieces.setBit(proposed_move.getDestinationIndex());
 
-    // check for criminal negligence
+    // check for criminal negligence (uncovered check)
     if (isAttackedBySlidePattern(king, PieceType::ROOK, all_pieces) ||
         isAttackedBySlidePattern(king, PieceType::BISHOP, all_pieces)) {
       return true;
