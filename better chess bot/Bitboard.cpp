@@ -130,7 +130,7 @@ void Bitboard::clearLowestBit() {
   board &= (board - 1);
 }
 
-void Bitboard::move(Direction direction) {
+void Bitboard::shift(Direction direction) {
   int shift_amount = direction_check[direction].shiftAmount;
   board =
       board &
@@ -144,7 +144,7 @@ void Bitboard::nextTile() { board <<= 1; }
 
 Bitboard Bitboard::look(Direction direction) const {
   Bitboard copy = Bitboard(board);
-  copy.move(direction);
+  copy.shift(direction);
   return copy;
 }
 
@@ -159,7 +159,7 @@ Bitboard Bitboard::slidePath(Direction direction,
   Bitboard path = Bitboard(0ULL);
 
   do {
-    piece.move(direction);
+    piece.shift(direction);
     path.setBitsFrom(piece); // Add the new location to the path
   } while (piece.hasRemainingBits() &&
            Bitboard::findCommonBits(piece, all_pieces).isEmpty());

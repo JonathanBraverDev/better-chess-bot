@@ -84,7 +84,7 @@ private:
   static void PrepareBlackPawnMoves();
 
   // Helpers for make/undo move
-  Bitboard &getPieceBoard(Color color, PieceType type);
+  Bitboard &getPieceBoardRef(Color color, PieceType type);
   void toggleCastle(const Move move);
   void toggleMove(const Move move);
   void toggleCaptured(const Move move);
@@ -94,10 +94,9 @@ private:
 public:
   // allow initialization from string
 
-    // constructor that takes a vector of moves and created a position following them
+  // constructor that takes a vector of moves and created a position following them
 
   void makeMove(Move move);
-  void undoMove(Move move);
 
   Bitboard getPieces(Color color, PieceType type) const;
   Piece getPieceAtIndex(uint8_t index) const;

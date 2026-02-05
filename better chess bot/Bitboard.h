@@ -67,14 +67,14 @@ public:
   // extracts the lowest bit, deleting it from the board
   Bitboard popLowestBit();
 
-  // Move the entire board one tile in any direction
-  void move(Direction direction);
+  // Shifts the entire board one tile in any direction
+  void shift(Direction direction);
 
   // ONLY use to 'loop' a piece over the board
   // popLowestBit should be used where possible
   void nextTile();
 
-  // Return a copy of the entire board moved one tile in any direction
+  // Returns a copy of the board shifted one tile in any direction
   Bitboard look(Direction direction) const;
 
   // Traces the path of a sliding piece, including the first colision

@@ -13,7 +13,7 @@ namespace UnitTests {
             Bitboard test_board(A1);
 
             // Act
-            test_board.move(Direction::UP);
+            test_board.shift(Direction::UP);
 
             // Assert
             // Add assertions to check the expected state of the board after the move
@@ -23,7 +23,7 @@ namespace UnitTests {
         TEST_METHOD(UpOut) {
             Bitboard test_board(C8);
 
-            test_board.move(Direction::UP);
+            test_board.shift(Direction::UP);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -31,7 +31,7 @@ namespace UnitTests {
         TEST_METHOD(Down) {
             Bitboard test_board(H5);
 
-            test_board.move(Direction::DOWN);
+            test_board.shift(Direction::DOWN);
 
             Assert::AreEqual(H4, test_board.getBoard());
         }
@@ -39,7 +39,7 @@ namespace UnitTests {
         TEST_METHOD(DownOut) {
             Bitboard test_board(D1);
 
-            test_board.move(Direction::DOWN);
+            test_board.shift(Direction::DOWN);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -47,7 +47,7 @@ namespace UnitTests {
         TEST_METHOD(Left) {
             Bitboard test_board(D3);
 
-            test_board.move(Direction::LEFT);
+            test_board.shift(Direction::LEFT);
 
             Assert::AreEqual(C3, test_board.getBoard());
         }
@@ -55,7 +55,7 @@ namespace UnitTests {
         TEST_METHOD(LeftOut) {
             Bitboard test_board(A5);
 
-            test_board.move(Direction::LEFT);
+            test_board.shift(Direction::LEFT);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -63,7 +63,7 @@ namespace UnitTests {
         TEST_METHOD(Right) {
             Bitboard test_board(E2);
 
-            test_board.move(Direction::RIGHT);
+            test_board.shift(Direction::RIGHT);
 
             Assert::AreEqual(F2, test_board.getBoard());
         }
@@ -71,7 +71,7 @@ namespace UnitTests {
         TEST_METHOD(RightOut) {
             Bitboard test_board(H2);
 
-            test_board.move(Direction::RIGHT);
+            test_board.shift(Direction::RIGHT);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -79,7 +79,7 @@ namespace UnitTests {
         TEST_METHOD(UpLeft) {
             Bitboard test_board(B2);
 
-            test_board.move(Direction::UP_LEFT);
+            test_board.shift(Direction::UP_LEFT);
 
             Assert::AreEqual(A3, test_board.getBoard());
         }
@@ -87,7 +87,7 @@ namespace UnitTests {
         TEST_METHOD(UpLeftOut) {
             Bitboard test_board(A2);
 
-            test_board.move(Direction::UP_LEFT);
+            test_board.shift(Direction::UP_LEFT);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -95,7 +95,7 @@ namespace UnitTests {
         TEST_METHOD(UpRight) {
             Bitboard test_board(F4);
 
-            test_board.move(Direction::UP_RIGHT);
+            test_board.shift(Direction::UP_RIGHT);
 
             Assert::AreEqual(G5, test_board.getBoard());
         }
@@ -103,7 +103,7 @@ namespace UnitTests {
         TEST_METHOD(UpRightOut) {
             Bitboard test_board(H7);
 
-            test_board.move(Direction::UP_RIGHT);
+            test_board.shift(Direction::UP_RIGHT);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -111,7 +111,7 @@ namespace UnitTests {
         TEST_METHOD(DownLeft) {
             Bitboard test_board(F6);
 
-            test_board.move(Direction::DOWN_LEFT);
+            test_board.shift(Direction::DOWN_LEFT);
 
             Assert::AreEqual(E5, test_board.getBoard());
         }
@@ -119,7 +119,7 @@ namespace UnitTests {
         TEST_METHOD(DownLeftOut) {
             Bitboard test_board(C1);
 
-            test_board.move(Direction::DOWN_LEFT);
+            test_board.shift(Direction::DOWN_LEFT);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }
@@ -127,7 +127,7 @@ namespace UnitTests {
         TEST_METHOD(DownRight) {
             Bitboard test_board(B7);
 
-            test_board.move(Direction::DOWN_RIGHT);
+            test_board.shift(Direction::DOWN_RIGHT);
 
             Assert::AreEqual(C6, test_board.getBoard());
         }
@@ -135,7 +135,7 @@ namespace UnitTests {
         TEST_METHOD(DownRightOut) {
             Bitboard test_board(A1);
 
-            test_board.move(Direction::DOWN_RIGHT);
+            test_board.shift(Direction::DOWN_RIGHT);
 
             Assert::AreEqual(0ULL, test_board.getBoard());
         }

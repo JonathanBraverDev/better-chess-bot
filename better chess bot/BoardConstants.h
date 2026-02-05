@@ -177,6 +177,21 @@ constexpr B64 LONG_CASTLE_ROOK_COLUMN = COLUMN_D;
 constexpr B64 SHORT_CASTLE_KING_COLUMN = COLUMN_G;
 constexpr B64 SHORT_CASTLE_ROOK_COLUMN = COLUMN_F;
 
+// Toggle masks for standard castling
+// White Short: King E1->G1, Rook H1->F1
+constexpr B64 WHITE_SHORT_CASTLE_KING_MASK = E1 | G1;
+constexpr B64 WHITE_SHORT_CASTLE_ROOK_MASK = H1 | F1;
+// White Long: King E1->C1, Rook A1->D1
+constexpr B64 WHITE_LONG_CASTLE_KING_MASK = E1 | C1;
+constexpr B64 WHITE_LONG_CASTLE_ROOK_MASK = A1 | D1;
+
+// Black Short: King E8->G8, Rook H8->F8
+constexpr B64 BLACK_SHORT_CASTLE_KING_MASK = E8 | G8;
+constexpr B64 BLACK_SHORT_CASTLE_ROOK_MASK = H8 | F8;
+// Black Long: King E8->C8, Rook A8->D8
+constexpr B64 BLACK_LONG_CASTLE_KING_MASK = E8 | C8;
+constexpr B64 BLACK_LONG_CASTLE_ROOK_MASK = A8 | D8;
+
 // the row to which white writes en-passants
 constexpr B64 WHITE_EN_PASSANT = ROW_3;
 // the row to which black writes en-passants

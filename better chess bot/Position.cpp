@@ -7,7 +7,188 @@
 PrecomputedMoves Position::precomputed_moves;
 
 void Position::makeMove(Move move) {
-  // should be mostly a copy from old code
+  if (move.getMiscMoveType() == MoveType::CASTLE_SHORT ||
+      move.getMiscMoveType() == MoveType::CASTLE_LONG) {
+    toggleCastle(move);
+  } else {
+    if (move.isCapture()) {
+      toggleCaptured(move);
+    }
+
+    if (move.isPromotion()) {
+      togglePromotion(move);
+    } else {
+      toggleMove(move);
+    }
+  }
+
+  updateSpecialMoveRights(move);
+  current_color = getOpponentColor();
+
+  // Invalidate cached data
+  legal_moves.clear();
+  are_moves_valid = false;
+  own_pieces.clear();
+  opponent_pieces.clear();
+}
+
+Bitboard &Position::getPieceBoardRef(Color color, PieceType type) {
+  assert(color != Color::NONE && type != PieceType::NONE);
+  // Similar to getPieces but returning a reference
+  switch (color) {
+  case Color::WHITE:
+    switch (type) {
+    case PieceType::PAWN:
+      return white_pawns;
+    case PieceType::KNIGHT:
+      return white_knights;
+    case PieceType::BISHOP:
+      return white_bishops;
+    case PieceType::ROOK:
+      return white_rooks;
+    case PieceType::QUEEN:
+      return white_queens;
+    case PieceType::KING:
+      return white_king;
+    default:
+      break;
+    }
+    break;
+  case Color::BLACK:
+    switch (type) {
+    case PieceType::PAWN:
+      return black_pawns;
+    case PieceType::KNIGHT:
+      return black_knights;
+    case PieceType::BISHOP:
+      return black_bishops;
+    case PieceType::ROOK:
+      return black_rooks;
+    case PieceType::QUEEN:
+      return black_queens;
+    case PieceType::KING:
+      return black_king;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+void Position::toggleCastle(const Move move) {
+  Bitboard &king_board = getPieceBoardRef(current_color, PieceType::KING);
+  Bitboard &rook_board = getPieceBoardRef(current_color, PieceType::ROOK);
+
+  bool is_short_castle = (move.getMiscMoveType() == MoveType::CASTLE_SHORT);
+
+  // Use pre-calculated masks to toggle both origin and destination in one go
+  if (current_color == Color::WHITE) {
+    if (is_short_castle) {
+      king_board.toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_KING_MASK));
+      rook_board.toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_ROOK_MASK));
+    } else {
+      king_board.toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_KING_MASK));
+      rook_board.toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_ROOK_MASK));
+    }
+  } else {
+    if (is_short_castle) {
+      king_board.toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_KING_MASK));
+      rook_board.toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_ROOK_MASK));
+    } else {
+      king_board.toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_KING_MASK));
+      rook_board.toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_ROOK_MASK));
+    }
+  }
+
+  // todo: support Fischer castling where nither pieceis at the usual position
+  // in that case use the move's origin and destination to find pieces
+}
+
+void Position::toggleMove(const Move move) {
+  Bitboard &piece_board =
+      getPieceBoardRef(current_color, move.getAbsoluteMovingType());
+  piece_board.toggleBit(move.getOriginIndex());
+  piece_board.toggleBit(move.getDestinationIndex());
+}
+
+void Position::toggleCaptured(const Move move) {
+  Bitboard &captured_board =
+      getPieceBoardRef(getOpponentColor(), move.getCapturedType());
+  uint8_t capture_idx = move.getDestinationIndex();
+
+  // If En Passant, the captured pawn is not on the destination square
+  if (move.getMiscMoveType() == MoveType::PAWN_UNIQE && move.isCapture()) {
+
+    Bitboard capture_location(0);
+    capture_location.setBit(capture_idx);
+
+    // Shift to find the actual pawn location
+    // White ends up above the black pawn when capturing
+    if (current_color == Color::WHITE) {
+      capture_location.shift(Direction::DOWN);
+    } else {
+      capture_location.shift(Direction::UP);
+    }
+
+    capture_idx = capture_location.singleBitIndex();
+  }
+
+  captured_board.toggleBit(capture_idx);
+}
+
+void Position::togglePromotion(const Move move) {
+  // Remove pawn
+  getPieceBoardRef(current_color, PieceType::PAWN)
+      .toggleBit(move.getOriginIndex());
+
+  // Add promoted piece
+  getPieceBoardRef(current_color, move.getAbsoluteMovingType())
+      .toggleBit(move.getDestinationIndex());
+}
+
+void Position::updateSpecialMoveRights(const Move move) {
+  // Clear existing En Passant rights (always valid for one turn only)
+  special_move_rights.clearBitsFrom(Bitboard(ALL_EN_PASSANT));
+
+  switch (move.getAbsoluteMovingType()) {
+  case PieceType::KING:
+    // If the King makes any move, clear all castle rights
+    if (current_color == Color::WHITE) {
+      special_move_rights.clearBitsFrom(Bitboard(WHITE_CASTLE_ROW));
+    } else {
+      special_move_rights.clearBitsFrom(Bitboard(BLACK_CASTLE_ROW));
+    }
+    break;
+
+  case PieceType::ROOK:
+    // If a Rook moves, clear its castling right.
+    special_move_rights.clearBit(move.getOriginIndex());
+    break;
+
+  case PieceType::PAWN:
+    // If a pawn jumps, add an En Passant right behind it
+    if (move.getMiscMoveType() == MoveType::PAWN_UNIQE && !move.isCapture()) {
+      // Mark the destination tile
+      Bitboard ep_location(0);
+      ep_location.setBit(move.getDestinationIndex());
+
+      // Shift the marked tile to the correct En Passant position
+      // White pawns end up above its En Passant tile when jumping
+      if (current_color == Color::WHITE) {
+        ep_location.shift(Direction::DOWN);
+      } else {
+        ep_location.shift(Direction::UP);
+      }
+
+      special_move_rights.toggleBitsFrom(ep_location);
+    }
+    break;
+
+  default:
+    break;
+  }
 }
 
 void Position::getPawnMoves() {
