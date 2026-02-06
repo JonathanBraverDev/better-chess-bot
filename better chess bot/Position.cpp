@@ -123,18 +123,8 @@ void Position::toggleCaptured(const Move move) {
   // If En Passant, the captured pawn is not on the destination square
   if (move.getMiscMoveType() == MoveType::PAWN_UNIQE && move.isCapture()) {
 
-    Bitboard capture_location(0);
-    capture_location.setBit(capture_idx);
-
-    // Shift to find the actual pawn location
-    // White ends up above the black pawn when capturing
-    if (current_color == Color::WHITE) {
-      capture_location.shift(Direction::DOWN);
-    } else {
-      capture_location.shift(Direction::UP);
-    }
-
-    capture_idx = capture_location.singleBitIndex();
+    capture_idx = getEnPassantCaptureLocation(current_color, capture_idx)
+                      .singleBitIndex();
   }
 
   captured_board.toggleBit(capture_idx);
@@ -908,6 +898,23 @@ void Position::PrepareBlackPawnMoves() {
 
     black_pawn.nextTile();
   }
+}
+
+// finds the location of the pawn that was captured by en passant
+Bitboard Position::getEnPassantCaptureLocation(Color capturing_color,
+                                               uint8_t en_passant_tile_index) {
+  Bitboard capture_location(0);
+  capture_location.setBit(en_passant_tile_index);
+
+  // Shift to find the actual pawn location
+  // White ends up above the black pawn when capturing
+  if (capturing_color == Color::WHITE) {
+    capture_location.shift(Direction::DOWN);
+  } else {
+    capture_location.shift(Direction::UP);
+  }
+
+  return capture_location;
 }
 
 void Position::InitializeMoves() {

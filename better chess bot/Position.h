@@ -91,6 +91,9 @@ private:
   static void PrepareWhitePawnMoves();
   static void PrepareBlackPawnMoves();
 
+  static Bitboard getEnPassantCaptureLocation(Color capturing_color,
+                                              uint8_t en_passant_tile_index);
+
   // Helpers for make/undo move
   Bitboard &getPieceBoardRef(Color color, PieceType type);
   void toggleCastle(const Move move);
