@@ -21,9 +21,13 @@ jobs:
       run: msbuild /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 "better chess bot.sln"
       # TODO: stop forcing the tool when the V145 toolset becomes available on GitHub Actions
 
+    - name: Setup VSTest Path 
+      run: |
+        $vstestPath = vswhere -latest -products * -requires Microsoft.VisualStudio.Workload.NativeDesktop -find **\vstest.console.exe
+        if (-not $vstestPath) { throw "vstest.console.exe not found" }
+        $vstestDir = Split-Path $vstestPath
+        echo "$vstestDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
     - name: Run Unit Tests
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        $vsPath = vswhere -latest -requires Microsoft.VisualStudio.Component.TestTools.Core -property installationPath
-        $vstestPath = Join-Path $vsPath "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
-        & $vstestPath "x64\Release\UnitTests.dll"
+      run: vstest.console.exe "x64\Release\UnitTests.dll"
