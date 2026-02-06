@@ -75,6 +75,8 @@ Bitboard &Position::getPieceBoardRef(Color color, PieceType type) {
   default:
     break;
   }
+  assert(false);
+  return white_pawns; // This should NEVER happen
 }
 
 void Position::toggleCastle(const Move move) {
@@ -376,7 +378,16 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
     move_base.setMovingType(pieceType);
     move_base.setOriginIndex(piece.singleBitIndex());
 
-    destinations = getSlideDestinations(piece, pieceType);
+    if (pieceType == PieceType::QUEEN) {
+      destinations = Bitboard::combineBoards(
+          getSlideDestinations(piece, AttackPattern::LINE),
+          getSlideDestinations(piece, AttackPattern::DIAGONAL));
+    } else if (pieceType == PieceType::ROOK) {
+      destinations = getSlideDestinations(piece, AttackPattern::LINE);
+    } else if (pieceType == PieceType::BISHOP) {
+      destinations = getSlideDestinations(piece, AttackPattern::DIAGONAL);
+    }
+
     destinations.clearBitsFrom(own_pieces);
 
     finalizeMoves(destinations, move_base);
@@ -386,40 +397,28 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
 }
 
 Bitboard Position::getSlideDestinations(const Bitboard piece,
-                                        const PieceType pieceType) const {
-  assert(pieceType == PieceType::BISHOP || pieceType == PieceType::ROOK ||
-         pieceType == PieceType::QUEEN);
+                                        const AttackPattern pattern) const {
+  assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
   Bitboard destinations;
   Bitboard blockers = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
-  switch (pieceType) {
-  case PieceType::BISHOP:
+  switch (pattern) {
+  case AttackPattern::DIAGONAL:
     destinations = Bitboard::combineBoards(
         piece.slidePath(Direction::UP_LEFT, blockers),
         piece.slidePath(Direction::UP_RIGHT, blockers),
         piece.slidePath(Direction::DOWN_LEFT, blockers),
         piece.slidePath(Direction::DOWN_RIGHT, blockers));
     break;
-  case PieceType::ROOK:
+  case AttackPattern::LINE:
     destinations =
         Bitboard::combineBoards(piece.slidePath(Direction::UP, blockers),
                                 piece.slidePath(Direction::DOWN, blockers),
                                 piece.slidePath(Direction::LEFT, blockers),
                                 piece.slidePath(Direction::RIGHT, blockers));
     break;
-  case PieceType::QUEEN:
-    destinations = Bitboard::combineBoards(
-        piece.slidePath(Direction::UP, blockers),
-        piece.slidePath(Direction::DOWN, blockers),
-        piece.slidePath(Direction::LEFT, blockers),
-        piece.slidePath(Direction::RIGHT, blockers),
-        piece.slidePath(Direction::UP_LEFT, blockers),
-        piece.slidePath(Direction::UP_RIGHT, blockers),
-        piece.slidePath(Direction::DOWN_LEFT, blockers),
-        piece.slidePath(Direction::DOWN_RIGHT, blockers));
-    break;
   }
-  return Bitboard(0); // TODO: check if ineed this compilation placeholder
+  return destinations;
 }
 
 void Position::getBishopMoves() { getSlidingPieceMoves(PieceType::BISHOP); }
@@ -577,6 +576,10 @@ void Position::CheckAndSaveMove(Move proposed_move) {
   if (!selfCheckCheck(proposed_move)) {
     // move is legal, run additional flag checks like check and FREE FLAG
 
+    if (enemyCheckCheck(proposed_move)) {
+      proposed_move.setCheck(true);
+    }
+
     legal_moves.push_back(proposed_move);
   }
 }
@@ -589,16 +592,16 @@ bool Position::selfCheckCheck(Move proposed_move) const {
   Bitboard all_pieces = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
   if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
-    if (isAttackedBySlidePattern(king, PieceType::ROOK, all_pieces) ||
-        isAttackedBySlidePattern(king, PieceType::BISHOP, all_pieces)) {
+    if (isAttackedBySlidePattern(king, AttackPattern::LINE, all_pieces) ||
+        isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, all_pieces)) {
       return true;
     }
 
     king_index = king.singleBitIndex();
 
-    if (isAttackedByJumpPattern(king_index, PieceType::KNIGHT) ||
-        isAttackedByJumpPattern(king_index, PieceType::PAWN) ||
-        isAttackedByJumpPattern(king_index, PieceType::KING)) {
+    if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT) ||
+        isAttackedByJumpPattern(king_index, AttackPattern::PAWN) ||
+        isAttackedByJumpPattern(king_index, AttackPattern::KING)) {
       return true;
     }
 
@@ -608,8 +611,8 @@ bool Position::selfCheckCheck(Move proposed_move) const {
     all_pieces.setBit(proposed_move.getDestinationIndex());
 
     // check for criminal negligence (uncovered check)
-    if (isAttackedBySlidePattern(king, PieceType::ROOK, all_pieces) ||
-        isAttackedBySlidePattern(king, PieceType::BISHOP, all_pieces)) {
+    if (isAttackedBySlidePattern(king, AttackPattern::LINE, all_pieces) ||
+        isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, all_pieces)) {
       return true;
     }
   }
@@ -617,32 +620,38 @@ bool Position::selfCheckCheck(Move proposed_move) const {
   return false;
 }
 
-bool Position::isAttackedBySlidePattern(Bitboard target, PieceType pattern,
+bool Position::isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
                                         Bitboard blockers) const {
-  assert(pattern == PieceType::BISHOP || pattern == PieceType::ROOK);
+  assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
   Bitboard slide_path = getSlideDestinations(target, pattern);
-  Bitboard slide_attackers = Bitboard::combineBoards(
-      getOpponentPieces(pattern), getOpponentPieces(PieceType::QUEEN));
+  Bitboard slide_attackers = getPiecesByPattern(getOpponentColor(), pattern);
   return Bitboard::findCommonBits(slide_attackers, slide_path)
       .hasRemainingBits();
 }
 
 bool Position::isAttackedByJumpPattern(uint8_t target_index,
-                                       PieceType pattern) const {
-  assert(pattern == PieceType::PAWN || pattern == PieceType::KNIGHT ||
-         pattern == PieceType::KING);
+                                       AttackPattern pattern) const {
+  assert(pattern == AttackPattern::PAWN || pattern == AttackPattern::KNIGHT ||
+         pattern == AttackPattern::KING);
   Bitboard jump_origins;
   switch (pattern) {
-  case PieceType::KNIGHT:
+  case AttackPattern::KNIGHT:
     jump_origins = precomputed_moves.knight_moves[target_index];
-  case PieceType::PAWN:
+    break;
+  case AttackPattern::PAWN:
     jump_origins =
         precomputed_moves.pawn_attacks[2 * target_index +
                                        (current_color == Color::WHITE ? 0 : 1)];
-  case PieceType::KING:
+    break;
+  case AttackPattern::KING:
     jump_origins = precomputed_moves.king_moves[target_index];
+    break;
+  default:
+    assert(false);
+    break;
   }
-  return Bitboard::findCommonBits(jump_origins, getOpponentPieces(pattern))
+  return Bitboard::findCommonBits(
+             jump_origins, getPiecesByPattern(getOpponentColor(), pattern))
       .hasRemainingBits();
 }
 
@@ -652,8 +661,8 @@ bool Position::isAttackedByAnyPattern(Bitboard targets,
   Bitboard target = targets.popLowestBit(); // focus on the next target bit
 
   // Check for sliding piece attacks
-  if (isAttackedBySlidePattern(targets, PieceType::ROOK, blockers) ||
-      isAttackedBySlidePattern(targets, PieceType::BISHOP, blockers)) {
+  if (isAttackedBySlidePattern(targets, AttackPattern::LINE, blockers) ||
+      isAttackedBySlidePattern(targets, AttackPattern::DIAGONAL, blockers)) {
     return true;
   }
 
@@ -662,9 +671,9 @@ bool Position::isAttackedByAnyPattern(Bitboard targets,
     target_index = target.singleBitIndex();
 
     // Check for jumping piece attacks
-    if (isAttackedByJumpPattern(target_index, PieceType::KNIGHT) ||
-        isAttackedByJumpPattern(target_index, PieceType::PAWN) ||
-        isAttackedByJumpPattern(target_index, PieceType::KING)) {
+    if (isAttackedByJumpPattern(target_index, AttackPattern::KNIGHT) ||
+        isAttackedByJumpPattern(target_index, AttackPattern::PAWN) ||
+        isAttackedByJumpPattern(target_index, AttackPattern::KING)) {
       return true;
     }
 
@@ -709,6 +718,7 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
     case PieceType::KING:
       return white_king;
     }
+    break;
   case Color::BLACK:
     switch (type) {
     case PieceType::PAWN:
@@ -724,6 +734,27 @@ Bitboard Position::getPieces(Color color, PieceType type) const {
     case PieceType::KING:
       return black_king;
     }
+    break;
+  }
+  assert(false);
+  return Bitboard(0);
+}
+
+Bitboard Position::getPiecesByPattern(Color color,
+                                      AttackPattern pattern) const {
+  switch (pattern) {
+  case AttackPattern::PAWN:
+    return getPieces(color, PieceType::PAWN);
+  case AttackPattern::KNIGHT:
+    return getPieces(color, PieceType::KNIGHT);
+  case AttackPattern::KING:
+    return getPieces(color, PieceType::KING);
+  case AttackPattern::DIAGONAL:
+    return Bitboard::combineBoards(getPieces(color, PieceType::BISHOP),
+                                   getPieces(color, PieceType::QUEEN));
+  case AttackPattern::LINE:
+    return Bitboard::combineBoards(getPieces(color, PieceType::ROOK),
+                                   getPieces(color, PieceType::QUEEN));
   }
 }
 

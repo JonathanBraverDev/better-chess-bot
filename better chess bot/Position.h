@@ -65,7 +65,7 @@ private:
   inline void getQueenMoves();
   void getSlidingPieceMoves(const PieceType pieceType);
   Bitboard getSlideDestinations(const Bitboard piece,
-                                const PieceType pieceType) const;
+                                const AttackPattern pattern) const;
 
   void finalizeMoves(Bitboard destinations, Move move_base);
   void addDestinationMoves(Bitboard destinations, Move move_base);
@@ -73,9 +73,10 @@ private:
 
   void CheckAndSaveMove(Move proposed_move);
   bool selfCheckCheck(Move proposed_move) const;
-  bool isAttackedBySlidePattern(Bitboard target, PieceType pattern,
+  bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
                                 Bitboard blockers) const;
-  bool isAttackedByJumpPattern(uint8_t target_index, PieceType pattern) const;
+  bool isAttackedByJumpPattern(uint8_t target_index,
+                               AttackPattern pattern) const;
   bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
   bool enemyCheckCheck(Move proposed_move) const;
 
@@ -107,6 +108,7 @@ public:
 
   Bitboard getOwnPieces(PieceType type) const;
   Bitboard getOpponentPieces(PieceType type) const;
+  Bitboard getPiecesByPattern(Color color, AttackPattern pattern) const;
   Bitboard getAllOwnPieces();
   Bitboard getAllOpponentPieces();
   Bitboard getAllPieces();
