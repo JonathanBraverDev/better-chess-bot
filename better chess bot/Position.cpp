@@ -193,7 +193,7 @@ void Position::updateSpecialMoveRights(const Move move) {
   }
 }
 
-void Position::getPawnMoves() {
+void Position::getPawnMoves() const {
   Bitboard pawns = getPieces(current_color, PieceType::PAWN);
   Bitboard empty_tiles =
       Bitboard::combineBoards(own_pieces, opponent_pieces).getInverted();
@@ -253,7 +253,7 @@ void Position::getPawnMoves() {
 }
 
 void Position::checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles,
-                                   Move move_base, Direction forward) {
+                                   Move move_base, Direction forward) const {
   if (step.hasRemainingBits()) {
     // check jump if a step is possible
     Bitboard jump = Bitboard::findCommonBits(step.look(forward), empty_tiles);
@@ -269,7 +269,7 @@ void Position::checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles,
 }
 
 void Position::checkAndAddEnPassant(Bitboard potential_en_passant,
-                                    int pawn_move_index, Move move_base) {
+                                    int pawn_move_index, Move move_base) const {
   // check if en-passant is possible
   Bitboard en_passant =
       Bitboard::findCommonBits(precomputed_moves.pawn_attacks[pawn_move_index],
@@ -284,7 +284,7 @@ void Position::checkAndAddEnPassant(Bitboard potential_en_passant,
 }
 
 void Position::addPromotionMoves(Bitboard step, Bitboard captures,
-                                 Move move_base) {
+                                 Move move_base) const {
   if (step.hasRemainingBits()) {
     // add step promotions
     move_base.setDestinationIndex(step.singleBitIndex());
@@ -316,7 +316,7 @@ void Position::addPromotionMoves(Bitboard step, Bitboard captures,
 }
 
 void Position::addNormalPawnMoves(Move move_base, Bitboard step,
-                                  Bitboard captures) {
+                                  Bitboard captures) const {
   // base_move is expected to have the origin set
   // note that the passed move is never safely reset
 
@@ -341,7 +341,7 @@ void Position::addNormalPawnMoves(Move move_base, Bitboard step,
   }
 }
 
-void Position::getKnightMoves() {
+void Position::getKnightMoves() const {
   Bitboard knights = getPieces(current_color, PieceType::KNIGHT);
   Bitboard destinations;
   Move move_base;
@@ -364,7 +364,7 @@ void Position::getKnightMoves() {
   }
 }
 
-void Position::getSlidingPieceMoves(const PieceType pieceType) {
+void Position::getSlidingPieceMoves(const PieceType pieceType) const {
   Bitboard pieces = getPieces(current_color, pieceType);
   Bitboard destinations;
   Move move_base;
@@ -398,9 +398,15 @@ void Position::getSlidingPieceMoves(const PieceType pieceType) {
 
 Bitboard Position::getSlideDestinations(const Bitboard piece,
                                         const AttackPattern pattern) const {
+  return getSlideDestinations(
+      piece, pattern, Bitboard::combineBoards(own_pieces, opponent_pieces));
+}
+
+Bitboard Position::getSlideDestinations(const Bitboard piece,
+                                        const AttackPattern pattern,
+                                        const Bitboard blockers) const {
   assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
   Bitboard destinations;
-  Bitboard blockers = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
   switch (pattern) {
   case AttackPattern::DIAGONAL:
@@ -421,13 +427,15 @@ Bitboard Position::getSlideDestinations(const Bitboard piece,
   return destinations;
 }
 
-void Position::getBishopMoves() { getSlidingPieceMoves(PieceType::BISHOP); }
+void Position::getBishopMoves() const {
+  getSlidingPieceMoves(PieceType::BISHOP);
+}
 
-void Position::getRookMoves() { getSlidingPieceMoves(PieceType::ROOK); }
+void Position::getRookMoves() const { getSlidingPieceMoves(PieceType::ROOK); }
 
-void Position::getQueenMoves() { getSlidingPieceMoves(PieceType::QUEEN); }
+void Position::getQueenMoves() const { getSlidingPieceMoves(PieceType::QUEEN); }
 
-void Position::getKingMoves() {
+void Position::getKingMoves() const {
   Bitboard king = getPieces(current_color, PieceType::KING);
   Bitboard own_pieces = getAllOwnPieces();
   Bitboard opponent_pieces = getAllOpponentPieces();
@@ -448,7 +456,7 @@ void Position::getKingMoves() {
 }
 
 void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
-                                Move move_base) {
+                                Move move_base) const {
   if (!Bitboard::findCommonBits(king, special_move_rights).hasRemainingBits() ||
       isAttackedByAnyPattern(king, getAllPieces())) {
     // No castling rights for the king OR
@@ -497,7 +505,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
 
 bool Position::canCastle(const Bitboard king, const Bitboard rook,
                          const Bitboard king_dest, const Bitboard rook_dest,
-                         const Bitboard all_pieces) {
+                         const Bitboard all_pieces) const {
   // Check if the rook can castle, cross ref to rights included in call
   if (!rook.hasRemainingBits()) {
     return false;
@@ -526,7 +534,7 @@ bool Position::canCastle(const Bitboard king, const Bitboard rook,
 }
 
 // filters out 'frienly fire' and saves the moves from the destination board
-void Position::finalizeMoves(Bitboard destinations, Move move_base) {
+void Position::finalizeMoves(Bitboard destinations, Move move_base) const {
   destinations.clearBitsFrom(own_pieces);
 
   Bitboard captures = Bitboard::findCommonBits(destinations, opponent_pieces);
@@ -538,7 +546,8 @@ void Position::finalizeMoves(Bitboard destinations, Move move_base) {
   addCaptureMoves(captures, move_base);
 }
 
-void Position::addDestinationMoves(Bitboard destinations, Move move_base) {
+void Position::addDestinationMoves(Bitboard destinations,
+                                   Move move_base) const {
   Bitboard destination = destinations.popLowestBit();
   Move move;
 
@@ -552,7 +561,7 @@ void Position::addDestinationMoves(Bitboard destinations, Move move_base) {
   }
 }
 
-void Position::addCaptureMoves(Bitboard captures, Move move_base) {
+void Position::addCaptureMoves(Bitboard captures, Move move_base) const {
   Bitboard capture = captures.popLowestBit();
   Move move;
 
@@ -572,7 +581,7 @@ void Position::addCaptureMoves(Bitboard captures, Move move_base) {
 
 // saves only legal moves, updates flags
 // use this instead of directly pusning to vector
-void Position::CheckAndSaveMove(Move proposed_move) {
+void Position::CheckAndSaveMove(Move proposed_move) const {
   if (!selfCheckCheck(proposed_move)) {
     // move is legal, run additional flag checks like check and FREE FLAG
 
@@ -623,7 +632,7 @@ bool Position::selfCheckCheck(Move proposed_move) const {
 bool Position::isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
                                         Bitboard blockers) const {
   assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
-  Bitboard slide_path = getSlideDestinations(target, pattern);
+  Bitboard slide_path = getSlideDestinations(target, pattern, blockers);
   Bitboard slide_attackers = getPiecesByPattern(getOpponentColor(), pattern);
   return Bitboard::findCommonBits(slide_attackers, slide_path)
       .hasRemainingBits();
@@ -793,7 +802,7 @@ Piece Position::getPieceAtTile(Bitboard tile) const {
   }
 }
 
-std::vector<Move> Position::getLegalMoves() {
+std::vector<Move> Position::getLegalMoves() const {
   if (!are_moves_valid) {
     getAllOwnPieces();
     getAllOpponentPieces();
@@ -819,7 +828,7 @@ Bitboard Position::getOpponentPieces(PieceType type) const {
   return getPieces(getOpponentColor(), type);
 }
 
-Bitboard Position::getAllOwnPieces() {
+Bitboard Position::getAllOwnPieces() const {
   if (own_pieces.isEmpty()) {
     own_pieces = Bitboard::combineBoards(
         getOwnPieces(PieceType::PAWN), getOwnPieces(PieceType::KNIGHT),
@@ -829,7 +838,7 @@ Bitboard Position::getAllOwnPieces() {
   return own_pieces;
 }
 
-Bitboard Position::getAllOpponentPieces() {
+Bitboard Position::getAllOpponentPieces() const {
   if (opponent_pieces.isEmpty()) {
     opponent_pieces = Bitboard::combineBoards(
         getOpponentPieces(PieceType::PAWN),
@@ -841,7 +850,7 @@ Bitboard Position::getAllOpponentPieces() {
   return opponent_pieces;
 }
 
-Bitboard Position::getAllPieces() {
+Bitboard Position::getAllPieces() const {
   return Bitboard::combineBoards(getAllOwnPieces(), getAllOpponentPieces());
 }
 

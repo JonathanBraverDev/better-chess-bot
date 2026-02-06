@@ -36,10 +36,11 @@ private:
 
   // greatly reducing cluttered calls during move generation
   // remember to wipe when ANYTHING changes on the board
-  Bitboard own_pieces;
-  Bitboard opponent_pieces;
-  std::vector<Move> legal_moves; // moves that get here should be fully legal.
-  bool are_moves_valid;
+  mutable Bitboard own_pieces;
+  mutable Bitboard opponent_pieces;
+  // moves that get here should be fully legal.
+  mutable std::vector<Move> legal_moves;
+  mutable bool are_moves_valid;
 
   static PrecomputedMoves precomputed_moves;
 
@@ -47,31 +48,36 @@ private:
   Bitboard getOpponentEnPassant() const;
 
   // moves the pieces could make
-  void getPawnMoves();
+  void getPawnMoves() const;
   void checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move move_base,
-                           Direction forward);
+                           Direction forward) const;
   void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index,
-                            Move move_base);
-  void addPromotionMoves(Bitboard step, Bitboard captures, Move move_base);
-  void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
-  void getKnightMoves();
-  void getKingMoves();
-  void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base);
+                            Move move_base) const;
+  void addPromotionMoves(Bitboard step, Bitboard captures,
+                         Move move_base) const;
+  void addNormalPawnMoves(Move base_move, Bitboard step,
+                          Bitboard captures) const;
+  void getKnightMoves() const;
+  void getKingMoves() const;
+  void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base) const;
   bool canCastle(const Bitboard king, const Bitboard rook,
                  const Bitboard king_dest, const Bitboard rook_dest,
-                 const Bitboard all_pieces);
-  inline void getBishopMoves();
-  inline void getRookMoves();
-  inline void getQueenMoves();
-  void getSlidingPieceMoves(const PieceType pieceType);
+                 const Bitboard all_pieces) const;
+  inline void getBishopMoves() const;
+  inline void getRookMoves() const;
+  inline void getQueenMoves() const;
+  void getSlidingPieceMoves(const PieceType pieceType) const;
   Bitboard getSlideDestinations(const Bitboard piece,
                                 const AttackPattern pattern) const;
+  Bitboard getSlideDestinations(const Bitboard piece,
+                                const AttackPattern pattern,
+                                const Bitboard blockers) const;
 
-  void finalizeMoves(Bitboard destinations, Move move_base);
-  void addDestinationMoves(Bitboard destinations, Move move_base);
-  void addCaptureMoves(Bitboard captures, Move move_base);
+  void finalizeMoves(Bitboard destinations, Move move_base) const;
+  void addDestinationMoves(Bitboard destinations, Move move_base) const;
+  void addCaptureMoves(Bitboard captures, Move move_base) const;
 
-  void CheckAndSaveMove(Move proposed_move);
+  void CheckAndSaveMove(Move proposed_move) const;
   bool selfCheckCheck(Move proposed_move) const;
   bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
                                 Bitboard blockers) const;
@@ -104,14 +110,14 @@ public:
   Piece getPieceAtIndex(uint8_t index) const;
   Piece getPieceAtTile(Bitboard tile) const;
 
-  std::vector<Move> getLegalMoves();
+  std::vector<Move> getLegalMoves() const;
 
   Bitboard getOwnPieces(PieceType type) const;
   Bitboard getOpponentPieces(PieceType type) const;
   Bitboard getPiecesByPattern(Color color, AttackPattern pattern) const;
-  Bitboard getAllOwnPieces();
-  Bitboard getAllOpponentPieces();
-  Bitboard getAllPieces();
+  Bitboard getAllOwnPieces() const;
+  Bitboard getAllOpponentPieces() const;
+  Bitboard getAllPieces() const;
 
   static void InitializeMoves();
 
