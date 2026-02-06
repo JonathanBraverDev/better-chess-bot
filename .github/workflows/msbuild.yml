@@ -20,3 +20,10 @@ jobs:
       # Build the solution in Release mode for x64, forcing v143 toolset for CI compatibility
       run: msbuild /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 "better chess bot.sln"
       # TODO: stop forcing the tool when the V145 toolset becomes available on GitHub Actions
+
+    - name: Run Unit Tests
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        $vsPath = vswhere -latest -requires Microsoft.VisualStudio.Component.TestTools.Core -property installationPath
+        $vstestPath = Join-Path $vsPath "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
+        & $vstestPath "x64\Release\UnitTests.dll"
