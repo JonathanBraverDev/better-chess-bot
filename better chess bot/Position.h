@@ -29,8 +29,9 @@ private:
   Bitboard black_queens;
   Bitboard black_king; // I swear it's not just discrimination
 
-    Bitboard special_move_rights; // en passant AND castle rights for both sides, they can't overlap anyway
-    // use the bitboard to calculate BitRights and use for all moves from the position
+  // en passant AND castle rights for both sides, they can't overlap anyway
+  // used to calculate BitRights for all moves from the position
+  Bitboard special_move_rights;
   Color current_color;
 
   // greatly reducing cluttered calls during move generation
@@ -94,7 +95,7 @@ private:
 public:
   // allow initialization from string
 
-  // constructor that takes a vector of moves and created a position following them
+  // TODO: Add a constructor that creates a position from moves
 
   void makeMove(Move move);
 
@@ -112,6 +113,6 @@ public:
 
   static void InitializeMoves();
 
-    // Converts the special move board to a Move containig the appropriate BitRights
+  // Creates an empty move with BitRights from the special move board
   Move currentBitRights() const;
 };

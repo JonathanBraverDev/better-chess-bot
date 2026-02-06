@@ -511,7 +511,7 @@ bool Position::canCastle(const Bitboard king, const Bitboard rook,
       Bitboard::combineBoards(Bitboard::findCommonBits(all_pieces, rook_path),
                               Bitboard::findCommonBits(all_pieces, king_path));
 
-  // NOTE: this does not check the king's origin. that was handled in the caller.
+  // NOTE: does not check the king's origin. that was handled in the caller.
   if (isAttackedByAnyPattern(king_path,
                              all_pieces.getWithoutBitsFrom(castling_pieces))) {
     // The king is passing through or ending in a check
