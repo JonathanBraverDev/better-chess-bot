@@ -686,7 +686,79 @@ bool Position::isAttackedByAnyPattern(Bitboard targets,
 
 // checks if the move puts the enemy in check
 bool Position::enemyCheckCheck(Move proposed_move) const {
-  // TODO: implement
+  Bitboard opponent_king = getPieces(getOpponentColor(), PieceType::KING);
+
+  if (!opponent_king.hasRemainingBits()) {
+    return false;
+  }
+
+  // Use the type that will be on the board (promoted or moving)
+  PieceType moving_type = proposed_move.getAbsoluteMovingType();
+  uint8_t dest_index = proposed_move.getDestinationIndex();
+  uint8_t origin_index = proposed_move.getOriginIndex();
+
+  // 1. Direct Check (Jumpers)
+  // These are unaffected by blockers, so we check them immediately for speed.
+  if (moving_type == PieceType::KNIGHT) {
+    if (precomputed_moves.knight_moves[dest_index]
+            .getCommonBitsWith(opponent_king)
+            .hasRemainingBits())
+      return true;
+  } else if (moving_type == PieceType::PAWN) {
+    // Check if Pawn at destination attacks King
+    // Pawns capture diagonally forward relative to their color
+    int attack_idx = 2 * dest_index + (current_color == Color::WHITE ? 0 : 1);
+    if (precomputed_moves.pawn_attacks[attack_idx]
+            .getCommonBitsWith(opponent_king)
+            .hasRemainingBits())
+      return true;
+  }
+
+  // Update the blocker board
+  Bitboard updated_blockers = getAllPieces();
+  updated_blockers.clearBit(origin_index);
+  updated_blockers.setBit(dest_index);
+
+  // Handle Capture (mask out captured piece)
+  if (proposed_move.isCapture() &&
+      proposed_move.getMiscMoveType() == MoveType::PAWN_UNIQE) {
+    updated_blockers.clearBit(
+        getEnPassantCaptureLocation(current_color, dest_index)
+            .singleBitIndex());
+  }
+
+  // Search for attackers FROM the enemy king
+
+  // -- LINE CHECKS --
+  Bitboard line_attackers =
+      getPiecesByPattern(current_color, AttackPattern::LINE);
+  // remove piece from origin, add to destination if a line attacker moved
+  line_attackers.clearBit(origin_index);
+  if (moving_type == PieceType::ROOK || moving_type == PieceType::QUEEN) {
+    line_attackers.setBit(dest_index);
+  }
+
+  Bitboard line_rays = getSlideDestinations(opponent_king, AttackPattern::LINE,
+                                            updated_blockers);
+  if (line_rays.getCommonBitsWith(line_attackers).hasRemainingBits()) {
+    return true;
+  }
+
+  // -- DIAGONAL CHECKS --
+  Bitboard diag_attackers =
+      getPiecesByPattern(current_color, AttackPattern::DIAGONAL);
+  // remove piece from origin, add to destination if a diagonal attacker moved
+  diag_attackers.clearBit(origin_index);
+  if (moving_type == PieceType::BISHOP || moving_type == PieceType::QUEEN) {
+    diag_attackers.setBit(dest_index);
+  }
+
+  Bitboard diag_rays = getSlideDestinations(
+      opponent_king, AttackPattern::DIAGONAL, updated_blockers);
+  if (diag_rays.getCommonBitsWith(diag_attackers).hasRemainingBits()) {
+    return true;
+  }
+
   return false;
 }
 
