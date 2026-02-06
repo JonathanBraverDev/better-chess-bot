@@ -25,12 +25,12 @@ BitMove Move::getEncodedMove() const {
     return encodedMove;
 }
 
-uint8_t Move::getOriginIndex() const {
-    return (encodedMove & ORIGIN_INDEX_MASK) >> ORIGIN_INDEX_OFFSET;
+BoardIndex Move::getOriginIndex() const {
+  return (encodedMove & ORIGIN_INDEX_MASK) >> ORIGIN_INDEX_OFFSET;
 }
 
-uint8_t Move::getDestinationIndex() const {
-    return (encodedMove & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET;
+BoardIndex Move::getDestinationIndex() const {
+  return (encodedMove & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET;
 }
 
 PieceType Move::getMovingOrPromotedType() const {
@@ -47,6 +47,16 @@ AttackerType Move::getAttackerType() const {
     return attacker_type;
 }
 
+// interpret the moving piece data to its "absolute value" piece type
+PieceType Move::getAbsoluteMovingType() const {
+    if (!isCapture() || isPromotion()) { // promotions use the regular types to aid with move ordering
+        return getMovingOrPromotedType();
+    } else {
+        return attackerTypeToPieceTypeMap.at(getAttackerType());
+    }
+    return PieceType();
+}
+
 PieceType Move::getCapturedType() const {
     PieceType type = static_cast<PieceType>((encodedMove & CAPTURED_TYPE_MASK) >> CAPTURED_TYPE_OFFSET);
     assert(type != PieceType::NONE && type != PieceType::KING);
@@ -54,13 +64,10 @@ PieceType Move::getCapturedType() const {
 }
 
 MoveType Move::getMiscMoveType() const {
-    return static_cast<MoveType>((encodedMove & MISC_MOVE_TYPE_MASK) >> MOVE_TYPE_OFFSET);
+    return static_cast<MoveType>((encodedMove & MISC_MOVE_TYPE_MASK) >> MISC_MOVE_TYPE_OFFSET);
 }
 
-
-bool Move::isCapture() const {
-    return (encodedMove & IS_CAPTURE_MASK) != 0;
-}
+bool Move::isCapture() const { return (encodedMove & IS_CAPTURE_MASK) != 0; }
 
 bool Move::isCheck() const {
     return (encodedMove & IS_CHECK_MASK) != 0;
@@ -74,60 +81,107 @@ bool Move::isPromotion() const {
 // for all setters, wipe the target data with the inverted mask and set the requested value
 void Move::setOriginIndex(uint8_t index) {
     assert(index <= 63);
-    encodedMove = (encodedMove & ~ORIGIN_INDEX_MASK) | ((index << ORIGIN_INDEX_OFFSET) & ORIGIN_INDEX_MASK);
+    setProperty(ORIGIN_INDEX_MASK, ORIGIN_INDEX_OFFSET, index);
 }
 
-void Move::setDestinationIndex(uint8_t index) {
-    assert(index <= 63);
-    encodedMove = (encodedMove & ~DESTINATION_INDEX_MASK) | ((index << DESTINATION_INDEX_OFFSET) & DESTINATION_INDEX_MASK);
+void Move::setDestinationIndex(BoardIndex index) {
+  assert(index <= 63);
+  setProperty(DESTINATION_INDEX_MASK, DESTINATION_INDEX_OFFSET, index);
 }
 
 void Move::setMovingType(PieceType type) {
     assert(type != PieceType::NONE);
-    encodedMove = (encodedMove & ~PIECE_TYPE_MASK) | ((static_cast<uint8_t>(type) << PIECE_TYPE_OFFSET) & PIECE_TYPE_MASK);
+    setProperty(PIECE_TYPE_MASK, PIECE_TYPE_OFFSET, type);
 }
 
 void Move::setPromotedType(PieceType type) {
-    assert(type == PieceType::QUEEN || type == PieceType::ROOK || type == PieceType::BISHOP || type == PieceType::KNIGHT);
+    assert(type == PieceType::QUEEN || type == PieceType::ROOK ||
+           type == PieceType::BISHOP || type == PieceType::KNIGHT);
     setPromotion(true); // can't be a promotion without a... promotion
-    encodedMove = (encodedMove & ~PIECE_TYPE_MASK) | ((static_cast<uint8_t>(type) << PIECE_TYPE_OFFSET) & PIECE_TYPE_MASK);
+    setProperty(PIECE_TYPE_MASK, PIECE_TYPE_OFFSET, type);
 }
 
 void Move::setAttackerType(AttackerType attacker_type) {
     assert(attacker_type != AttackerType::NONE);
     setCapture(true); // can't be an attacker without capture
-    encodedMove = (encodedMove & ~PIECE_TYPE_MASK) | ((static_cast<uint8_t>(attacker_type) << PIECE_TYPE_OFFSET) & PIECE_TYPE_MASK);
+    setProperty(PIECE_TYPE_MASK, PIECE_TYPE_OFFSET, attacker_type);
 }
 
 void Move::setCapturedType(PieceType type) {
     assert(type != PieceType::NONE && type != PieceType::KING);
-    encodedMove = (encodedMove & ~CAPTURED_TYPE_MASK) | ((static_cast<uint8_t>(type) << CAPTURED_TYPE_OFFSET) & CAPTURED_TYPE_MASK);
+    setProperty(CAPTURED_TYPE_MASK, CAPTURED_TYPE_OFFSET, type);
 }
 
 void Move::setMiscMoveType(MoveType miscType) {
-    encodedMove = (encodedMove & ~MISC_MOVE_TYPE_MASK) | ((static_cast<uint8_t>(miscType) << MOVE_TYPE_OFFSET) & MISC_MOVE_TYPE_MASK);
+    setProperty(MISC_MOVE_TYPE_MASK, MISC_MOVE_TYPE_OFFSET, miscType);
 }
 
-void Move::setCapture(bool isCapture) {
-    if (isCapture) {
+void Move::setCapture(bool is_capture) {
+    if (is_capture) {
         encodedMove |= IS_CAPTURE_MASK;
     } else {
         encodedMove &= ~IS_CAPTURE_MASK;
     }
 }
 
-void Move::setCheck(bool isCheck) {
-    if (isCheck) {
+void Move::setCheck(bool is_check) {
+    if (is_check) {
         encodedMove |= IS_CHECK_MASK;
     } else {
         encodedMove &= ~IS_CHECK_MASK;
     }
 }
 
-void Move::setPromotion(bool isPromote) {
-    if (isPromote) {
+void Move::setPromotion(bool is_promote) {
+    if (is_promote) {
         encodedMove |= IS_PROMOTE_MASK;
     } else {
         encodedMove &= ~IS_PROMOTE_MASK;
     }
+}
+
+void Move::setWhiteShortCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_SHORT_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_SHORT_CASTLE_MASK;
+    }
+}
+
+void Move::setWhiteLongCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_LONG_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+    }
+}
+
+void Move::setBlackShortCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_LONG_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+    }
+}
+
+void Move::setBlackLongCastleRight(bool can_castle) {
+    if (can_castle) {
+        encodedMove |= WHITE_LONG_CASTLE_MASK;
+    } else {
+        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+    }
+}
+
+void Move::setValidEnPassant(bool isValid) {
+    if (isValid) {
+        encodedMove |= VALID_EN_PASSANT_MASK;
+    } else {
+        encodedMove &= ~VALID_EN_PASSANT_MASK;
+    }
+}
+
+void Move::setEnPassantIndex(BoardIndex index) {
+  assert(index <= 7);
+  setValidEnPassant(true);
+  setProperty(EN_PASSANT_INDEX_MASK, EN_PASSANT_INDEX_OFFSET, index);
 }

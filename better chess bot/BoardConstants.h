@@ -2,72 +2,74 @@
 
 #include "Types.h"
 
+// human facing constants are 1-indexed, while bitboard indices are 0-indexed
+
 // the things I do for readability... (aren't very readable themselves eh)
 enum TileIndex {
-	A1_index = 0,
-	B1_index,
-	C1_index,
-	D1_index,
-	E1_index,
-	F1_index,
-	G1_index,
-	H1_index,
-	A2_index = 8,
-	B2_index,
-	C2_index,
-	D2_index,
-	E2_index,
-	F2_index,
-	G2_index,
-	H2_index,
-	A3_index = 16,
-	B3_index,
-	C3_index,
-	D3_index,
-	E3_index,
-	F3_index,
-	G3_index,
-	H3_index,
-	A4_index = 24,
-	B4_index,
-	C4_index,
-	D4_index,
-	E4_index,
-	F4_index,
-	G4_index,
-	H4_index,
-	A5_index = 32,
-	B5_index,
-	C5_index,
-	D5_index,
-	E5_index,
-	F5_index,
-	G5_index,
-	H5_index,
-	A6_index = 40,
-	B6_index,
-	C6_index,
-	D6_index,
-	E6_index,
-	F6_index,
-	G6_index,
-	H6_index,
-	A7_index = 48,
-	B7_index,
-	C7_index,
-	D7_index,
-	E7_index,
-	F7_index,
-	G7_index,
-	H7_index,
-	A8_index = 56,
-	B8_index,
-	C8_index,
-	D8_index,
-	E8_index,
-	F8_index,
-	G8_index,
-	H8_index
+  A1_index = 0,
+  B1_index,
+  C1_index,
+  D1_index,
+  E1_index,
+  F1_index,
+  G1_index,
+  H1_index,
+  A2_index = 8,
+  B2_index,
+  C2_index,
+  D2_index,
+  E2_index,
+  F2_index,
+  G2_index,
+  H2_index,
+  A3_index = 16,
+  B3_index,
+  C3_index,
+  D3_index,
+  E3_index,
+  F3_index,
+  G3_index,
+  H3_index,
+  A4_index = 24,
+  B4_index,
+  C4_index,
+  D4_index,
+  E4_index,
+  F4_index,
+  G4_index,
+  H4_index,
+  A5_index = 32,
+  B5_index,
+  C5_index,
+  D5_index,
+  E5_index,
+  F5_index,
+  G5_index,
+  H5_index,
+  A6_index = 40,
+  B6_index,
+  C6_index,
+  D6_index,
+  E6_index,
+  F6_index,
+  G6_index,
+  H6_index,
+  A7_index = 48,
+  B7_index,
+  C7_index,
+  D7_index,
+  E7_index,
+  F7_index,
+  G7_index,
+  H7_index,
+  A8_index = 56,
+  B8_index,
+  C8_index,
+  D8_index,
+  E8_index,
+  F8_index,
+  G8_index,
+  H8_index
 };
 
 // shift each tile to its index
@@ -136,7 +138,8 @@ constexpr B64 F8 = (1ULL << F8_index);
 constexpr B64 G8 = (1ULL << G8_index);
 constexpr B64 H8 = (1ULL << H8_index);
 
-// constexpr > const, compiletime vs runtime evaluation, less runtime -> more better.
+// constexpr > const, compiletime vs runtime evaluation, less runtime -> more
+// better.
 constexpr int BOARD_SIZE = 8;
 
 // useful for out of bounds detection
@@ -145,11 +148,11 @@ constexpr B64 COLUMN_B = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
 constexpr B64 COLUMN_C = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8;
 constexpr B64 COLUMN_D = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8;
 constexpr B64 COLUMN_E = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8;
-constexpr B64 COLUMB_F = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8;
-constexpr B64 COLUMB_G = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8;
+constexpr B64 COLUMN_F = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8;
+constexpr B64 COLUMN_G = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8;
 constexpr B64 COLUMN_H = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8;
 constexpr B64 COLUMN_AB = COLUMN_A | COLUMN_B;
-constexpr B64 COLUMN_GH = COLUMB_G | COLUMN_H;
+constexpr B64 COLUMN_GH = COLUMN_G | COLUMN_H;
 
 // used for pawn first move/promotion
 constexpr B64 ROW_8 = A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8;
@@ -164,19 +167,41 @@ constexpr B64 TILE_BLACK = 0xAAAAAAAAAAAAAAAAULL;
 constexpr B64 TILE_WHITE = 0x5555555555555555ULL;
 
 // special move related
-constexpr B64 WHITE_CASTLE = ROW_1;
-constexpr B64 BLACK_CASTLE = ROW_8;
+constexpr B64 WHITE_CASTLE_ROW = ROW_1;
+constexpr B64 BLACK_CASTLE_ROW = ROW_8;
+constexpr B64 VOID_WHITE_CASTLE = ~WHITE_CASTLE_ROW;
+constexpr B64 VOID_BLACK_CASTLE = ~BLACK_CASTLE_ROW;
+
+constexpr B64 LONG_CASTLE_KING_COLUMN = COLUMN_C;
+constexpr B64 LONG_CASTLE_ROOK_COLUMN = COLUMN_D;
+constexpr B64 SHORT_CASTLE_KING_COLUMN = COLUMN_G;
+constexpr B64 SHORT_CASTLE_ROOK_COLUMN = COLUMN_F;
+
+// Toggle masks for standard castling
+// White Short: King E1->G1, Rook H1->F1
+constexpr B64 WHITE_SHORT_CASTLE_KING_MASK = E1 | G1;
+constexpr B64 WHITE_SHORT_CASTLE_ROOK_MASK = H1 | F1;
+// White Long: King E1->C1, Rook A1->D1
+constexpr B64 WHITE_LONG_CASTLE_KING_MASK = E1 | C1;
+constexpr B64 WHITE_LONG_CASTLE_ROOK_MASK = A1 | D1;
+
+// Black Short: King E8->G8, Rook H8->F8
+constexpr B64 BLACK_SHORT_CASTLE_KING_MASK = E8 | G8;
+constexpr B64 BLACK_SHORT_CASTLE_ROOK_MASK = H8 | F8;
+// Black Long: King E8->C8, Rook A8->D8
+constexpr B64 BLACK_LONG_CASTLE_KING_MASK = E8 | C8;
+constexpr B64 BLACK_LONG_CASTLE_ROOK_MASK = A8 | D8;
+
 // the row to which white writes en-passants
 constexpr B64 WHITE_EN_PASSANT = ROW_3;
 // the row to which black writes en-passants
 constexpr B64 BLACK_EN_PASSANT = ROW_6;
 constexpr B64 ALL_EN_PASSANT = WHITE_EN_PASSANT | BLACK_EN_PASSANT;
-constexpr B64 VOID_WHITE_CASTLE = ~WHITE_CASTLE;
-constexpr B64 VOID_BLACK_CASTLE = ~BLACK_CASTLE;
 constexpr B64 VOID_ALL_EN_PASSANT = ~ALL_EN_PASSANT;
 
+// the following pawn rows are subjective to each color
 constexpr int PAWN_INITIAL_ROW = 2;
 // the row FROM which an enpassant can potentially be played
 constexpr int PAWN_ENPASSANT_ROW = BOARD_SIZE - (PAWN_INITIAL_ROW + 1);
-constexpr int PAWN_PRE_PROMOTION_ROW = BOARD_SIZE - 1;
 constexpr int PAWN_PROMOTION_ROW = BOARD_SIZE;
+constexpr int PAWN_PRE_PROMOTION_ROW = PAWN_PROMOTION_ROW - 1;
