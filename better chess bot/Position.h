@@ -81,7 +81,7 @@ private:
   bool selfCheckCheck(Move proposed_move) const;
   bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
                                 Bitboard blockers) const;
-  bool isAttackedByJumpPattern(uint8_t target_index,
+  bool isAttackedByJumpPattern(BoardIndex target_index,
                                AttackPattern pattern) const;
   bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
   bool enemyCheckCheck(Move proposed_move) const;
@@ -92,7 +92,7 @@ private:
   static void PrepareBlackPawnMoves();
 
   static Bitboard getEnPassantCaptureLocation(Color capturing_color,
-                                              uint8_t en_passant_tile_index);
+                                              BoardIndex en_passant_tile_index);
 
   // Helpers for make/undo move
   Bitboard &getPieceBoardRef(Color color, PieceType type);
@@ -110,7 +110,7 @@ public:
   void makeMove(Move move);
 
   Bitboard getPieces(Color color, PieceType type) const;
-  Piece getPieceAtIndex(uint8_t index) const;
+  Piece getPieceAtIndex(BoardIndex index) const;
   Piece getPieceAtTile(Bitboard tile) const;
 
   std::vector<Move> getLegalMoves() const;

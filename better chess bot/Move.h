@@ -31,8 +31,8 @@ public:
 
     BitMove getEncodedMove() const;
 
-    uint8_t getOriginIndex() const;
-    uint8_t getDestinationIndex() const;
+  BoardIndex getOriginIndex() const;
+  BoardIndex getDestinationIndex() const;
     PieceType getAbsoluteMovingType() const;
     PieceType getCapturedType() const;
     MoveType getMiscMoveType() const;
@@ -40,8 +40,8 @@ public:
     bool isCheck() const;
     bool isPromotion() const;
 
-    void setOriginIndex(uint8_t index);
-    void setDestinationIndex(uint8_t index);
+  void setOriginIndex(BoardIndex index);
+  void setDestinationIndex(BoardIndex index);
     void setMovingType(PieceType type);
     // Sets promotion flag too
     void setPromotedType(PieceType type);
@@ -60,7 +60,7 @@ public:
     void setValidEnPassant(bool isValid);
     // index is within the row, 0-7
     // also sets valid en passant
-    void setEnPassantIndex(uint8_t index);
+  void setEnPassantIndex(BoardIndex index);
 
     // add conversion to text form
 };

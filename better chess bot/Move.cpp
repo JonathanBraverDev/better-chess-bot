@@ -25,12 +25,12 @@ BitMove Move::getEncodedMove() const {
     return encodedMove;
 }
 
-uint8_t Move::getOriginIndex() const {
-    return (encodedMove & ORIGIN_INDEX_MASK) >> ORIGIN_INDEX_OFFSET;
+BoardIndex Move::getOriginIndex() const {
+  return (encodedMove & ORIGIN_INDEX_MASK) >> ORIGIN_INDEX_OFFSET;
 }
 
-uint8_t Move::getDestinationIndex() const {
-    return (encodedMove & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET;
+BoardIndex Move::getDestinationIndex() const {
+  return (encodedMove & DESTINATION_INDEX_MASK) >> DESTINATION_INDEX_OFFSET;
 }
 
 PieceType Move::getMovingOrPromotedType() const {
@@ -67,10 +67,7 @@ MoveType Move::getMiscMoveType() const {
     return static_cast<MoveType>((encodedMove & MISC_MOVE_TYPE_MASK) >> MISC_MOVE_TYPE_OFFSET);
 }
 
-
-bool Move::isCapture() const {
-    return (encodedMove & IS_CAPTURE_MASK) != 0;
-}
+bool Move::isCapture() const { return (encodedMove & IS_CAPTURE_MASK) != 0; }
 
 bool Move::isCheck() const {
     return (encodedMove & IS_CHECK_MASK) != 0;
@@ -87,9 +84,9 @@ void Move::setOriginIndex(uint8_t index) {
     setProperty(ORIGIN_INDEX_MASK, ORIGIN_INDEX_OFFSET, index);
 }
 
-void Move::setDestinationIndex(uint8_t index) {
-    assert(index <= 63);
-    setProperty(DESTINATION_INDEX_MASK, DESTINATION_INDEX_OFFSET, index);
+void Move::setDestinationIndex(BoardIndex index) {
+  assert(index <= 63);
+  setProperty(DESTINATION_INDEX_MASK, DESTINATION_INDEX_OFFSET, index);
 }
 
 void Move::setMovingType(PieceType type) {
@@ -183,8 +180,8 @@ void Move::setValidEnPassant(bool isValid) {
     }
 }
 
-void Move::setEnPassantIndex(uint8_t index) {
-    assert(index <= 7);
-    setValidEnPassant(true);
-    setProperty(EN_PASSANT_INDEX_MASK, EN_PASSANT_INDEX_OFFSET, index);
+void Move::setEnPassantIndex(BoardIndex index) {
+  assert(index <= 7);
+  setValidEnPassant(true);
+  setProperty(EN_PASSANT_INDEX_MASK, EN_PASSANT_INDEX_OFFSET, index);
 }

@@ -46,18 +46,18 @@ public:
 
   // Using this method is unsafe, avoid where possible
   B64 getBoard() const;
-  bool getBit(uint8_t index) const;
+  bool getBit(BoardIndex index) const;
   int countSetBits() const;
-  uint8_t singleBitIndex() const;
+  BoardIndex singleBitIndex() const;
   bool hasRemainingBits() const;
   bool isEmpty() const;
 
-  void setBit(uint8_t index);
+  void setBit(BoardIndex index);
   void setBitsFrom(Bitboard otherBoard);
-  void clearBit(uint8_t index);
+  void clearBit(BoardIndex index);
   void clearLowestBit();
   void clearBitsFrom(Bitboard otherBoard);
-  void toggleBit(uint8_t index);
+  void toggleBit(BoardIndex index);
   void toggleBitsFrom(Bitboard otherBoard);
   Bitboard getInverted() const;
   Bitboard getCommonBitsWith(Bitboard otherBoard) const;

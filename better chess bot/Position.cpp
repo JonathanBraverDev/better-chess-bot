@@ -195,7 +195,7 @@ void Position::getPawnMoves() const {
   Direction direction_forward =
       (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
   int color_offset = (current_color == Color::WHITE ? 0 : 1);
-  uint8_t pawn_index;
+  BoardIndex pawn_index;
   int pawn_move_index;
   int adjusted_pawn_row;
 
@@ -587,7 +587,7 @@ void Position::CheckAndSaveMove(Move proposed_move) const {
 bool Position::selfCheckCheck(Move proposed_move) const {
 
   Bitboard king = getPieces(current_color, PieceType::KING);
-  uint8_t king_index;
+  BoardIndex king_index;
   Bitboard all_pieces = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
   if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
@@ -628,7 +628,7 @@ bool Position::isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
       .hasRemainingBits();
 }
 
-bool Position::isAttackedByJumpPattern(uint8_t target_index,
+bool Position::isAttackedByJumpPattern(BoardIndex target_index,
                                        AttackPattern pattern) const {
   assert(pattern == AttackPattern::PAWN || pattern == AttackPattern::KNIGHT ||
          pattern == AttackPattern::KING);
@@ -656,7 +656,7 @@ bool Position::isAttackedByJumpPattern(uint8_t target_index,
 
 bool Position::isAttackedByAnyPattern(Bitboard targets,
                                       Bitboard blockers) const {
-  uint8_t target_index;
+  BoardIndex target_index;
   Bitboard target = targets.popLowestBit(); // focus on the next target bit
 
   // Check for sliding piece attacks
@@ -694,8 +694,8 @@ bool Position::enemyCheckCheck(Move proposed_move) const {
 
   // Use the type that will be on the board (promoted or moving)
   PieceType moving_type = proposed_move.getAbsoluteMovingType();
-  uint8_t dest_index = proposed_move.getDestinationIndex();
-  uint8_t origin_index = proposed_move.getOriginIndex();
+  BoardIndex dest_index = proposed_move.getDestinationIndex();
+  BoardIndex origin_index = proposed_move.getOriginIndex();
 
   // 1. Direct Check (Jumpers)
   // These are unaffected by blockers, so we check them immediately for speed.
@@ -829,7 +829,7 @@ Bitboard Position::getPiecesByPattern(Color color,
   }
 }
 
-Piece Position::getPieceAtIndex(uint8_t index) const {
+Piece Position::getPieceAtIndex(BoardIndex index) const {
   Bitboard tile = (1ULL << index);
   return getPieceAtTile(tile);
 }
@@ -974,7 +974,7 @@ void Position::PrepareBlackPawnMoves() {
 
 // finds the location of the pawn that was captured by en passant
 Bitboard Position::getEnPassantCaptureLocation(Color capturing_color,
-                                               uint8_t en_passant_tile_index) {
+                                      BoardIndex en_passant_tile_index) {
   Bitboard capture_location(0);
   capture_location.setBit(en_passant_tile_index);
 
