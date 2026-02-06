@@ -24,6 +24,6 @@ jobs:
     - name: Run Unit Tests
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        $vstestPath = vswhere -latest -products * -requires Microsoft.VisualStudio.Workload.NativeDesktop -find **\vstest.console.exe
+        $vstestPath = vswhere -latest -products * -requires Microsoft.VisualStudio.Workload.NativeDesktop -find **\vstest.console.exe | Select-Object -First 1
         if (-not $vstestPath) { throw "vstest.console.exe not found" }
         & $vstestPath "x64\Release\UnitTests.dll"
