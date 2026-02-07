@@ -9,14 +9,15 @@ constexpr int ORIGIN_INDEX_LENGTH = 6;
 constexpr int DESTINATION_INDEX_LENGTH = 6;
 // bit rights
 constexpr int CASTLE_RIGHTS_FLAGS = 4;
-constexpr int VALID_EN_PASSANT_LENGTH = 1; // for length calculation
+constexpr int VALID_EN_PASSANT_LENGTH = 1;
 constexpr int EN_PASSANT_INDEX_LENGTH = 3;
 // MVV-LVA
 constexpr int PIECE_TYPE_LENGTH = 3;
 constexpr int CAPTURED_TYPE_LENGTH = 3;
 // move ordering flags
+// todo: one bit can be saved here, see MoveType enum
 constexpr int MISC_MOVE_TYPE_LENGTH = 2;
-constexpr int MOVE_FLAGS_LENGTH = 4; // flags don't need individual offsets, only masks
+constexpr int MOVE_FLAGS_LENGTH = 4; // flags only need masks
 
 static_assert(ORIGIN_INDEX_LENGTH + DESTINATION_INDEX_LENGTH + CASTLE_RIGHTS_FLAGS +
 	VALID_EN_PASSANT_LENGTH + EN_PASSANT_INDEX_LENGTH + PIECE_TYPE_LENGTH + CAPTURED_TYPE_LENGTH +

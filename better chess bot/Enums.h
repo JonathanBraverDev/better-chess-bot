@@ -29,6 +29,10 @@ const std::map<AttackerType, PieceType> attackerTypeToPieceTypeMap = {
   {AttackerType::QUEEN, PieceType::QUEEN},
 };
 
+// TODO: save one bit.
+// both castles can be encoded with one bit and quickly checked when needed
+// pawn unique is partially redunant with promotion, the jump can be checked on
+// the board, the issue might be a compliction with en passant.
 enum class MoveType { NORMAL, PAWN_UNIQE, CASTLE_LONG, CASTLE_SHORT };
 
 enum class GameOverCause { CHECKMATE, RESIGNATION, TIMEOUT, STALEMALTE, INSUFFICENT_MATERIAL,
