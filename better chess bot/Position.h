@@ -104,6 +104,8 @@ private:
 
 public:
   // allow initialization from string
+  Position();
+  static Position fromFen(FenString fen);
 
   // TODO: Add a constructor that creates a position from moves
 

@@ -1,7 +1,9 @@
 #include "Position.h"
 #include "Enums.h"
-#include "structs.h"
+#include "Structs.h"
 #include <cassert>
+#include <sstream>
+#include <string>
 
 // empty initizlization of static member
 PrecomputedMoves Position::precomputed_moves;
@@ -1035,4 +1037,141 @@ Move Position::currentBitRights() const {
   }
 
   return rights;
+}
+
+Position::Position() {
+  white_pawns.clear();
+  white_knights.clear();
+  white_bishops.clear();
+  white_rooks.clear();
+  white_queens.clear();
+  white_king.clear();
+  black_pawns.clear();
+  black_knights.clear();
+  black_bishops.clear();
+  black_rooks.clear();
+  black_queens.clear();
+  black_king.clear();
+  special_move_rights.clear();
+  own_pieces.clear();
+  opponent_pieces.clear();
+  legal_moves.clear();
+  are_moves_valid = false;
+  current_color = Color::WHITE;
+}
+
+Position Position::fromFen(FenString fen) {
+  Position pos;
+
+  std::stringstream ss(fen);
+  std::string segment;
+
+  // Piece Placement
+  if (std::getline(ss, segment, ' ')) {
+    int rank = BOARD_SIZE - 1;
+    int file = 0;
+
+    for (char c : segment) {
+      if (c == '/') {
+        rank--;
+        file = 0;
+      } else if (isdigit(c)) {
+        file += c - '0';
+      } else {
+        BoardIndex index = rank * BOARD_SIZE + file;
+
+        switch (c) {
+        case 'P':
+          pos.white_pawns.setBit(index);
+          break;
+        case 'N':
+          pos.white_knights.setBit(index);
+          break;
+        case 'B':
+          pos.white_bishops.setBit(index);
+          break;
+        case 'R':
+          pos.white_rooks.setBit(index);
+          break;
+        case 'Q':
+          pos.white_queens.setBit(index);
+          break;
+        case 'K':
+          pos.white_king.setBit(index);
+          break;
+        case 'p':
+          pos.black_pawns.setBit(index);
+          break;
+        case 'n':
+          pos.black_knights.setBit(index);
+          break;
+        case 'b':
+          pos.black_bishops.setBit(index);
+          break;
+        case 'r':
+          pos.black_rooks.setBit(index);
+          break;
+        case 'q':
+          pos.black_queens.setBit(index);
+          break;
+        case 'k':
+          pos.black_king.setBit(index);
+          break;
+        }
+        file++;
+      }
+    }
+  }
+
+  // Active Color
+  if (std::getline(ss, segment, ' ')) {
+    pos.current_color = (segment == "w") ? Color::WHITE : Color::BLACK;
+  } else {
+    pos.current_color = Color::WHITE; // Default
+  }
+
+  // Castling Rights
+  if (std::getline(ss, segment, ' ')) {
+    if (segment != "-") {
+
+      for (char c : segment) {
+        switch (c) {
+        case 'K':
+          pos.special_move_rights.setBit(E1_index);
+          pos.special_move_rights.setBit(H1_index);
+          break;
+        case 'Q':
+          pos.special_move_rights.setBit(E1_index);
+          pos.special_move_rights.setBit(A1_index);
+          break;
+        case 'k':
+          pos.special_move_rights.setBit(E8_index);
+          pos.special_move_rights.setBit(H8_index);
+          break;
+        case 'q':
+          pos.special_move_rights.setBit(E8_index);
+          pos.special_move_rights.setBit(A8_index);
+          break;
+        }
+      }
+    }
+  }
+
+  // En Passant Target
+  if (std::getline(ss, segment, ' ')) {
+    if (segment != "-") {
+      // segment is like "e3"
+      int file = segment[0] - 'a';
+      int rank = segment[1] - '1';
+      BoardIndex ep_index = rank * BOARD_SIZE + file;
+
+      pos.special_move_rights.setBit(ep_index);
+    }
+  }
+
+  // Fill cache
+  pos.own_pieces = pos.getAllOwnPieces();
+  pos.opponent_pieces = pos.getAllOpponentPieces();
+
+  return pos;
 }
