@@ -496,7 +496,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
 bool Position::canCastleWithRook(const Bitboard king, const Bitboard rook,
                                  const Bitboard king_dest, const Bitboard rook_dest) const {
   // Check if the rook can castle, cross ref to rights included in call
-  if (!rook.hasRemainingBits()) {
+  if (!rook.findCommonBits(special_move_rights).hasRemainingBits()) {
     return false;
   }
 
@@ -504,18 +504,19 @@ bool Position::canCastleWithRook(const Bitboard king, const Bitboard rook,
   Bitboard king_path = king.sameRowPathTo(king_dest);
   Bitboard rook_path = rook.sameRowPathTo(rook_dest);
   Bitboard castling_pieces = Bitboard::combineBoards(king, rook);
-  Bitboard interfering_pieces =
-      Bitboard::combineBoards(Bitboard::findCommonBits(all_pieces, rook_path),
-                              Bitboard::findCommonBits(all_pieces, king_path));
+  Bitboard blockers = all_pieces.getWithoutBitsFrom(castling_pieces);
 
   // NOTE: does not check the king's origin. was handled in getCastlingMoves.
-  if (isAttackedByAnyPattern(king_path,
-                             all_pieces.getWithoutBitsFrom(castling_pieces))) {
+  if (isAttackedByAnyPattern(king_path, blockers)) {
     // The king is passing through or ending in a check
     return false;
   }
 
-  if (interfering_pieces != Bitboard::combineBoards(king, rook)) {
+  Bitboard interfering_pieces =
+      Bitboard::combineBoards(Bitboard::findCommonBits(blockers, rook_path),
+                              Bitboard::findCommonBits(blockers, king_path));
+
+  if (interfering_pieces.hasRemainingBits()) {
     // A third piece is in the way of either the rook or the king
     return false;
   }
