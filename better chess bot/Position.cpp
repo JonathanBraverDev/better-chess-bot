@@ -1004,6 +1004,11 @@ void Position::InitializeMoves() {
   PrepareBlackPawnMoves();
 }
 
+bool Position::isInCheck() const {
+  Bitboard king = getPieces(current_color, PieceType::KING);
+  return isAttackedByAnyPattern(king, getAllPieces());
+}
+
 Move Position::currentBitRights() const {
   Move rights(0);
 

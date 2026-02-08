@@ -167,6 +167,7 @@
     <ClCompile Include="FenParsingTests.cpp" />
     <ClCompile Include="MoveGenerationTests.cpp" />
     <ClCompile Include="EvaluationTests.cpp" />
+    <ClCompile Include="SearchTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

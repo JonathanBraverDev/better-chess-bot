@@ -127,4 +127,6 @@ public:
 
   // Creates an empty move with BitRights from the special move board
   Move currentBitRights() const;
+
+  bool isInCheck() const;
 };
