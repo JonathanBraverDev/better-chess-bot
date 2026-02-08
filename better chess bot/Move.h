@@ -63,4 +63,5 @@ public:
   void setEnPassantIndex(BoardIndex index);
 
     // add conversion to text form
+    std::string verboseDecode() const;
 };

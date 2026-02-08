@@ -185,3 +185,46 @@ void Move::setEnPassantIndex(BoardIndex index) {
   setValidEnPassant(true);
   setProperty(EN_PASSANT_INDEX_MASK, EN_PASSANT_INDEX_OFFSET, index);
 }
+
+
+std::string Move::verboseDecode() const {
+  if (getMiscMoveType() == MoveType::CASTLE_SHORT) {
+    return "Short Castle";
+  }
+  if (getMiscMoveType() == MoveType::CASTLE_LONG) {
+    return "Long Castle";
+  }
+
+  std::string origin = tileNames[getOriginIndex()];
+  std::string dest = tileNames[getDestinationIndex()];
+  std::string description = "";
+
+  if (isPromotion()) {
+    description = "Pawn moves from " + origin;
+    if (isCapture()) {
+      std::string capturedName = pieceTypeToNameMap.at(getCapturedType());
+      description += ", captures a " + capturedName + " on " + dest;
+    } else {
+      description += " to " + dest;
+    }
+    std::string promotedName = pieceTypeToNameMap.at(getAbsoluteMovingType());
+    description += " and promotes to a " + promotedName;
+  } else {
+    std::string pieceName = pieceTypeToNameMap.at(getAbsoluteMovingType());
+    description = pieceName + " moves from " + origin;
+    if (isCapture()) {
+      std::string capturedName = pieceTypeToNameMap.at(getCapturedType());
+      description += " and captures a " + capturedName + " at " + dest;
+    } else {
+      description += " to " + dest;
+    }
+  }
+
+  if (isCheck()) {
+    description += " with check";
+  }
+
+  description += ".";
+  return description;
+}
+
