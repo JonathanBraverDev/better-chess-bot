@@ -10,5 +10,6 @@
 // add headers that you want to pre-compile here
 #include "../better chess bot/Bitboard.h"
 #include "../better chess bot/Move.h"
+#include "../better chess bot/Position.h"
 
 #endif //PCH_H

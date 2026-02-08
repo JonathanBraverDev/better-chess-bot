@@ -66,10 +66,10 @@ B64 Bitboard::lowestBitBoard() const {
 int Bitboard::countSetBits() const {
   int count;
   B64 board_copy = board;
-  // runs untill board is zeroed out, counting up
-  for (count = 0; board; count++)
+  // runs until the copy is zeroed out, counting iterations
+  for (count = 0; board_copy; count++)
     // removes one bit per iteration
-    board_copy = (board_copy & -board_copy);
+    board_copy &= (board_copy - 1);
   return count;
 }
 

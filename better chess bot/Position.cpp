@@ -1,7 +1,9 @@
 #include "Position.h"
 #include "Enums.h"
-#include "structs.h"
+#include "Structs.h"
 #include <cassert>
+#include <sstream>
+#include <string>
 
 // empty initizlization of static member
 PrecomputedMoves Position::precomputed_moves;
@@ -475,8 +477,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   move_base.setMovingType(PieceType::KING);
 
   // Long castling
-  if (canCastle(king, long_rook, long_king_dest, long_rook_dest,
-                getAllPieces())) {
+  if (canCastleWithRook(king, long_rook, long_king_dest, long_rook_dest)) {
     move_base.setDestinationIndex(long_rook.singleBitIndex());
     move_base.setMiscMoveType(MoveType::CASTLE_LONG);
 
@@ -484,8 +485,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   }
 
   // Short castling
-  if (canCastle(king, short_rook, short_king_dest, short_rook_dest,
-                getAllPieces())) {
+  if (canCastleWithRook(king, short_rook, short_king_dest, short_rook_dest)) {
     move_base.setDestinationIndex(short_rook.singleBitIndex());
     move_base.setMiscMoveType(MoveType::CASTLE_SHORT);
 
@@ -493,29 +493,30 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   }
 }
 
-bool Position::canCastle(const Bitboard king, const Bitboard rook,
-                         const Bitboard king_dest, const Bitboard rook_dest,
-                         const Bitboard all_pieces) const {
+bool Position::canCastleWithRook(const Bitboard king, const Bitboard rook,
+                                 const Bitboard king_dest, const Bitboard rook_dest) const {
   // Check if the rook can castle, cross ref to rights included in call
-  if (!rook.hasRemainingBits()) {
+  if (!rook.findCommonBits(special_move_rights).hasRemainingBits()) {
     return false;
   }
 
+  Bitboard all_pieces = getAllPieces();
   Bitboard king_path = king.sameRowPathTo(king_dest);
   Bitboard rook_path = rook.sameRowPathTo(rook_dest);
   Bitboard castling_pieces = Bitboard::combineBoards(king, rook);
-  Bitboard interfering_pieces =
-      Bitboard::combineBoards(Bitboard::findCommonBits(all_pieces, rook_path),
-                              Bitboard::findCommonBits(all_pieces, king_path));
+  Bitboard blockers = all_pieces.getWithoutBitsFrom(castling_pieces);
 
-  // NOTE: does not check the king's origin. that was handled in the caller.
-  if (isAttackedByAnyPattern(king_path,
-                             all_pieces.getWithoutBitsFrom(castling_pieces))) {
+  // NOTE: does not check the king's origin. was handled in getCastlingMoves.
+  if (isAttackedByAnyPattern(king_path, blockers)) {
     // The king is passing through or ending in a check
     return false;
   }
 
-  if (interfering_pieces != Bitboard::combineBoards(king, rook)) {
+  Bitboard interfering_pieces =
+      Bitboard::combineBoards(Bitboard::findCommonBits(blockers, rook_path),
+                              Bitboard::findCommonBits(blockers, king_path));
+
+  if (interfering_pieces.hasRemainingBits()) {
     // A third piece is in the way of either the rook or the king
     return false;
   }
@@ -591,12 +592,19 @@ bool Position::selfCheckCheck(Move proposed_move) const {
   Bitboard all_pieces = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
   if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
+    // move the piece blocker to the destination
+    all_pieces.clearBit(proposed_move.getOriginIndex());
+    all_pieces.setBit(proposed_move.getDestinationIndex());
+
+    // Update King position for check detection
+    king.clear();
+    king.setBit(proposed_move.getDestinationIndex());
+    king_index = proposed_move.getDestinationIndex();
+
     if (isAttackedBySlidePattern(king, AttackPattern::LINE, all_pieces) ||
         isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, all_pieces)) {
       return true;
     }
-
-    king_index = king.singleBitIndex();
 
     if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT) ||
         isAttackedByJumpPattern(king_index, AttackPattern::PAWN) ||
@@ -1035,4 +1043,141 @@ Move Position::currentBitRights() const {
   }
 
   return rights;
+}
+
+Position::Position() {
+  white_pawns.clear();
+  white_knights.clear();
+  white_bishops.clear();
+  white_rooks.clear();
+  white_queens.clear();
+  white_king.clear();
+  black_pawns.clear();
+  black_knights.clear();
+  black_bishops.clear();
+  black_rooks.clear();
+  black_queens.clear();
+  black_king.clear();
+  special_move_rights.clear();
+  own_pieces.clear();
+  opponent_pieces.clear();
+  legal_moves.clear();
+  are_moves_valid = false;
+  current_color = Color::WHITE;
+}
+
+Position Position::fromFen(FenString fen) {
+  Position pos;
+
+  std::stringstream ss(fen);
+  std::string segment;
+
+  // Piece Placement
+  if (std::getline(ss, segment, ' ')) {
+    int rank = BOARD_SIZE - 1;
+    int file = 0;
+
+    for (char c : segment) {
+      if (c == '/') {
+        rank--;
+        file = 0;
+      } else if (isdigit(c)) {
+        file += c - '0';
+      } else {
+        BoardIndex index = rank * BOARD_SIZE + file;
+
+        switch (c) {
+        case 'P':
+          pos.white_pawns.setBit(index);
+          break;
+        case 'N':
+          pos.white_knights.setBit(index);
+          break;
+        case 'B':
+          pos.white_bishops.setBit(index);
+          break;
+        case 'R':
+          pos.white_rooks.setBit(index);
+          break;
+        case 'Q':
+          pos.white_queens.setBit(index);
+          break;
+        case 'K':
+          pos.white_king.setBit(index);
+          break;
+        case 'p':
+          pos.black_pawns.setBit(index);
+          break;
+        case 'n':
+          pos.black_knights.setBit(index);
+          break;
+        case 'b':
+          pos.black_bishops.setBit(index);
+          break;
+        case 'r':
+          pos.black_rooks.setBit(index);
+          break;
+        case 'q':
+          pos.black_queens.setBit(index);
+          break;
+        case 'k':
+          pos.black_king.setBit(index);
+          break;
+        }
+        file++;
+      }
+    }
+  }
+
+  // Active Color
+  if (std::getline(ss, segment, ' ')) {
+    pos.current_color = (segment == "w") ? Color::WHITE : Color::BLACK;
+  } else {
+    pos.current_color = Color::WHITE; // Default
+  }
+
+  // Castling Rights
+  if (std::getline(ss, segment, ' ')) {
+    if (segment != "-") {
+
+      for (char c : segment) {
+        switch (c) {
+        case 'K':
+          pos.special_move_rights.setBit(E1_index);
+          pos.special_move_rights.setBit(H1_index);
+          break;
+        case 'Q':
+          pos.special_move_rights.setBit(E1_index);
+          pos.special_move_rights.setBit(A1_index);
+          break;
+        case 'k':
+          pos.special_move_rights.setBit(E8_index);
+          pos.special_move_rights.setBit(H8_index);
+          break;
+        case 'q':
+          pos.special_move_rights.setBit(E8_index);
+          pos.special_move_rights.setBit(A8_index);
+          break;
+        }
+      }
+    }
+  }
+
+  // En Passant Target
+  if (std::getline(ss, segment, ' ')) {
+    if (segment != "-") {
+      // segment is like "e3"
+      int file = segment[0] - 'a';
+      int rank = segment[1] - '1';
+      BoardIndex ep_index = rank * BOARD_SIZE + file;
+
+      pos.special_move_rights.setBit(ep_index);
+    }
+  }
+
+  // Fill cache
+  pos.own_pieces = pos.getAllOwnPieces();
+  pos.opponent_pieces = pos.getAllOpponentPieces();
+
+  return pos;
 }

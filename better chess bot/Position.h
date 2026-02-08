@@ -60,9 +60,8 @@ private:
   void getKnightMoves() const;
   void getKingMoves() const;
   void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base) const;
-  bool canCastle(const Bitboard king, const Bitboard rook,
-                 const Bitboard king_dest, const Bitboard rook_dest,
-                 const Bitboard all_pieces) const;
+  bool canCastleWithRook(const Bitboard king, const Bitboard rook,
+                 const Bitboard king_dest, const Bitboard rook_dest) const;
   inline void getBishopMoves() const;
   inline void getRookMoves() const;
   inline void getQueenMoves() const;
@@ -104,6 +103,8 @@ private:
 
 public:
   // allow initialization from string
+  Position();
+  static Position fromFen(FenString fen);
 
   // TODO: Add a constructor that creates a position from moves
 
