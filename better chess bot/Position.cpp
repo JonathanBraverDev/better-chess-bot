@@ -530,6 +530,7 @@ void Position::finalizeMoves(Bitboard destinations, Move move_base) const {
 
   Bitboard captures = Bitboard::findCommonBits(destinations, opponent_pieces);
   destinations.clearBitsFrom(captures);
+  captures.clearBitsFrom(getPieces(getOpponentColor(), PieceType::KING)); // ignore captures of the king
 
   addDestinationMoves(destinations, move_base);
   move_base.setAttackerType(
