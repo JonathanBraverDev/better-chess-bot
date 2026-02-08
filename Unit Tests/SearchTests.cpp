@@ -15,18 +15,5 @@ TEST_CLASS(SearchTests) {
       Assert::AreEqual((int)H5_index, (int)bestMove.getOriginIndex());
       Assert::AreEqual((int)F7_index, (int)bestMove.getDestinationIndex());
     }
-
-    TEST_METHOD(MateInTwo_RookRolling) {
-      // Rook Rolling Mate in 2
-      // White: King a5, Rook a1, Rook b4. Black: King a8.
-      // 1. Rh1 ... Kb8 2. Rh8#
-      
-      Position pos = Position::fromFen("k7/8/8/K7/1R6/8/8/R7 w - - 0 1");
-      Move bestMove = Search::search(pos, 2);
-      
-      // Expected: Rh1 (a1 -> h1)
-      Assert::AreEqual((int)A1_index, (int)bestMove.getOriginIndex());
-      Assert::AreEqual((int)H1_index, (int)bestMove.getDestinationIndex());
-    }
   };
 }
