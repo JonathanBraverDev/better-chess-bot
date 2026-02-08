@@ -477,8 +477,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   move_base.setMovingType(PieceType::KING);
 
   // Long castling
-  if (canCastle(king, long_rook, long_king_dest, long_rook_dest,
-                getAllPieces())) {
+  if (canCastleWithRook(king, long_rook, long_king_dest, long_rook_dest)) {
     move_base.setDestinationIndex(long_rook.singleBitIndex());
     move_base.setMiscMoveType(MoveType::CASTLE_LONG);
 
@@ -486,8 +485,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   }
 
   // Short castling
-  if (canCastle(king, short_rook, short_king_dest, short_rook_dest,
-                getAllPieces())) {
+  if (canCastleWithRook(king, short_rook, short_king_dest, short_rook_dest)) {
     move_base.setDestinationIndex(short_rook.singleBitIndex());
     move_base.setMiscMoveType(MoveType::CASTLE_SHORT);
 
@@ -495,14 +493,14 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   }
 }
 
-bool Position::canCastle(const Bitboard king, const Bitboard rook,
-                         const Bitboard king_dest, const Bitboard rook_dest,
-                         const Bitboard all_pieces) const {
+bool Position::canCastleWithRook(const Bitboard king, const Bitboard rook,
+                                 const Bitboard king_dest, const Bitboard rook_dest) const {
   // Check if the rook can castle, cross ref to rights included in call
   if (!rook.hasRemainingBits()) {
     return false;
   }
 
+  Bitboard all_pieces = getAllPieces();
   Bitboard king_path = king.sameRowPathTo(king_dest);
   Bitboard rook_path = rook.sameRowPathTo(rook_dest);
   Bitboard castling_pieces = Bitboard::combineBoards(king, rook);
@@ -510,7 +508,7 @@ bool Position::canCastle(const Bitboard king, const Bitboard rook,
       Bitboard::combineBoards(Bitboard::findCommonBits(all_pieces, rook_path),
                               Bitboard::findCommonBits(all_pieces, king_path));
 
-  // NOTE: does not check the king's origin. that was handled in the caller.
+  // NOTE: does not check the king's origin. was handled in getCastlingMoves.
   if (isAttackedByAnyPattern(king_path,
                              all_pieces.getWithoutBitsFrom(castling_pieces))) {
     // The king is passing through or ending in a check
@@ -593,12 +591,19 @@ bool Position::selfCheckCheck(Move proposed_move) const {
   Bitboard all_pieces = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
   if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
+    // move the piece blocker to the destination
+    all_pieces.clearBit(proposed_move.getOriginIndex());
+    all_pieces.setBit(proposed_move.getDestinationIndex());
+
+    // Update King position for check detection
+    king.clear();
+    king.setBit(proposed_move.getDestinationIndex());
+    king_index = proposed_move.getDestinationIndex();
+
     if (isAttackedBySlidePattern(king, AttackPattern::LINE, all_pieces) ||
         isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, all_pieces)) {
       return true;
     }
-
-    king_index = king.singleBitIndex();
 
     if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT) ||
         isAttackedByJumpPattern(king_index, AttackPattern::PAWN) ||
