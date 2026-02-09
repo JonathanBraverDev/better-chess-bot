@@ -39,6 +39,7 @@ public:
     bool isCapture() const;
     bool isCheck() const;
     bool isPromotion() const;
+    bool isEnPassant() const;
 
   void setOriginIndex(BoardIndex index);
   void setDestinationIndex(BoardIndex index);
@@ -63,4 +64,5 @@ public:
   void setEnPassantIndex(BoardIndex index);
 
     // add conversion to text form
+    std::string verboseDecode() const;
 };

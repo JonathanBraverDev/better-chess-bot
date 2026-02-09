@@ -1,4 +1,5 @@
 #include "Position.h"
+#include "Bitboard.h"
 #include "Enums.h"
 #include "Structs.h"
 #include <cassert>
@@ -123,7 +124,7 @@ void Position::toggleCaptured(const Move move) {
   uint8_t capture_idx = move.getDestinationIndex();
 
   // If En Passant, the captured pawn is not on the destination square
-  if (move.getMiscMoveType() == MoveType::PAWN_UNIQE && move.isCapture()) {
+  if (move.isEnPassant()) {
 
     capture_idx = getEnPassantCaptureLocation(current_color, capture_idx)
                       .singleBitIndex();
@@ -272,6 +273,7 @@ void Position::checkAndAddEnPassant(Bitboard potential_en_passant,
     move_base.setMiscMoveType(MoveType::PAWN_UNIQE);
     move_base.setCapturedType(PieceType::PAWN);
     move_base.setDestinationIndex(en_passant.singleBitIndex());
+    CheckAndSaveMove(move_base);
   }
 }
 
@@ -530,6 +532,7 @@ void Position::finalizeMoves(Bitboard destinations, Move move_base) const {
 
   Bitboard captures = Bitboard::findCommonBits(destinations, opponent_pieces);
   destinations.clearBitsFrom(captures);
+  captures.clearBitsFrom(getPieces(getOpponentColor(), PieceType::KING)); // ignore captures of the king
 
   addDestinationMoves(destinations, move_base);
   move_base.setAttackerType(
@@ -587,22 +590,22 @@ void Position::CheckAndSaveMove(Move proposed_move) const {
 // check if the move results in a self check
 bool Position::selfCheckCheck(Move proposed_move) const {
 
-  Bitboard king = getPieces(current_color, PieceType::KING);
+  Bitboard own_king = getPieces(current_color, PieceType::KING);
   BoardIndex king_index;
-  Bitboard all_pieces = Bitboard::combineBoards(own_pieces, opponent_pieces);
+  Bitboard blockers = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
   if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
     // move the piece blocker to the destination
-    all_pieces.clearBit(proposed_move.getOriginIndex());
-    all_pieces.setBit(proposed_move.getDestinationIndex());
+    blockers.clearBit(proposed_move.getOriginIndex());
+    blockers.setBit(proposed_move.getDestinationIndex());
 
     // Update King position for check detection
-    king.clear();
-    king.setBit(proposed_move.getDestinationIndex());
+    own_king.clear();
+    own_king.setBit(proposed_move.getDestinationIndex());
     king_index = proposed_move.getDestinationIndex();
 
-    if (isAttackedBySlidePattern(king, AttackPattern::LINE, all_pieces) ||
-        isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, all_pieces)) {
+    if (isAttackedBySlidePattern(own_king, AttackPattern::LINE, blockers) ||
+        isAttackedBySlidePattern(own_king, AttackPattern::DIAGONAL, blockers)) {
       return true;
     }
 
@@ -613,14 +616,40 @@ bool Position::selfCheckCheck(Move proposed_move) const {
     }
 
   } else {
+    king_index = own_king.singleBitIndex();
+
     // move the piece blocker to the destination
-    all_pieces.clearBit(proposed_move.getOriginIndex());
-    all_pieces.setBit(proposed_move.getDestinationIndex());
+    blockers.clearBit(proposed_move.getOriginIndex());
+    blockers.setBit(proposed_move.getDestinationIndex());
+
+    // handle en passant
+    if (proposed_move.isEnPassant()) {
+      blockers.clearBitsFrom(getEnPassantCaptureLocation(current_color, proposed_move.getDestinationIndex()));
+    }
 
     // check for criminal negligence (uncovered check)
-    if (isAttackedBySlidePattern(king, AttackPattern::LINE, all_pieces) ||
-        isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, all_pieces)) {
+    if (isAttackedBySlidePattern(own_king, AttackPattern::LINE, blockers) ||
+        isAttackedBySlidePattern(own_king, AttackPattern::DIAGONAL, blockers)) {
       return true;
+    }
+
+    // if starting in check and not moving the king, it might still be in check from a jumping piece
+    if (isInCheck()) {
+        // Check Knight attacks (excluding captured piece location if applicable)
+        if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT, proposed_move.getDestinationIndex())) {
+            return true;
+        }
+
+        // Check Pawn attacks
+        BoardIndex pawn_exclude_index = proposed_move.getDestinationIndex();
+        if (proposed_move.isEnPassant()) {
+             // For En Passant, the captured pawn is NOT at destination, but at the end of the jump
+             pawn_exclude_index = getEnPassantCaptureLocation(current_color, proposed_move.getDestinationIndex()).singleBitIndex();
+        }
+
+        if (isAttackedByJumpPattern(king_index, AttackPattern::PAWN, pawn_exclude_index)) {
+             return true;
+        }
     }
   }
 
@@ -636,8 +665,11 @@ bool Position::isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
       .hasRemainingBits();
 }
 
+
+
 bool Position::isAttackedByJumpPattern(BoardIndex target_index,
-                                       AttackPattern pattern) const {
+                                       AttackPattern pattern,
+                                       BoardIndex excluded_index) const {
   assert(pattern == AttackPattern::PAWN || pattern == AttackPattern::KNIGHT ||
          pattern == AttackPattern::KING);
   Bitboard jump_origins;
@@ -657,21 +689,25 @@ bool Position::isAttackedByJumpPattern(BoardIndex target_index,
     assert(false);
     break;
   }
-  return Bitboard::findCommonBits(
-             jump_origins, getPiecesByPattern(getOpponentColor(), pattern))
-      .hasRemainingBits();
+
+  Bitboard attackers = getPiecesByPattern(getOpponentColor(), pattern);
+  if (excluded_index != INVALID_INDEX) {
+      attackers.clearBit(excluded_index);
+  }
+  
+  return Bitboard::findCommonBits(jump_origins, attackers).hasRemainingBits();
 }
 
 bool Position::isAttackedByAnyPattern(Bitboard targets,
                                       Bitboard blockers) const {
-  BoardIndex target_index;
-  Bitboard target = targets.popLowestBit(); // focus on the next target bit
-
-  // Check for sliding piece attacks
+  // Check for sliding piece attacks (on all targets at once)
   if (isAttackedBySlidePattern(targets, AttackPattern::LINE, blockers) ||
       isAttackedBySlidePattern(targets, AttackPattern::DIAGONAL, blockers)) {
     return true;
   }
+
+  BoardIndex target_index;
+  Bitboard target = targets.popLowestBit(); // focus on the next target bit
 
   while (target.hasRemainingBits()) {
     // Get the index of the current target
@@ -1002,6 +1038,11 @@ void Position::InitializeMoves() {
   PrepareKnightMoves();
   PrepareWhitePawnMoves();
   PrepareBlackPawnMoves();
+}
+
+bool Position::isInCheck() const {
+  Bitboard king = getPieces(current_color, PieceType::KING);
+  return isAttackedByAnyPattern(king, getAllPieces());
 }
 
 Move Position::currentBitRights() const {

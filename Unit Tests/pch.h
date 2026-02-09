@@ -11,5 +11,9 @@
 #include "../better chess bot/Bitboard.h"
 #include "../better chess bot/Move.h"
 #include "../better chess bot/Position.h"
+#include "../better chess bot/Evaluation.h"
+#include "../better chess bot/Evaluation structure.h"
+#include "../better chess bot/Search.h"
+#include "../better chess bot/BoardConstants.h"
 
 #endif //PCH_H

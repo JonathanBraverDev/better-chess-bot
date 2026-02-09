@@ -6,3 +6,5 @@
 #include "../better chess bot/Bitboard.cpp"
 #include "../better chess bot/Move.cpp"
 #include "../better chess bot/Position.cpp"
+#include "../better chess bot/Evaluation.cpp"
+#include "../better chess bot/Search.cpp"

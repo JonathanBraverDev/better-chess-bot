@@ -80,8 +80,10 @@ private:
   bool selfCheckCheck(Move proposed_move) const;
   bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
                                 Bitboard blockers) const;
+
   bool isAttackedByJumpPattern(BoardIndex target_index,
-                               AttackPattern pattern) const;
+                               AttackPattern pattern,
+                               BoardIndex excluded_index = INVALID_INDEX) const;
   bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
   bool enemyCheckCheck(Move proposed_move) const;
 
@@ -127,4 +129,6 @@ public:
 
   // Creates an empty move with BitRights from the special move board
   Move currentBitRights() const;
+
+  bool isInCheck() const;
 };

@@ -38,8 +38,9 @@ private:
   }
 
 public:
-  Bitboard();                // Default constructor
-  Bitboard(B64 initialData); // Constructor with initial data
+  Bitboard();                 // Default constructor
+  Bitboard(B64 initialData);  // Constructor with initial data
+  static Bitboard boardFromIndex(BoardIndex index); // creates a board with only the given index set
   void clear();
 
   void visualize() const;

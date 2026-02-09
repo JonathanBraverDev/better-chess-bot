@@ -141,6 +141,8 @@
   <ItemGroup>
     <ClCompile Include="better chess bot.cpp" />
     <ClCompile Include="Bitboard.cpp" />
+    <ClCompile Include="Evaluation.cpp" />
+    <ClCompile Include="Search.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Move.cpp" />
@@ -150,6 +152,8 @@
     <ClInclude Include="Bitboard.h" />
     <ClInclude Include="DeBruijn.h" />
     <ClInclude Include="Enums.h" />
+    <ClInclude Include="Evaluation.h" />
+    <ClInclude Include="Search.h" />
     <ClInclude Include="Evaluation structure.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameState.h" />
