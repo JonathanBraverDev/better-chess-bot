@@ -589,7 +589,7 @@ void Position::CheckAndSaveMove(Move proposed_move) const {
 // check if the move results in a self check
 bool Position::selfCheckCheck(Move proposed_move) const {
 
-  Bitboard king = getPieces(current_color, PieceType::KING);
+  Bitboard own_king = getPieces(current_color, PieceType::KING);
   BoardIndex king_index;
   Bitboard blockers = Bitboard::combineBoards(own_pieces, opponent_pieces);
 
@@ -599,12 +599,12 @@ bool Position::selfCheckCheck(Move proposed_move) const {
     blockers.setBit(proposed_move.getDestinationIndex());
 
     // Update King position for check detection
-    king.clear();
-    king.setBit(proposed_move.getDestinationIndex());
+    own_king.clear();
+    own_king.setBit(proposed_move.getDestinationIndex());
     king_index = proposed_move.getDestinationIndex();
 
-    if (isAttackedBySlidePattern(king, AttackPattern::LINE, blockers) ||
-        isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, blockers)) {
+    if (isAttackedBySlidePattern(own_king, AttackPattern::LINE, blockers) ||
+        isAttackedBySlidePattern(own_king, AttackPattern::DIAGONAL, blockers)) {
       return true;
     }
 
@@ -615,6 +615,8 @@ bool Position::selfCheckCheck(Move proposed_move) const {
     }
 
   } else {
+    king_index = own_king.singleBitIndex();
+
     // move the piece blocker to the destination
     blockers.clearBit(proposed_move.getOriginIndex());
     blockers.setBit(proposed_move.getDestinationIndex());
@@ -625,8 +627,8 @@ bool Position::selfCheckCheck(Move proposed_move) const {
     }
 
     // check for criminal negligence (uncovered check)
-    if (isAttackedBySlidePattern(king, AttackPattern::LINE, blockers) ||
-        isAttackedBySlidePattern(king, AttackPattern::DIAGONAL, blockers)) {
+    if (isAttackedBySlidePattern(own_king, AttackPattern::LINE, blockers) ||
+        isAttackedBySlidePattern(own_king, AttackPattern::DIAGONAL, blockers)) {
       return true;
     }
 
@@ -697,14 +699,14 @@ bool Position::isAttackedByJumpPattern(BoardIndex target_index,
 
 bool Position::isAttackedByAnyPattern(Bitboard targets,
                                       Bitboard blockers) const {
-  BoardIndex target_index;
-  Bitboard target = targets.popLowestBit(); // focus on the next target bit
-
-  // Check for sliding piece attacks
+  // Check for sliding piece attacks (on all targets at once)
   if (isAttackedBySlidePattern(targets, AttackPattern::LINE, blockers) ||
       isAttackedBySlidePattern(targets, AttackPattern::DIAGONAL, blockers)) {
     return true;
   }
+
+  BoardIndex target_index;
+  Bitboard target = targets.popLowestBit(); // focus on the next target bit
 
   while (target.hasRemainingBits()) {
     // Get the index of the current target
