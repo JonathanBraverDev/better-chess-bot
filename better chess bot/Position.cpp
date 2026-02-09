@@ -273,6 +273,7 @@ void Position::checkAndAddEnPassant(Bitboard potential_en_passant,
     move_base.setMiscMoveType(MoveType::PAWN_UNIQE);
     move_base.setCapturedType(PieceType::PAWN);
     move_base.setDestinationIndex(en_passant.singleBitIndex());
+    CheckAndSaveMove(move_base);
   }
 }
 
