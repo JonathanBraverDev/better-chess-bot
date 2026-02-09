@@ -72,6 +72,8 @@ enum TileIndex {
   H8_index
 };
 
+constexpr BoardIndex INVALID_INDEX = 64;
+
 // shift each tile to its index
 constexpr B64 A1 = (1ULL << A1_index);
 constexpr B64 B1 = (1ULL << B1_index);

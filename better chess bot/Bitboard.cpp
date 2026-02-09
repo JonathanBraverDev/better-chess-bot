@@ -32,6 +32,11 @@ Bitboard::Bitboard() : board(0) {}
 // Constructor with initial data
 Bitboard::Bitboard(B64 initialData) : board(initialData) {}
 
+Bitboard Bitboard::boardFromIndex(BoardIndex index) {
+    if (index == INVALID_INDEX) return Bitboard(0);
+    return Bitboard(1ULL << index);
+}
+
 void Bitboard::clear() { board = 0; }
 
 void Bitboard::visualize() const {

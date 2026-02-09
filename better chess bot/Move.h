@@ -39,6 +39,7 @@ public:
     bool isCapture() const;
     bool isCheck() const;
     bool isPromotion() const;
+    bool isEnPassant() const;
 
   void setOriginIndex(BoardIndex index);
   void setDestinationIndex(BoardIndex index);

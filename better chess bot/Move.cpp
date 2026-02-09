@@ -140,6 +140,10 @@ void Move::setPromotion(bool is_promote) {
     }
 }
 
+bool Move::isEnPassant() const {
+    return isCapture() && getMiscMoveType() == MoveType::PAWN_UNIQE;
+}
+
 void Move::setWhiteShortCastleRight(bool can_castle) {
     if (can_castle) {
         encodedMove |= WHITE_SHORT_CASTLE_MASK;
