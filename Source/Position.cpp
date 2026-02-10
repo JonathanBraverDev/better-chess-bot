@@ -462,9 +462,9 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   Bitboard own_castle_row =
       (current_color == Color::WHITE ? WHITE_CASTLE_ROW : BLACK_CASTLE_ROW);
   Bitboard long_rook = Bitboard::findCommonBits(king.lowerThanSingleBit(),
-                                                own_rooks, special_move_rights);
+                                                own_rooks, special_move_rights, own_castle_row);
   Bitboard short_rook = Bitboard::findCommonBits(
-      king.higherThanSingleBit(), own_rooks, special_move_rights);
+      king.higherThanSingleBit(), own_rooks, special_move_rights, own_castle_row);
 
   Bitboard long_king_dest = Bitboard::findCommonBits(
       own_castle_row, Bitboard(LONG_CASTLE_KING_COLUMN));
@@ -479,7 +479,8 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   move_base.setMovingType(PieceType::KING);
 
   // Long castling
-  if (canCastleWithRook(king, long_rook, long_king_dest, long_rook_dest)) {
+  if (long_rook.hasRemainingBits() &&
+      canCastleWithRook(king, long_rook, long_king_dest, long_rook_dest)) {
     move_base.setDestinationIndex(long_rook.singleBitIndex());
     move_base.setMiscMoveType(MoveType::CASTLE_LONG);
 
@@ -487,7 +488,8 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
   }
 
   // Short castling
-  if (canCastleWithRook(king, short_rook, short_king_dest, short_rook_dest)) {
+  if (short_rook.hasRemainingBits() &&
+      canCastleWithRook(king, short_rook, short_king_dest, short_rook_dest)) {
     move_base.setDestinationIndex(short_rook.singleBitIndex());
     move_base.setMiscMoveType(MoveType::CASTLE_SHORT);
 
@@ -1221,4 +1223,88 @@ Position Position::fromFen(FenString fen) {
   pos.opponent_pieces = pos.getAllOpponentPieces();
 
   return pos;
+}
+
+std::string Position::toFen() const {
+  std::stringstream ss;
+
+  // 1. Piece Placement
+  for (int rank = BOARD_SIZE - 1; rank >= 0; --rank) {
+    int empty_count = 0;
+    for (int file = 0; file < BOARD_SIZE; ++file) {
+      BoardIndex index = rank * BOARD_SIZE + file;
+      Piece piece = getPieceAtIndex(index);
+
+      if (piece.type == PieceType::NONE) {
+        empty_count++;
+      } else {
+        if (empty_count > 0) {
+          ss << empty_count;
+          empty_count = 0;
+        }
+
+        char p = '?';
+        switch (piece.type) {
+        case PieceType::PAWN:   p = 'p'; break;
+        case PieceType::KNIGHT: p = 'n'; break;
+        case PieceType::BISHOP: p = 'b'; break;
+        case PieceType::ROOK:   p = 'r'; break;
+        case PieceType::QUEEN:  p = 'q'; break;
+        case PieceType::KING:   p = 'k'; break;
+        }
+
+        if (piece.color == Color::WHITE) {
+          p = toupper(p);
+        }
+        ss << p;
+      }
+    }
+    if (empty_count > 0) {
+      ss << empty_count;
+    }
+    if (rank > 0) {
+      ss << '/';
+    }
+  }
+
+  // 2. Active Color
+  ss << " " << (current_color == Color::WHITE ? "w" : "b");
+
+  // 3. Castling Rights
+  ss << " ";
+  bool castling_available = false;
+  if (special_move_rights.getBit(E1_index) && special_move_rights.getBit(H1_index)) {
+      ss << "K"; castling_available = true;
+  }
+  if (special_move_rights.getBit(E1_index) && special_move_rights.getBit(A1_index)) {
+      ss << "Q"; castling_available = true;
+  }
+  if (special_move_rights.getBit(E8_index) && special_move_rights.getBit(H8_index)) {
+      ss << "k"; castling_available = true;
+  }
+  if (special_move_rights.getBit(E8_index) && special_move_rights.getBit(A8_index)) {
+      ss << "q"; castling_available = true;
+  }
+  if (!castling_available) {
+    ss << "-";
+  }
+
+  // 4. En Passant Target
+  ss << " ";
+  Bitboard ep_board = special_move_rights.getCommonBitsWith(Bitboard(ALL_EN_PASSANT));
+  if (ep_board.hasRemainingBits()) {
+    BoardIndex ep_index = ep_board.singleBitIndex();
+    int file = ep_index % BOARD_SIZE;
+    int rank = ep_index / BOARD_SIZE;
+    char file_char = 'a' + file;
+    char rank_char = '1' + rank;
+    ss << file_char << rank_char;
+  } else {
+    ss << "-";
+  }
+
+  // 5. Halfmove Clock & 6. Fullmove Number (dummies)
+  ss << " 0 1";
+
+  return ss.str();
 }

@@ -4,6 +4,7 @@
 #include "Move.h"
 #include "Structs.h"
 #include <vector>
+#include <string>
 
 // out of structs.h cuse codependancy mess
 struct PrecomputedMoves {
@@ -107,6 +108,7 @@ public:
   // allow initialization from string
   Position();
   static Position fromFen(FenString fen);
+  std::string toFen() const;
 
   // TODO: Add a constructor that creates a position from moves
 
