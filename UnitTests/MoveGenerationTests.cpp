@@ -71,9 +71,6 @@ namespace UnitTests {
       // White King e1.
       // Expected: 7 moves (5 King + 1 Push + 1 EP Capture)
       Position pos = Position::fromFen("8/8/8/kpP5/8/8/8/4K3 w - b6 0 1");
-      for (auto& move : pos.getLegalMoves()) {
-        std::cout << move.verboseDecode() << std::endl;
-      }
       Assert::AreEqual((size_t)7, pos.getLegalMoves().size());
     }
 
