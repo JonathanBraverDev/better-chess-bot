@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="better chess bot.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Move.cpp">
@@ -47,7 +47,7 @@
     <ClInclude Include="Search.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Evaluation structure.h">
+    <ClInclude Include="EvaluationStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Move.h">

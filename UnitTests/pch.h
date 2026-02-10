@@ -8,12 +8,12 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
-#include "../better chess bot/Bitboard.h"
-#include "../better chess bot/Move.h"
-#include "../better chess bot/Position.h"
-#include "../better chess bot/Evaluation.h"
-#include "../better chess bot/Evaluation structure.h"
-#include "../better chess bot/Search.h"
-#include "../better chess bot/BoardConstants.h"
+#include "../Source/Bitboard.h"
+#include "../Source/Move.h"
+#include "../Source/Position.h"
+#include "../Source/Evaluation.h"
+#include "../Source/EvaluationStructure.h"
+#include "../Source/Search.h"
+#include "../Source/BoardConstants.h"
 
 #endif //PCH_H

@@ -7,17 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add the source directory to the include path
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/better chess bot")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Source")
 
 # Define the source files
-set(SOURCES
-    "better chess bot/better chess bot.cpp"
-    "better chess bot/Bitboard.cpp"
-    "better chess bot/Game.cpp"
-    "better chess bot/GameState.cpp"
-    "better chess bot/Move.cpp"
-    "better chess bot/Position.cpp"
-)
+file(GLOB SOURCES "Source/*.cpp")
 
 # Add the executable
 add_executable(BetterChessBot ${SOURCES})
