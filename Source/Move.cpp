@@ -162,17 +162,17 @@ void Move::setWhiteLongCastleRight(bool can_castle) {
 
 void Move::setBlackShortCastleRight(bool can_castle) {
     if (can_castle) {
-        encodedMove |= WHITE_LONG_CASTLE_MASK;
+        encodedMove |= BLACK_SHORT_CASTLE_MASK;
     } else {
-        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+        encodedMove &= ~BLACK_SHORT_CASTLE_MASK;
     }
 }
 
 void Move::setBlackLongCastleRight(bool can_castle) {
     if (can_castle) {
-        encodedMove |= WHITE_LONG_CASTLE_MASK;
+        encodedMove |= BLACK_LONG_CASTLE_MASK;
     } else {
-        encodedMove &= ~WHITE_LONG_CASTLE_MASK;
+        encodedMove &= ~BLACK_LONG_CASTLE_MASK;
     }
 }
 
