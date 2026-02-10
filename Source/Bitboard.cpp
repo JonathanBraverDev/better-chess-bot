@@ -27,17 +27,17 @@ const DirectionCheck Bitboard::direction_check[] = {
 };
 
 // Default constructor initializes data to 0
-Bitboard::Bitboard() : board(0) {}
+Bitboard::Bitboard() : bits(0) {}
 
 // Constructor with initial data
-Bitboard::Bitboard(B64 initialData) : board(initialData) {}
+Bitboard::Bitboard(B64 initialData) : bits(initialData) {}
 
 Bitboard Bitboard::boardFromIndex(BoardIndex index) {
     if (index == INVALID_INDEX) return Bitboard(0);
     return Bitboard(1ULL << index);
 }
 
-void Bitboard::clear() { board = 0; }
+void Bitboard::clear() { bits = 0; }
 
 void Bitboard::visualize() const {
   for (int i = BOARD_SIZE - 1; i >= 0; i--) {
@@ -56,72 +56,72 @@ void Bitboard::visualize() const {
 }
 
 // any use is a potential danger to data integrity
-B64 Bitboard::getBoard() const { return board; }
+B64 Bitboard::getBoard() const { return bits; }
 
 bool Bitboard::getBit(uint8_t index) const {
   // SHIFT 1 to position, use AND to extract the bit
-  return (board & (1ULL << index)) != 0;
+  return (bits & (1ULL << index)) != 0;
 }
 
 B64 Bitboard::lowestBitBoard() const {
   // AND with 2's compliment to get the lowest bit (very cool)
-  return (board & -board);
+  return (bits & -bits);
 }
 
 int Bitboard::countSetBits() const {
   int count;
-  B64 board_copy = board;
+  B64 bits_copy = bits;
   // runs until the copy is zeroed out, counting iterations
-  for (count = 0; board_copy; count++)
+  for (count = 0; bits_copy; count++)
     // removes one bit per iteration
-    board_copy &= (board_copy - 1);
+    bits_copy &= (bits_copy - 1);
   return count;
 }
 
 // returns the index of the active bit
 // useble only on boards with a single active bit
 uint8_t Bitboard::singleBitIndex() const {
-  return DeBruijnPositionLookup[((board * DeBruijnMultiplier)) >> 58];
+  return DeBruijnPositionLookup[((bits * DeBruijnMultiplier)) >> 58];
 }
 
-bool Bitboard::hasRemainingBits() const { return board != 0; }
+bool Bitboard::hasRemainingBits() const { return bits != 0; }
 
-bool Bitboard::isEmpty() const { return board == 0; }
+bool Bitboard::isEmpty() const { return bits == 0; }
 
 void Bitboard::setBit(uint8_t index) {
-  board |= (1ULL << index); // SHIFT 1 to position, set to OR
+  bits |= (1ULL << index); // SHIFT 1 to position, set to OR
 }
 
 void Bitboard::clearBit(uint8_t index) {
-  board &= ~(1ULL << index); // SHIFT 1 to position, INVERT, set to AND
+  bits &= ~(1ULL << index); // SHIFT 1 to position, INVERT, set to AND
 }
 
 void Bitboard::setBitsFrom(Bitboard otherBoard) {
-  board |= otherBoard.getBoard();
+  bits |= otherBoard.getBoard();
 }
 
 void Bitboard::clearBitsFrom(Bitboard otherBoard) {
-  board &= ~otherBoard.getBoard();
+  bits &= ~otherBoard.getBoard();
 }
 
-void Bitboard::toggleBit(uint8_t index) { board ^= (1ULL << index); }
+void Bitboard::toggleBit(uint8_t index) { bits ^= (1ULL << index); }
 
 void Bitboard::toggleBitsFrom(Bitboard otherBoard) {
-  board ^= otherBoard.getBoard();
+  bits ^= otherBoard.getBoard();
 }
 
-Bitboard Bitboard::getInverted() const { return ~board; }
+Bitboard Bitboard::getInverted() const { return ~bits; }
 
 Bitboard Bitboard::getCommonBitsWith(Bitboard otherBoard) const {
-  return board & otherBoard.getBoard();
+  return bits & otherBoard.getBoard();
 }
 
 Bitboard Bitboard::getCombinedWith(Bitboard otherBoard) const {
-  return board | otherBoard.getBoard();
+  return bits | otherBoard.getBoard();
 }
 
 Bitboard Bitboard::getWithoutBitsFrom(Bitboard otherBoard) const {
-  return board & otherBoard.getInverted().getBoard();
+  return bits & otherBoard.getInverted().getBoard();
 }
 
 Bitboard Bitboard::popLowestBit() {
@@ -132,23 +132,23 @@ Bitboard Bitboard::popLowestBit() {
 
 void Bitboard::clearLowestBit() {
   // AND after -1, garantees removal of exactly one lowest bit;
-  board &= (board - 1);
+  bits &= (bits - 1);
 }
 
 void Bitboard::shift(Direction direction) {
   int shift_amount = direction_check[direction].shiftAmount;
-  board =
-      board &
+  bits =
+      bits &
       direction_check[direction].boundCheck; // stops odd shifting teleportation
   // Avoid negative shifts by fliping the shift direction and value
-  board = (shift_amount >= 0) ? (board << shift_amount)
-                              : (board >> (-shift_amount));
+  bits = (shift_amount >= 0) ? (bits << shift_amount)
+                              : (bits >> (-shift_amount));
 }
 
-void Bitboard::nextTile() { board <<= 1; }
+void Bitboard::nextTile() { bits <<= 1; }
 
 Bitboard Bitboard::look(Direction direction) const {
-  Bitboard copy = Bitboard(board);
+  Bitboard copy = Bitboard(bits);
   copy.shift(direction);
   return copy;
 }
@@ -160,14 +160,14 @@ Bitboard Bitboard::slidePath(Direction direction,
          direction == Direction::UP_LEFT || direction == Direction::UP_RIGHT ||
          direction == Direction::DOWN_LEFT ||
          direction == Direction::DOWN_RIGHT);
-  Bitboard piece = board;
+  Bitboard piece = bits;
   Bitboard path = Bitboard(0ULL);
 
   do {
     piece.shift(direction);
     path.setBitsFrom(piece); // Add the new location to the path
   } while (piece.hasRemainingBits() &&
-           Bitboard::findCommonBits(piece, all_pieces).isEmpty());
+           findCommonBits(piece, all_pieces).isEmpty());
   // Stop if piece is 0 (shifted out) or a collision occurred on the last move
   // The first colision is added to be contextually figured out by the caller
 
@@ -177,20 +177,20 @@ Bitboard Bitboard::slidePath(Direction direction,
 // returns a Bitboard of all bits lower than the active bit
 // useble only on boards with a single active bit
 Bitboard Bitboard::lowerThanSingleBit() const {
-  return Bitboard(board - 1); // similar to clearLowestBit
+  return Bitboard(bits - 1); // similar to clearLowestBit
 }
 
 // returns a Bitboard of all bits higher than the active bit
 // useble only on boards with a single active bit
 Bitboard Bitboard::higherThanSingleBit() const {
   return Bitboard(
-      ~(board - 1) ^
-      board); // INVERT lowerThanSingleBit, XOR with the single bit to remove it
+      ~(bits - 1) ^
+      bits); // INVERT lowerThanSingleBit, XOR with the single bit to remove it
 }
 
 Bitboard Bitboard::sameRowPathTo(Bitboard destination) const {
   assert(countSetBits() == 1 && destination.countSetBits() == 1);
-  if (board < destination.getBoard()) {
+  if (bits < destination.getBoard()) {
     return higherThanSingleBit().getCommonBitsWith(
         destination.lowerThanSingleBit());
   } else {
