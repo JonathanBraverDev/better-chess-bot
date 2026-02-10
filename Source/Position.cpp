@@ -500,7 +500,7 @@ void Position::getCastlingMoves(Bitboard king, Bitboard blockers,
 bool Position::canCastleWithRook(const Bitboard king, const Bitboard rook,
                                  const Bitboard king_dest, const Bitboard rook_dest) const {
   // Check if the rook can castle, cross ref to rights included in call
-  if (!rook.findCommonBits(special_move_rights).hasRemainingBits()) {
+  if (!rook.getCommonBitsWith(special_move_rights).hasRemainingBits()) {
     return false;
   }
 
