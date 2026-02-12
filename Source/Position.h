@@ -80,7 +80,8 @@ private:
   void CheckAndSaveMove(Move proposed_move) const;
   bool selfCheckCheck(Move proposed_move) const;
   bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
-                                Bitboard blockers) const;
+                                Bitboard blockers,
+                                BoardIndex excluded_index = INVALID_INDEX) const;
 
   bool isAttackedByJumpPattern(BoardIndex target_index,
                                AttackPattern pattern,
