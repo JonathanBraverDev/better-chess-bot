@@ -144,6 +144,11 @@ bool Move::isEnPassant() const {
     return isCapture() && getMiscMoveType() == MoveType::PAWN_UNIQE;
 }
 
+bool Move::isCastle() const {
+  return getMiscMoveType() == MoveType::CASTLE_SHORT ||
+         getMiscMoveType() == MoveType::CASTLE_LONG;
+}
+
 void Move::setWhiteShortCastleRight(bool can_castle) {
     if (can_castle) {
         encodedMove |= WHITE_SHORT_CASTLE_MASK;

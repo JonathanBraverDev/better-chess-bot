@@ -33,13 +33,14 @@ public:
 
   BoardIndex getOriginIndex() const;
   BoardIndex getDestinationIndex() const;
-    PieceType getAbsoluteMovingType() const;
-    PieceType getCapturedType() const;
-    MoveType getMiscMoveType() const;
-    bool isCapture() const;
-    bool isCheck() const;
-    bool isPromotion() const;
-    bool isEnPassant() const;
+  PieceType getAbsoluteMovingType() const;
+  PieceType getCapturedType() const;
+  MoveType getMiscMoveType() const;
+  bool isCapture() const;
+  bool isCheck() const;
+  bool isPromotion() const;
+  bool isEnPassant() const;
+  bool isCastle() const;
 
   void setOriginIndex(BoardIndex index);
   void setDestinationIndex(BoardIndex index);

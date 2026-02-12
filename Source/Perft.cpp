@@ -43,9 +43,7 @@ PerftStats detailedPerft(Position &pos, int depth, bool isRoot) {
       }
 
       // Count castling moves
-      MoveType moveType = move.getMiscMoveType();
-      if (moveType == MoveType::CASTLE_SHORT ||
-          moveType == MoveType::CASTLE_LONG) {
+      if (move.isCastle()) {
         stats.castles++;
       }
 
@@ -54,12 +52,11 @@ PerftStats detailedPerft(Position &pos, int depth, bool isRoot) {
         stats.promotions++;
       }
 
-      // Count checks and checkmates
+      // Count checks
       if (move.isCheck()) {
         stats.checks++;
 
-        // Check if it's checkmate by making the move and seeing if there are
-        // legal moves
+        // If there are no moves for a checked opponent, it's a checkmate
         Position nextPos = pos;
         nextPos.makeMove(move);
         std::vector<Move> opponentMoves = nextPos.getLegalMoves();
