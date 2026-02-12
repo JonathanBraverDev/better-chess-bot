@@ -147,6 +147,8 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="Position.cpp" />
+    <ClCompile Include="Perft.cpp" />
+    <ClCompile Include="Replay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitboard.h" />
@@ -164,6 +166,9 @@
     <ClInclude Include="Position.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="Perft.h" />
+    <ClInclude Include="PerftStats.h" />
+    <ClInclude Include="Replay.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
