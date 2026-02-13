@@ -7,15 +7,11 @@
 #include <string>
 
 // out of structs.h cuse codependancy mess
-struct PrecomputedMoves {
-  Bitboard king_moves[64];
-  Bitboard knight_moves[64];
-  Bitboard pawn_moves[64 * 2];
-  Bitboard pawn_attacks[64 * 2];
-};
-
 // all the needed information to make a legal move
 class Position {
+  friend class FenUtility;
+  friend class MoveGenerator;
+
 private:
   Bitboard white_pawns;
   Bitboard white_knights;
@@ -43,60 +39,6 @@ private:
   mutable std::vector<Move> legal_moves;
   mutable bool are_moves_valid;
 
-  static PrecomputedMoves precomputed_moves;
-
-  Color getOpponentColor() const;
-  Bitboard getOpponentEnPassant() const;
-
-  // moves the pieces could make
-  void getPawnMoves() const;
-  void checkAndAddPawnJump(Bitboard step, Bitboard empty_tiles, Move move_base,
-                           Direction forward) const;
-  void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index,
-                            Move move_base) const;
-  void addPromotionMoves(Bitboard step, Bitboard captures,
-                         Move move_base) const;
-  void addNormalPawnMoves(Move base_move, Bitboard step,
-                          Bitboard captures) const;
-  void getKnightMoves() const;
-  void getKingMoves() const;
-  void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base) const;
-  bool canCastleWithRook(const Bitboard king, const Bitboard rook,
-                 const Bitboard king_dest, const Bitboard rook_dest) const;
-  inline void getBishopMoves() const;
-  inline void getRookMoves() const;
-  inline void getQueenMoves() const;
-  void getSlidingPieceMoves(const PieceType pieceType) const;
-  Bitboard getSlideDestinations(const Bitboard piece,
-                                const AttackPattern pattern) const;
-  Bitboard getSlideDestinations(const Bitboard piece,
-                                const AttackPattern pattern,
-                                const Bitboard blockers) const;
-
-  void finalizeMoves(Bitboard destinations, Move move_base) const;
-  void addDestinationMoves(Bitboard destinations, Move move_base) const;
-  void addCaptureMoves(Bitboard captures, Move move_base) const;
-
-  void CheckAndSaveMove(Move proposed_move) const;
-  bool selfCheckCheck(Move proposed_move) const;
-  bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
-                                Bitboard blockers,
-                                BoardIndex excluded_index = INVALID_INDEX) const;
-
-  bool isAttackedByJumpPattern(BoardIndex target_index,
-                               AttackPattern pattern,
-                               BoardIndex excluded_index = INVALID_INDEX) const;
-  bool isAttackedByAnyPattern(Bitboard target, Bitboard blockers) const;
-  bool enemyCheckCheck(Move proposed_move) const;
-
-  static void PrepareKingMoves();
-  static void PrepareKnightMoves();
-  static void PrepareWhitePawnMoves();
-  static void PrepareBlackPawnMoves();
-
-  static Bitboard getEnPassantCaptureLocation(Color capturing_color,
-                                              BoardIndex en_passant_tile_index);
-
   // Helpers for make/undo move
   Bitboard &getPieceBoardRef(Color color, PieceType type);
   void toggleCastle(const Move move);
@@ -105,13 +47,16 @@ private:
   void togglePromotion(const Move move);
   void updateSpecialMoveRights(const Move move);
 
+  // Helper filters for MoveGenerator (formerly private)
+  bool selfCheckCheck(Move proposed_move) const;
+  bool enemyCheckCheck(Move proposed_move) const;
+  void CheckAndSaveMove(Move proposed_move) const;
+
 public:
   // allow initialization from string
   Position();
   static Position fromFen(FenString fen);
   std::string toFen() const;
-
-  // TODO: Add a constructor that creates a position from moves
 
   void makeMove(Move move);
 
@@ -134,4 +79,15 @@ public:
   Move currentBitRights() const;
 
   bool isInCheck() const;
+
+    // Accessors needed by MoveGenerator and FenUtility
+  Color getCurrentColor() const { return current_color; }
+  void setCurrentColor(Color color) { current_color = color; }
+  Bitboard getSpecialMoveRights() const { return special_move_rights; }
+  Bitboard& getSpecialMoveRightsRef() { return special_move_rights; }
+  Color getOpponentColor() const;
+  Bitboard getOpponentEnPassant() const;
+  
+  // Helpers for MoveGenerator
+  static Bitboard getEnPassantCaptureLocation(Color capturing_color, BoardIndex en_passant_tile_index);
 };

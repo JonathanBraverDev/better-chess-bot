@@ -149,6 +149,9 @@
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="Perft.cpp" />
     <ClCompile Include="Replay.cpp" />
+    <ClCompile Include="FenUtility.cpp" />
+    <ClCompile Include="MoveGenerator.cpp" />
+    <ClCompile Include="MoveTables.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitboard.h" />
@@ -169,6 +172,9 @@
     <ClInclude Include="Perft.h" />
     <ClInclude Include="PerftStats.h" />
     <ClInclude Include="Replay.h" />
+    <ClInclude Include="FenUtility.h" />
+    <ClInclude Include="MoveGenerator.h" />
+    <ClInclude Include="MoveTables.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

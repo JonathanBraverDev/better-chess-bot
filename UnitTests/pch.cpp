@@ -10,3 +10,6 @@
 #include "../Source/Search.cpp"
 #include "../Source/Game.cpp"
 #include "../Source/GameState.cpp"
+#include "../Source/FenUtility.cpp"
+#include "../Source/MoveGenerator.cpp"
+#include "../Source/MoveTables.cpp"
