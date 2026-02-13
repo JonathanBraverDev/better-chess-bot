@@ -1,5 +1,5 @@
 #include "Evaluation.h"
-#include "Evaluation structure.h"
+#include "EvaluationStructure.h"
 
 int Evaluator::evaluate(const Position& pos) {
     int ownScore = 0;

@@ -4,6 +4,7 @@
 #include "Move.h"
 #include "Structs.h"
 #include <vector>
+#include <string>
 
 // out of structs.h cuse codependancy mess
 struct PrecomputedMoves {
@@ -79,7 +80,8 @@ private:
   void CheckAndSaveMove(Move proposed_move) const;
   bool selfCheckCheck(Move proposed_move) const;
   bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern,
-                                Bitboard blockers) const;
+                                Bitboard blockers,
+                                BoardIndex excluded_index = INVALID_INDEX) const;
 
   bool isAttackedByJumpPattern(BoardIndex target_index,
                                AttackPattern pattern,
@@ -107,6 +109,7 @@ public:
   // allow initialization from string
   Position();
   static Position fromFen(FenString fen);
+  std::string toFen() const;
 
   // TODO: Add a constructor that creates a position from moves
 

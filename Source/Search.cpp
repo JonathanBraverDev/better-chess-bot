@@ -1,6 +1,6 @@
 #include "Search.h"
 #include "Evaluation.h"
-#include "Evaluation structure.h"
+#include "EvaluationStructure.h"
 #include <vector>
 #include <algorithm>
 #include <limits>
