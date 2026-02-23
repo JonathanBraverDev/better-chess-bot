@@ -5,6 +5,7 @@
 #include "Structs.h"
 #include <vector>
 #include <string>
+#include <cassert>
 
 // out of structs.h cuse codependancy mess
 // all the needed information to make a legal move
@@ -13,18 +14,17 @@ class Position {
   friend class MoveGenerator;
 
 private:
-  Bitboard white_pawns;
-  Bitboard white_knights;
-  Bitboard white_bishops;
-  Bitboard white_rooks;
-  Bitboard white_queens;
-  Bitboard white_king; // no 's' this time, budget cuts
-  Bitboard black_pawns;
-  Bitboard black_knights;
-  Bitboard black_bishops;
-  Bitboard black_rooks;
-  Bitboard black_queens;
-  Bitboard black_king; // I swear it's not just discrimination
+  // Array bitboard storage: [Color][PieceType]
+  // keys by the respective Enums
+  Bitboard pieces[2][6];
+
+  inline int colIdx(Color c) const {
+      return static_cast<int>(c);
+  }
+  inline int typeIdx(PieceType t) const {
+      assert(t != PieceType::NONE); // prevent negative index access
+      return static_cast<int>(t) -1;
+  }
 
   // en passant AND castle rights for both sides, they can't overlap anyway
   // used to calculate BitRights for all moves from the position

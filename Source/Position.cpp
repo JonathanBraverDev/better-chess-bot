@@ -6,12 +6,8 @@
 #include "FenUtility.h"
 #include "MoveTables.h"
 #include <cassert>
-#include <sstream>
-#include <iostream>
 #include <string>
 
-// empty initizlization of static member (now removed)
-// PrecomputedMoves Position::precomputed_moves;
 
 void Position::makeMove(Move move) {
   if (move.getMiscMoveType() == MoveType::CASTLE_SHORT ||
@@ -40,50 +36,8 @@ void Position::makeMove(Move move) {
 }
 
 Bitboard &Position::getPieceBoardRef(Color color, PieceType type) {
-  assert(color != Color::NONE && type != PieceType::NONE);
-  // Similar to getPieces but returning a reference
-  switch (color) {
-  case Color::WHITE:
-    switch (type) {
-    case PieceType::PAWN:
-      return white_pawns;
-    case PieceType::KNIGHT:
-      return white_knights;
-    case PieceType::BISHOP:
-      return white_bishops;
-    case PieceType::ROOK:
-      return white_rooks;
-    case PieceType::QUEEN:
-      return white_queens;
-    case PieceType::KING:
-      return white_king;
-    default:
-      break;
-    }
-    break;
-  case Color::BLACK:
-    switch (type) {
-    case PieceType::PAWN:
-      return black_pawns;
-    case PieceType::KNIGHT:
-      return black_knights;
-    case PieceType::BISHOP:
-      return black_bishops;
-    case PieceType::ROOK:
-      return black_rooks;
-    case PieceType::QUEEN:
-      return black_queens;
-    case PieceType::KING:
-      return black_king;
-    default:
-      break;
-    }
-    break;
-  default:
-    break;
-  }
-  assert(false);
-  return white_pawns; // This should NEVER happen
+  assert(type != PieceType::NONE);
+  return pieces[colIdx(color)][typeIdx(type)];
 }
 
 void Position::toggleCastle(const Move move) {
@@ -235,43 +189,8 @@ Bitboard Position::getOpponentEnPassant() const {
 }
 
 Bitboard Position::getPieces(Color color, PieceType type) const {
-  assert(color != Color::NONE && type != PieceType::NONE);
-  switch (color) {
-  case Color::WHITE:
-    switch (type) {
-    case PieceType::PAWN:
-      return white_pawns;
-    case PieceType::KNIGHT:
-      return white_knights;
-    case PieceType::BISHOP:
-      return white_bishops;
-    case PieceType::ROOK:
-      return white_rooks;
-    case PieceType::QUEEN:
-      return white_queens;
-    case PieceType::KING:
-      return white_king;
-    }
-    break;
-  case Color::BLACK:
-    switch (type) {
-    case PieceType::PAWN:
-      return black_pawns;
-    case PieceType::KNIGHT:
-      return black_knights;
-    case PieceType::BISHOP:
-      return black_bishops;
-    case PieceType::ROOK:
-      return black_rooks;
-    case PieceType::QUEEN:
-      return black_queens;
-    case PieceType::KING:
-      return black_king;
-    }
-    break;
-  }
-  assert(false);
-  return Bitboard(0);
+  assert(type != PieceType::NONE);
+  return pieces[colIdx(color)][typeIdx(type)];
 }
 
 Bitboard Position::getPiecesByPattern(Color color,
@@ -299,33 +218,14 @@ Piece Position::getPieceAtIndex(BoardIndex index) const {
 }
 
 Piece Position::getPieceAtTile(Bitboard tile) const {
-  if (findCommonBits(white_pawns, tile).hasRemainingBits()) {
-    return {Color::WHITE, PieceType::PAWN};
-  } else if (findCommonBits(black_pawns, tile).hasRemainingBits()) {
-    return {Color::BLACK, PieceType::PAWN};
-  } else if (findCommonBits(white_knights, tile).hasRemainingBits()) {
-    return {Color::WHITE, PieceType::KNIGHT};
-  } else if (findCommonBits(black_knights, tile).hasRemainingBits()) {
-    return {Color::BLACK, PieceType::KNIGHT};
-  } else if (findCommonBits(white_bishops, tile).hasRemainingBits()) {
-    return {Color::WHITE, PieceType::BISHOP};
-  } else if (findCommonBits(black_bishops, tile).hasRemainingBits()) {
-    return {Color::BLACK, PieceType::BISHOP};
-  } else if (findCommonBits(white_rooks, tile).hasRemainingBits()) {
-    return {Color::WHITE, PieceType::ROOK};
-  } else if (findCommonBits(black_rooks, tile).hasRemainingBits()) {
-    return {Color::BLACK, PieceType::ROOK};
-  } else if (findCommonBits(white_queens, tile).hasRemainingBits()) {
-    return {Color::WHITE, PieceType::QUEEN};
-  } else if (findCommonBits(black_queens, tile).hasRemainingBits()) {
-    return {Color::BLACK, PieceType::QUEEN};
-  } else if (findCommonBits(white_king, tile).hasRemainingBits()) {
-    return {Color::WHITE, PieceType::KING};
-  } else if (findCommonBits(black_king, tile).hasRemainingBits()) {
-    return {Color::BLACK, PieceType::KING};
-  } else {
-    return {Color::NONE, PieceType::NONE};
-  }
+    for (Color c : Colors) {
+        for (PieceType t : PieceTypes) {
+            if (findCommonBits(pieces[colIdx(c)][typeIdx(t)], tile).hasRemainingBits()) {
+                return {c, t};
+            }
+        }
+    }
+    return {Color::WHITE, PieceType::NONE};
 }
 
 std::vector<Move> Position::getLegalMoves() const {
@@ -352,22 +252,18 @@ Bitboard Position::getOpponentPieces(PieceType type) const {
 
 Bitboard Position::getAllOwnPieces() const {
   if (own_pieces.isEmpty()) {
-    own_pieces = combineBoards(
-        getOwnPieces(PieceType::PAWN), getOwnPieces(PieceType::KNIGHT),
-        getOwnPieces(PieceType::BISHOP), getOwnPieces(PieceType::ROOK),
-        getOwnPieces(PieceType::QUEEN), getOwnPieces(PieceType::KING));
+    for (PieceType t : PieceTypes) {
+        own_pieces.setBitsFrom(getOwnPieces(t));
+    }
   }
   return own_pieces;
 }
 
 Bitboard Position::getAllOpponentPieces() const {
   if (opponent_pieces.isEmpty()) {
-    opponent_pieces = combineBoards(
-        getOpponentPieces(PieceType::PAWN),
-        getOpponentPieces(PieceType::KNIGHT),
-        getOpponentPieces(PieceType::BISHOP),
-        getOpponentPieces(PieceType::ROOK), getOpponentPieces(PieceType::QUEEN),
-        getOpponentPieces(PieceType::KING));
+    for (PieceType t : PieceTypes) {
+        opponent_pieces.setBitsFrom(getOpponentPieces(t));
+    }
   }
   return opponent_pieces;
 }
@@ -387,6 +283,11 @@ bool Position::isInCheck() const {
 
 Move Position::currentBitRights() const {
   Move rights(0);
+
+  Bitboard white_king = pieces[colIdx(Color::WHITE)][typeIdx(PieceType::KING)];
+  Bitboard black_king = pieces[colIdx(Color::BLACK)][typeIdx(PieceType::KING)];
+  Bitboard white_rooks = pieces[colIdx(Color::WHITE)][typeIdx(PieceType::ROOK)];
+  Bitboard black_rooks = pieces[colIdx(Color::BLACK)][typeIdx(PieceType::ROOK)];
 
   // operating directly regardless of color
   if (findCommonBits(white_king, special_move_rights)
@@ -427,18 +328,12 @@ Move Position::currentBitRights() const {
 }
 
 Position::Position() {
-  white_pawns.clear();
-  white_knights.clear();
-  white_bishops.clear();
-  white_rooks.clear();
-  white_queens.clear();
-  white_king.clear();
-  black_pawns.clear();
-  black_knights.clear();
-  black_bishops.clear();
-  black_rooks.clear();
-  black_queens.clear();
-  black_king.clear();
+  for (Color c : Colors) {
+      for (PieceType t : PieceTypes) {
+          pieces[colIdx(c)][typeIdx(t)].clear();
+      }
+  }
+
   special_move_rights.clear();
   own_pieces.clear();
   opponent_pieces.clear();
@@ -454,3 +349,4 @@ Position Position::fromFen(FenString fen) {
 std::string Position::toFen() const {
   return FenUtility::toFen(*this);
 }
+

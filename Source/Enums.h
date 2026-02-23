@@ -4,8 +4,14 @@
 #include <string>
 #include "BoardConstants.h"
 
-enum class Color { NONE, WHITE, BLACK };
+enum class Color { WHITE, BLACK };
 enum class PieceType { NONE, KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN };
+
+constexpr Color Colors[] = {Color::WHITE, Color::BLACK};
+constexpr PieceType PieceTypes[] = {
+    PieceType::KING, PieceType::PAWN, PieceType::KNIGHT,
+    PieceType::BISHOP, PieceType::ROOK, PieceType::QUEEN};
+
 enum class AttackPattern { KING, PAWN, KNIGHT, LINE, DIAGONAL };
 // inverted value for the capturing piece
 enum class AttackerType { NONE, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
