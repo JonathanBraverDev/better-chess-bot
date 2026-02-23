@@ -79,7 +79,7 @@ void Position::toggleMove(const Move move) {
 void Position::toggleCaptured(const Move move) {
   Bitboard &captured_board =
       getPieceBoardRef(getOpponentColor(), move.getCapturedType());
-  uint8_t capture_idx = move.getDestinationIndex();
+  BoardIndex capture_idx = move.getDestinationIndex();
 
   // If En Passant, the captured pawn is not on the destination square
   if (move.isEnPassant()) {
@@ -213,8 +213,7 @@ Bitboard Position::getPiecesByPattern(Color color,
 }
 
 Piece Position::getPieceAtIndex(BoardIndex index) const {
-  Bitboard tile = (1ULL << index);
-  return getPieceAtTile(tile);
+  return getPieceAtTile(Bitboard::boardFromIndex(index));
 }
 
 Piece Position::getPieceAtTile(Bitboard tile) const {

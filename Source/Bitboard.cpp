@@ -58,7 +58,7 @@ void Bitboard::visualize() const {
 // any use is a potential danger to data integrity
 B64 Bitboard::getBoard() const { return bits; }
 
-bool Bitboard::getBit(uint8_t index) const {
+bool Bitboard::getBit(BoardIndex index) const {
   // SHIFT 1 to position, use AND to extract the bit
   return (bits & (1ULL << index)) != 0;
 }
@@ -80,7 +80,7 @@ int Bitboard::countSetBits() const {
 
 // returns the index of the active bit
 // useble only on boards with a single active bit
-uint8_t Bitboard::singleBitIndex() const {
+BoardIndex Bitboard::singleBitIndex() const {
   return DeBruijnPositionLookup[((bits * DeBruijnMultiplier)) >> 58];
 }
 
@@ -88,11 +88,11 @@ bool Bitboard::hasRemainingBits() const { return bits != 0; }
 
 bool Bitboard::isEmpty() const { return bits == 0; }
 
-void Bitboard::setBit(uint8_t index) {
+void Bitboard::setBit(BoardIndex index) {
   bits |= (1ULL << index); // SHIFT 1 to position, set to OR
 }
 
-void Bitboard::clearBit(uint8_t index) {
+void Bitboard::clearBit(BoardIndex index) {
   bits &= ~(1ULL << index); // SHIFT 1 to position, INVERT, set to AND
 }
 
@@ -104,7 +104,7 @@ void Bitboard::clearBitsFrom(Bitboard otherBoard) {
   bits &= ~otherBoard.getBoard();
 }
 
-void Bitboard::toggleBit(uint8_t index) { bits ^= (1ULL << index); }
+void Bitboard::toggleBit(BoardIndex index) { bits ^= (1ULL << index); }
 
 void Bitboard::toggleBitsFrom(Bitboard otherBoard) {
   bits ^= otherBoard.getBoard();
