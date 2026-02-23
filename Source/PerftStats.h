@@ -31,26 +31,4 @@ struct PerftStats {
         result += other;
         return result;
     }
-
-    // Pretty print the statistics
-    void print() const {
-        std::cout << "Nodes:      " << nodes << std::endl;
-        std::cout << "Captures:   " << captures << std::endl;
-        std::cout << "E.P.:       " << enPassant << std::endl;
-        std::cout << "Castles:    " << castles << std::endl;
-        std::cout << "Promotions: " << promotions << std::endl;
-        std::cout << "Checks:     " << checks << std::endl;
-        std::cout << "Checkmates: " << checkmates << std::endl;
-    }
-
-    // Print in a compact one-line format
-    void printCompact() const {
-        std::cout << "N:" << nodes 
-                  << " C:" << captures 
-                  << " EP:" << enPassant 
-                  << " CS:" << castles 
-                  << " P:" << promotions 
-                  << " CH:" << checks 
-                  << " CM:" << checkmates;
-    }
 };

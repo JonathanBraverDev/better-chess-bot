@@ -12,6 +12,32 @@ constexpr PieceType PieceTypes[] = {
     PieceType::KING, PieceType::PAWN, PieceType::KNIGHT,
     PieceType::BISHOP, PieceType::ROOK, PieceType::QUEEN};
 
+// Helper for FEN parsing
+inline char pieceToChar(PieceType type) {
+    switch (type) {
+        case PieceType::PAWN:   return 'p';
+        case PieceType::KNIGHT: return 'n';
+        case PieceType::BISHOP: return 'b';
+        case PieceType::ROOK:   return 'r';
+        case PieceType::QUEEN:  return 'q';
+        case PieceType::KING:   return 'k';
+        default:                return '?';
+    }
+}
+
+inline PieceType charToPiece(char c) {
+    char lower = static_cast<char>(tolower(c));
+    switch (lower) {
+        case 'p': return PieceType::PAWN;
+        case 'n': return PieceType::KNIGHT;
+        case 'b': return PieceType::BISHOP;
+        case 'r': return PieceType::ROOK;
+        case 'q': return PieceType::QUEEN;
+        case 'k': return PieceType::KING;
+        default:  return PieceType::NONE;
+    }
+}
+
 enum class AttackPattern { KING, PAWN, KNIGHT, LINE, DIAGONAL };
 // inverted value for the capturing piece
 enum class AttackerType { NONE, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };

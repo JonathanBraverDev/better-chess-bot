@@ -23,43 +23,10 @@ Position FenUtility::fromFen(const std::string& fen) {
       } else {
         BoardIndex index = rank * BOARD_SIZE + file;
 
-        switch (c) {
-        case 'P':
-          pos.getPieceBoardRef(Color::WHITE, PieceType::PAWN).setBit(index);
-          break;
-        case 'N':
-            pos.getPieceBoardRef(Color::WHITE, PieceType::KNIGHT).setBit(index);
-          break;
-        case 'B':
-            pos.getPieceBoardRef(Color::WHITE, PieceType::BISHOP).setBit(index);
-          break;
-        case 'R':
-            pos.getPieceBoardRef(Color::WHITE, PieceType::ROOK).setBit(index);
-          break;
-        case 'Q':
-            pos.getPieceBoardRef(Color::WHITE, PieceType::QUEEN).setBit(index);
-          break;
-        case 'K':
-            pos.getPieceBoardRef(Color::WHITE, PieceType::KING).setBit(index);
-          break;
-        case 'p':
-            pos.getPieceBoardRef(Color::BLACK, PieceType::PAWN).setBit(index);
-          break;
-        case 'n':
-            pos.getPieceBoardRef(Color::BLACK, PieceType::KNIGHT).setBit(index);
-          break;
-        case 'b':
-            pos.getPieceBoardRef(Color::BLACK, PieceType::BISHOP).setBit(index);
-          break;
-        case 'r':
-            pos.getPieceBoardRef(Color::BLACK, PieceType::ROOK).setBit(index);
-          break;
-        case 'q':
-            pos.getPieceBoardRef(Color::BLACK, PieceType::QUEEN).setBit(index);
-          break;
-        case 'k':
-            pos.getPieceBoardRef(Color::BLACK, PieceType::KING).setBit(index);
-          break;
+        PieceType type = charToPiece(c);
+        if (type != PieceType::NONE) {
+            Color color = isupper(c) ? Color::WHITE : Color::BLACK;
+            pos.getPieceBoardRef(color, type).setBit(index);
         }
         file++;
       }
@@ -137,16 +104,7 @@ std::string FenUtility::toFen(const Position& pos) {
           empty_count = 0;
         }
 
-        char p = '?';
-        switch (piece.type) {
-        case PieceType::PAWN:   p = 'p'; break;
-        case PieceType::KNIGHT: p = 'n'; break;
-        case PieceType::BISHOP: p = 'b'; break;
-        case PieceType::ROOK:   p = 'r'; break;
-        case PieceType::QUEEN:  p = 'q'; break;
-        case PieceType::KING:   p = 'k'; break;
-        }
-
+        char p = pieceToChar(piece.type);
         if (piece.color == Color::WHITE) {
           p = toupper(p);
         }

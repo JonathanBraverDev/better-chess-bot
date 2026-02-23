@@ -1,6 +1,6 @@
 #include "Perft.h"
+#include "Reporter.h"
 #include <chrono>
-#include <iostream>
 #include <vector>
 
 // Simple Perft runner
@@ -83,9 +83,7 @@ void detailedPerftDivide(Position &pos, int depth) {
   std::vector<Move> moves = pos.getLegalMoves();
   PerftStats totalStats;
 
-  std::cout << "\n=== Detailed Perft Divide (Depth " << depth
-            << ") ===" << std::endl;
-  std::cout << std::string(80, '-') << std::endl;
+  Reporter::printHeader("Detailed Perft Divide (Depth " + std::to_string(depth) + ")");
 
   for (const auto &move : moves) {
     Position nextPos = pos;
@@ -94,31 +92,13 @@ void detailedPerftDivide(Position &pos, int depth) {
     PerftStats moveStats = detailedPerft(nextPos, depth - 1, false);
     totalStats += moveStats;
 
-    // Print move info
-    std::cout << tileNames[move.getOriginIndex()] << "->"
-              << tileNames[move.getDestinationIndex()];
-
-    // Add move type indicators
-    if (move.isCapture())
-      std::cout << " (capture)";
-    if (move.isPromotion())
-      std::cout << " (promotion)";
-    if (move.getMiscMoveType() == MoveType::CASTLE_SHORT)
-      std::cout << " (O-O)";
-    if (move.getMiscMoveType() == MoveType::CASTLE_LONG)
-      std::cout << " (O-O-O)";
-    if (move.isCheck())
-      std::cout << " (+)";
-
-    std::cout << ": ";
-    moveStats.printCompact();
-    std::cout << std::endl;
+    Reporter::printPerftMove(move.getOriginIndex(), move.getDestinationIndex(), moveStats.nodes);
   }
 
-  std::cout << std::string(80, '=') << std::endl;
-  std::cout << "TOTALS:" << std::endl;
-  totalStats.print();
-  std::cout << std::string(80, '=') << std::endl;
+  Reporter::printSeparator();
+  Reporter::printMessage("TOTALS:");
+  Reporter::printStats(totalStats);
+  Reporter::printSeparator();
 }
 
 // Standard perft divide (kept for backward compatibility)
@@ -132,13 +112,10 @@ void perftDivide(Position &pos, int depth) {
     long long nodes = perft(nextPos, depth - 1);
     totalNodes += nodes;
 
-    // Simple output: origin->destination
-    std::cout << tileNames[move.getOriginIndex()] << "->"
-              << tileNames[move.getDestinationIndex()] << ": " << nodes
-              << std::endl;
+    Reporter::printPerftMove(move.getOriginIndex(), move.getDestinationIndex(), nodes);
   }
 
-  std::cout << "\nTotal: " << totalNodes << std::endl;
+  Reporter::printMessage("\nTotal: " + std::to_string(totalNodes));
 }
 
 void runPerftTest(std::string fen, int depth, long long expectedNodes) {
@@ -149,11 +126,9 @@ void runPerftTest(std::string fen, int depth, long long expectedNodes) {
   std::chrono::duration<double> elapsed = end - start;
 
   if (nodes == expectedNodes) {
-    std::cout << "[PASS] Depth " << depth << " Nodes: " << nodes
-              << " Time: " << elapsed.count() << "s" << std::endl;
+    Reporter::printMessage("[PASS] Depth " + std::to_string(depth) + " Nodes: " + std::to_string(nodes) + " Time: " + std::to_string(elapsed.count()) + "s");
   } else {
-    std::cout << "[FAIL] Depth " << depth << " Expected: " << expectedNodes
-              << " Got: " << nodes << std::endl;
+    Reporter::printMessage("[FAIL] Depth " + std::to_string(depth) + " Expected: " + std::to_string(expectedNodes) + " Got: " + std::to_string(nodes));
   }
 }
 
@@ -162,69 +137,59 @@ void runDetailedPerftTest(std::string fen, int depth,
                           PerftStats *expectedStats) {
   Position pos = Position::fromFen(fen);
 
-  std::cout << "\n=== Running Detailed Perft Test ===" << std::endl;
-  std::cout << "FEN: " << fen << std::endl;
-  std::cout << "Depth: " << depth << std::endl;
-  std::cout << std::string(80, '-') << std::endl;
+  Reporter::printHeader("Running Detailed Perft Test");
+  Reporter::printMessage("FEN: " + fen);
+  Reporter::printMessage("Depth: " + std::to_string(depth));
 
   auto start = std::chrono::high_resolution_clock::now();
   PerftStats stats = detailedPerft(pos, depth, true);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = end - start;
 
-  std::cout << "\nResults:" << std::endl;
-  stats.print();
-  std::cout << "\nTime: " << elapsed.count() << "s" << std::endl;
+  Reporter::printMessage("\nResults:");
+  Reporter::printStats(stats);
+  Reporter::printExecutionTime(elapsed.count());
 
-  if (stats.nodes > 0) {
-    std::cout << "Nodes/sec: "
-              << static_cast<long long>(stats.nodes / elapsed.count())
-              << std::endl;
+  if (stats.nodes > 0 && elapsed.count() > 0) {
+    Reporter::printMessage("Nodes/sec: " + std::to_string(static_cast<long long>(stats.nodes / elapsed.count())));
   }
 
   // Validate against expected stats
   bool allMatch = true;
-  std::cout << "\nValidation:" << std::endl;
+  Reporter::printMessage("\nValidation:");
 
   if (stats.nodes != expectedStats->nodes) {
-    std::cout << "  [FAIL] Nodes: expected " << expectedStats->nodes << ", got "
-              << stats.nodes << std::endl;
+    Reporter::printMessage("  [FAIL] Nodes: expected " + std::to_string(expectedStats->nodes) + ", got " + std::to_string(stats.nodes));
     allMatch = false;
   }
   if (stats.captures != expectedStats->captures) {
-    std::cout << "  [FAIL] Captures: expected " << expectedStats->captures
-              << ", got " << stats.captures << std::endl;
+    Reporter::printMessage("  [FAIL] Captures: expected " + std::to_string(expectedStats->captures) + ", got " + std::to_string(stats.captures));
     allMatch = false;
   }
   if (stats.enPassant != expectedStats->enPassant) {
-    std::cout << "  [FAIL] En Passant: expected " << expectedStats->enPassant
-              << ", got " << stats.enPassant << std::endl;
+    Reporter::printMessage("  [FAIL] En Passant: expected " + std::to_string(expectedStats->enPassant) + ", got " + std::to_string(stats.enPassant));
     allMatch = false;
   }
   if (stats.castles != expectedStats->castles) {
-    std::cout << "  [FAIL] Castles: expected " << expectedStats->castles
-              << ", got " << stats.castles << std::endl;
+    Reporter::printMessage("  [FAIL] Castles: expected " + std::to_string(expectedStats->castles) + ", got " + std::to_string(stats.castles));
     allMatch = false;
   }
   if (stats.promotions != expectedStats->promotions) {
-    std::cout << "  [FAIL] Promotions: expected " << expectedStats->promotions
-              << ", got " << stats.promotions << std::endl;
+    Reporter::printMessage("  [FAIL] Promotions: expected " + std::to_string(expectedStats->promotions) + ", got " + std::to_string(stats.promotions));
     allMatch = false;
   }
   if (stats.checks != expectedStats->checks) {
-    std::cout << "  [FAIL] Checks: expected " << expectedStats->checks
-              << ", got " << stats.checks << std::endl;
+    Reporter::printMessage("  [FAIL] Checks: expected " + std::to_string(expectedStats->checks) + ", got " + std::to_string(stats.checks));
     allMatch = false;
   }
   if (stats.checkmates != expectedStats->checkmates) {
-    std::cout << "  [FAIL] Checkmates: expected " << expectedStats->checkmates
-              << ", got " << stats.checkmates << std::endl;
+    Reporter::printMessage("  [FAIL] Checkmates: expected " + std::to_string(expectedStats->checkmates) + ", got " + std::to_string(stats.checkmates));
     allMatch = false;
   }
 
   if (allMatch) {
-    std::cout << "  [PASS] All statistics match expected values!" << std::endl;
+    Reporter::printMessage("  [PASS] All statistics match expected values!");
   }
 
-  std::cout << std::string(80, '=') << std::endl;
+  Reporter::printSeparator();
 }
