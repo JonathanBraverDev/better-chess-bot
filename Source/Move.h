@@ -66,4 +66,9 @@ public:
 
     // add conversion to text form
     std::string verboseDecode() const;
+
+    // for sorting, higher BitMove values are considered better
+    bool operator>(const Move& other) const {
+        return encodedMove > other.encodedMove;
+    }
 };
