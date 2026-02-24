@@ -36,9 +36,6 @@ private:
   // remember to wipe when ANYTHING changes on the board
   mutable Bitboard own_pieces;
   mutable Bitboard opponent_pieces;
-  // moves that get here should be fully legal.
-  mutable MoveList legal_moves;
-  mutable bool are_moves_valid;
 
   // Helpers for make/undo move
   Bitboard &getPieceBoardRef(Color color, PieceType type);

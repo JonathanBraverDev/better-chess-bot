@@ -31,8 +31,6 @@ void Position::makeMove(Move move) {
   current_color = getOpponentColor();
 
   // Invalidate cached data
-  legal_moves.clear();
-  are_moves_valid = false;
   own_pieces.clear();
   opponent_pieces.clear();
 }
@@ -85,8 +83,6 @@ void Position::undoMove(Move move) {
     }
   }
 
-  legal_moves.clear();
-  are_moves_valid = false;
   own_pieces.clear();
   opponent_pieces.clear();
 }
@@ -284,17 +280,11 @@ Piece Position::getPieceAtTile(Bitboard tile) const {
 }
 
 MoveList Position::getLegalMoves() const {
-  if (!are_moves_valid) {
-    getAllOwnPieces();
-    getAllOpponentPieces();
+  getAllOwnPieces();
+  getAllOpponentPieces();
 
-    // Use MoveGenerator
-    legal_moves = MoveGenerator::getLegalMoves(*this);
-
-    are_moves_valid = true;
-  }
-
-  return legal_moves;
+  // Use MoveGenerator
+  return MoveGenerator::getLegalMoves(*this);
 }
 
 Bitboard Position::getOwnPieces(PieceType type) const {
@@ -307,7 +297,7 @@ Bitboard Position::getOpponentPieces(PieceType type) const {
 
 Bitboard Position::getAllOwnPieces() const {
   if (own_pieces.isEmpty()) {
-    for (PieceType t : PieceTypes) {
+  for (PieceType t : PieceTypes) {
         own_pieces.setBitsFrom(getOwnPieces(t));
     }
   }
@@ -392,8 +382,6 @@ Position::Position() {
   special_move_rights.clear();
   own_pieces.clear();
   opponent_pieces.clear();
-  legal_moves.clear();
-  are_moves_valid = false;
   current_color = Color::WHITE;
 }
 
