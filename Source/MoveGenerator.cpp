@@ -29,7 +29,7 @@ MoveList MoveGenerator::generateLegalMoves() {
 
 void MoveGenerator::getPawnMoves() {
     Color current_color = pos.getCurrentColor();
-    Bitboard pawns = pos.getPieces(current_color, PieceType::PAWN);
+    Bitboard pawns = pos.getPieces(PieceType::PAWN);
     Bitboard empty_tiles = pos.getAllPieces().getInverted();
     Bitboard opponent_en_passant = pos.getOpponentEnPassantRow();
 
@@ -116,6 +116,7 @@ void MoveGenerator::addPromotionMoves(Bitboard step, Bitboard captures, Move mov
         }
     }
 
+    captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING));
     Bitboard promotion = captures.popLowestBit();
     while (promotion.hasRemainingBits()) {
         move_base.setDestinationIndex(promotion.singleBitIndex());
@@ -131,6 +132,7 @@ void MoveGenerator::addPromotionMoves(Bitboard step, Bitboard captures, Move mov
 }
 
 void MoveGenerator::addNormalPawnMoves(Move move_base, Bitboard step, Bitboard captures) {
+    captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING));
     Bitboard capture = captures.popLowestBit();
 
     if (step.hasRemainingBits()) {
@@ -319,7 +321,7 @@ void MoveGenerator::finalizeMoves(Bitboard destinations, Move move_base) {
     destinations.clearBitsFrom(pos.getAllOwnPieces());
     Bitboard captures = findCommonBits(destinations, pos.getAllOpponentPieces());
     destinations.clearBitsFrom(captures);
-    captures.clearBitsFrom(pos.getPieces(pos.getOpponentColor(), PieceType::KING)); 
+    captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING)); 
 
     addDestinationMoves(destinations, move_base);
     move_base.setAttackerType(pieceTypeToAttackerMap.at(move_base.getAbsoluteMovingType()));
@@ -417,7 +419,7 @@ bool MoveGenerator::selfCheckCheck(Move proposed_move) const {
 bool MoveGenerator::isAttackedBySlidePattern(Bitboard target, AttackPattern pattern, Bitboard blockers, BoardIndex excluded_index) const {
     assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
     Bitboard slide_path = getSlideDestinations(target, pattern, blockers);
-    Bitboard slide_attackers = pos.getPiecesByPattern(pos.getOpponentColor(), pattern);
+    Bitboard slide_attackers = pos.getOpponentPiecesByPattern(pattern);
     if (excluded_index != INVALID_INDEX) {
         slide_attackers.clearBit(excluded_index);
     }
@@ -442,7 +444,7 @@ bool MoveGenerator::isAttackedByJumpPattern(BoardIndex target_index, AttackPatte
         break;
     }
 
-    Bitboard attackers = pos.getPiecesByPattern(pos.getOpponentColor(), pattern);
+    Bitboard attackers = pos.getOpponentPiecesByPattern(pattern);
     if (excluded_index != INVALID_INDEX) {
         attackers.clearBit(excluded_index);
     }
@@ -473,7 +475,7 @@ bool MoveGenerator::isAttackedByAnyPattern(const Position& pos, Bitboard targets
 }
 
 bool MoveGenerator::enemyCheckCheck(Move proposed_move) const {
-    Bitboard opponent_king = pos.getPieces(pos.getOpponentColor(), PieceType::KING);
+    Bitboard opponent_king = pos.getOpponentPieces(PieceType::KING);
     if (!opponent_king.hasRemainingBits()) {
         return false;
     }
@@ -499,7 +501,7 @@ bool MoveGenerator::enemyCheckCheck(Move proposed_move) const {
         updated_blockers.clearBit(Position::getEnPassantCaptureLocation(pos.getCurrentColor(), dest_index).singleBitIndex());
     }
 
-    Bitboard line_attackers = pos.getPiecesByPattern(pos.getCurrentColor(), AttackPattern::LINE);
+    Bitboard line_attackers = pos.getPiecesByPattern(AttackPattern::LINE);
     line_attackers.clearBit(origin_index);
     if (moving_type == PieceType::ROOK || moving_type == PieceType::QUEEN) {
         line_attackers.setBit(dest_index);
@@ -510,7 +512,7 @@ bool MoveGenerator::enemyCheckCheck(Move proposed_move) const {
         return true;
     }
 
-    Bitboard diag_attackers = pos.getPiecesByPattern(pos.getCurrentColor(), AttackPattern::DIAGONAL);
+    Bitboard diag_attackers = pos.getPiecesByPattern(AttackPattern::DIAGONAL);
     diag_attackers.clearBit(origin_index);
     if (moving_type == PieceType::BISHOP || moving_type == PieceType::QUEEN) {
         diag_attackers.setBit(dest_index);

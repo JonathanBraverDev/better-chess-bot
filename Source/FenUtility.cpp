@@ -79,9 +79,8 @@ Position FenUtility::fromFen(const std::string& fen) {
     }
   }
 
-  // Fill cache
-  pos.getAllOwnPieces(); // Forces refresh
-  pos.getAllOpponentPieces(); // Forces refresh
+  // Populate the incremental color_pieces cache from the individual piece boards
+  pos.updateCachedPieces();
 
   return pos;
 }

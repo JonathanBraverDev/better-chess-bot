@@ -32,10 +32,12 @@ private:
   Bitboard special_move_rights;
   Color current_color;
 
-  // greatly reducing cluttered calls during move generation
-  // remember to wipe when ANYTHING changes on the board
-  mutable Bitboard own_pieces;
-  mutable Bitboard opponent_pieces;
+  // incrementally updated on make/undo move to reduce cluttered calls
+  Bitboard color_pieces[2];
+
+  // Helper to re-initialize caches when entire position is overwritten (e.g. from FEN)
+  // Must be called after directly writing to piece boards
+  void updateCachedPieces();
 
   // Helpers for make/undo move
   Bitboard &getPieceBoardRef(Color color, PieceType type);
@@ -60,6 +62,7 @@ public:
   void undoMove(Move move);
 
   Bitboard getPieces(Color color, PieceType type) const;
+  Bitboard getPieces(PieceType type) const;
   Piece getPieceAtIndex(BoardIndex index) const;
   Piece getPieceAtTile(Bitboard tile) const;
 
@@ -68,6 +71,8 @@ public:
   Bitboard getOwnPieces(PieceType type) const;
   Bitboard getOpponentPieces(PieceType type) const;
   Bitboard getPiecesByPattern(Color color, AttackPattern pattern) const;
+  Bitboard getPiecesByPattern(AttackPattern pattern) const;
+  Bitboard getOpponentPiecesByPattern(AttackPattern pattern) const;
   Bitboard getAllOwnPieces() const;
   Bitboard getAllOpponentPieces() const;
   Bitboard getAllPieces() const;

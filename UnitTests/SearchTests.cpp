@@ -26,7 +26,7 @@ TEST_CLASS(SearchTests) {
         Assert::IsTrue(pos.isInCheck());
         
         // With no legal moves
-        Assert::AreEqual((size_t)0, pos.getLegalMoves().size());
+        Assert::AreEqual(0, pos.getLegalMoves().size());
         
         // Search should return invalid move (or potentially handle it gracefully)
         Move bestMove = Search::search(pos, 1);

@@ -29,10 +29,6 @@ void Position::makeMove(Move move) {
 
   updateSpecialMoveRights(move);
   current_color = getOpponentColor();
-
-  // Invalidate cached data
-  own_pieces.clear();
-  opponent_pieces.clear();
 }
 
 void Position::undoMove(Move move) {
@@ -64,27 +60,15 @@ void Position::undoMove(Move move) {
     toggleCastle(move); // toggling castle again reverses it
   } else {
     if (move.isPromotion()) {
-      // Toggle back promotion
-      getPieceBoardRef(current_color, PieceType::PAWN).toggleBit(move.getOriginIndex());
-      getPieceBoardRef(current_color, move.getAbsoluteMovingType()).toggleBit(move.getDestinationIndex());
+      togglePromotion(move); // toggling promotion again reverses it
     } else {
       toggleMove(move); // toggling move again reverses it
     }
 
     if (move.isCapture()) {
-       // Toggle captured piece back onto the board
-      Bitboard &captured_board = getPieceBoardRef(getOpponentColor(), move.getCapturedType());
-      BoardIndex capture_idx = move.getDestinationIndex();
-
-      if (move.isEnPassant()) {
-        capture_idx = getEnPassantCaptureLocation(current_color, capture_idx).singleBitIndex();
-      }
-      captured_board.toggleBit(capture_idx);
+      toggleCaptured(move); // toggling capture again reverses it
     }
   }
-
-  own_pieces.clear();
-  opponent_pieces.clear();
 }
 
 Bitboard &Position::getPieceBoardRef(Color color, PieceType type) {
@@ -103,17 +87,25 @@ void Position::toggleCastle(const Move move) {
     if (is_short_castle) {
       king_board.toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_KING_MASK));
       rook_board.toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_ROOK_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_KING_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_ROOK_MASK));
     } else {
       king_board.toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_KING_MASK));
       rook_board.toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_ROOK_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_KING_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_ROOK_MASK));
     }
   } else {
     if (is_short_castle) {
       king_board.toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_KING_MASK));
       rook_board.toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_ROOK_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_KING_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_ROOK_MASK));
     } else {
       king_board.toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_KING_MASK));
       rook_board.toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_ROOK_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_KING_MASK));
+      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_ROOK_MASK));
     }
   }
 
@@ -126,6 +118,8 @@ void Position::toggleMove(const Move move) {
       getPieceBoardRef(current_color, move.getAbsoluteMovingType());
   piece_board.toggleBit(move.getOriginIndex());
   piece_board.toggleBit(move.getDestinationIndex());
+  color_pieces[colIdx(current_color)].toggleBit(move.getOriginIndex());
+  color_pieces[colIdx(current_color)].toggleBit(move.getDestinationIndex());
 }
 
 void Position::toggleCaptured(const Move move) {
@@ -141,16 +135,19 @@ void Position::toggleCaptured(const Move move) {
   }
 
   captured_board.toggleBit(capture_idx);
+  color_pieces[colIdx(getOpponentColor())].toggleBit(capture_idx);
 }
 
 void Position::togglePromotion(const Move move) {
   // Remove pawn
   getPieceBoardRef(current_color, PieceType::PAWN)
       .toggleBit(move.getOriginIndex());
+  color_pieces[colIdx(current_color)].toggleBit(move.getOriginIndex());
 
   // Add promoted piece
   getPieceBoardRef(current_color, move.getAbsoluteMovingType())
       .toggleBit(move.getDestinationIndex());
+  color_pieces[colIdx(current_color)].toggleBit(move.getDestinationIndex());
 }
 
 void Position::updateSpecialMoveRights(const Move move) {
@@ -287,6 +284,18 @@ MoveList Position::getLegalMoves() const {
   return MoveGenerator::getLegalMoves(*this);
 }
 
+Bitboard Position::getPieces(PieceType type) const {
+  return getPieces(current_color, type);
+}
+
+Bitboard Position::getPiecesByPattern(AttackPattern pattern) const {
+  return getPiecesByPattern(current_color, pattern);
+}
+
+Bitboard Position::getOpponentPiecesByPattern(AttackPattern pattern) const {
+  return getPiecesByPattern(getOpponentColor(), pattern);
+}
+
 Bitboard Position::getOwnPieces(PieceType type) const {
   return getPieces(current_color, type);
 }
@@ -296,25 +305,15 @@ Bitboard Position::getOpponentPieces(PieceType type) const {
 }
 
 Bitboard Position::getAllOwnPieces() const {
-  if (own_pieces.isEmpty()) {
-  for (PieceType t : PieceTypes) {
-        own_pieces.setBitsFrom(getOwnPieces(t));
-    }
-  }
-  return own_pieces;
+  return color_pieces[colIdx(current_color)];
 }
 
 Bitboard Position::getAllOpponentPieces() const {
-  if (opponent_pieces.isEmpty()) {
-    for (PieceType t : PieceTypes) {
-        opponent_pieces.setBitsFrom(getOpponentPieces(t));
-    }
-  }
-  return opponent_pieces;
+  return color_pieces[colIdx(getOpponentColor())];
 }
 
 Bitboard Position::getAllPieces() const {
-  return combineBoards(getAllOwnPieces(), getAllOpponentPieces());
+  return combineBoards(color_pieces[0], color_pieces[1]);
 }
 
 void Position::InitializeMoves() {
@@ -380,9 +379,18 @@ Position::Position() {
   }
 
   special_move_rights.clear();
-  own_pieces.clear();
-  opponent_pieces.clear();
+  color_pieces[0].clear();
+  color_pieces[1].clear();
   current_color = Color::WHITE;
+}
+
+void Position::updateCachedPieces() {
+  color_pieces[0].clear();
+  color_pieces[1].clear();
+  for (PieceType t : PieceTypes) {
+    color_pieces[0].setBitsFrom(pieces[colIdx(Color::WHITE)][typeIdx(t)]);
+    color_pieces[1].setBitsFrom(pieces[colIdx(Color::BLACK)][typeIdx(t)]);
+  }
 }
 
 Position Position::fromFen(FenString fen) {
