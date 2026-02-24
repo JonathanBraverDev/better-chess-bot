@@ -223,6 +223,8 @@ Bitboard MoveGenerator::getSlideDestinations(const Bitboard piece, const AttackP
             piece.slidePath(Direction::LEFT, blockers),
             piece.slidePath(Direction::RIGHT, blockers));
         break;
+    default:
+        break;
     }
     return destinations;
 }
