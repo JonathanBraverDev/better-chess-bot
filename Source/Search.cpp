@@ -1,12 +1,11 @@
 #include "Search.h"
 #include "Evaluation.h"
 #include "EvaluationStructure.h"
-#include <vector>
 #include <algorithm>
 #include <limits>
 
-Move Search::search(const Position& pos, int depth) {
-    std::vector<Move> legalMoves = pos.getLegalMoves();
+Move Search::search(Position& pos, int depth) {
+    MoveList legalMoves = pos.getLegalMoves();
     if (legalMoves.empty()) {
         return Move(); // Return invalid move if no moves available
     }
@@ -20,11 +19,12 @@ Move Search::search(const Position& pos, int depth) {
     int beta = std::numeric_limits<int>::max();
 
     for (const Move& move : legalMoves) {
-        Position childPos = pos;
-        childPos.makeMove(move);
+        pos.makeMove(move);
         
         // Negamax: score = -negamax(child)
-        int score = -negamax(childPos, depth - 1, -beta, -alpha);
+        int score = -negamax(pos, depth - 1, -beta, -alpha);
+        
+        pos.undoMove(move);
 
         if (score > bestScore) {
             bestScore = score;
@@ -39,7 +39,7 @@ Move Search::search(const Position& pos, int depth) {
     return bestMove;
 }
 
-int Search::negamax(const Position& pos, int depth, int alpha, int beta) {
+int Search::negamax(Position& pos, int depth, int alpha, int beta) {
     
     // Evaluate at target depth
     if (depth == 0) {
@@ -47,7 +47,7 @@ int Search::negamax(const Position& pos, int depth, int alpha, int beta) {
     }
 
     // Generate moves
-    std::vector<Move> legalMoves = pos.getLegalMoves();
+    MoveList legalMoves = pos.getLegalMoves();
 
     // Resolve static end game
     if (legalMoves.empty()) {
@@ -64,10 +64,11 @@ int Search::negamax(const Position& pos, int depth, int alpha, int beta) {
     int bestScore = -std::numeric_limits<int>::max();
 
     for (const Move& move : legalMoves) {
-        Position childPos = pos;
-        childPos.makeMove(move);
+        pos.makeMove(move);
 
-        int score = -negamax(childPos, depth - 1, -beta, -alpha);
+        int score = -negamax(pos, depth - 1, -beta, -alpha);
+        
+        pos.undoMove(move);
 
         if (score > bestScore) {
             bestScore = score;

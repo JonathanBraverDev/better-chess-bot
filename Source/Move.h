@@ -55,14 +55,21 @@ public:
     void setCheck(bool is_check);
     void setPromotion(bool is_promote);
 
-    void setWhiteShortCastleRight(bool can_castle);
-    void setWhiteLongCastleRight(bool can_castle);
-    void setBlackShortCastleRight(bool can_castle);
-    void setBlackLongCastleRight(bool can_castle);
-    void setValidEnPassant(bool isValid);
-    // index is within the row, 0-7
-    // also sets valid en passant
+  void setWhiteShortCastleRight(bool can_castle);
+  void setWhiteLongCastleRight(bool can_castle);
+  void setBlackShortCastleRight(bool can_castle);
+  void setBlackLongCastleRight(bool can_castle);
+  void setValidEnPassant(bool isValid);
+  // index is within the row, 0-7
+  // also sets valid en passant
   void setEnPassantIndex(BoardIndex index);
+
+  bool getWhiteShortCastleRight() const;
+  bool getWhiteLongCastleRight() const;
+  bool getBlackShortCastleRight() const;
+  bool getBlackLongCastleRight() const;
+  bool isValidEnPassant() const;
+  BoardIndex getEnPassantIndex() const;
 
     // add conversion to text form
     std::string verboseDecode() const;

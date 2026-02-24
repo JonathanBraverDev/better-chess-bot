@@ -5,11 +5,13 @@
 #include "MoveGenerator.h"
 #include "FenUtility.h"
 #include "MoveTables.h"
+#include "BoardConstants.h"
 #include <cassert>
 #include <string>
 
 
 void Position::makeMove(Move move) {
+
   if (move.getMiscMoveType() == MoveType::CASTLE_SHORT ||
       move.getMiscMoveType() == MoveType::CASTLE_LONG) {
     toggleCastle(move);
@@ -29,6 +31,60 @@ void Position::makeMove(Move move) {
   current_color = getOpponentColor();
 
   // Invalidate cached data
+  legal_moves.clear();
+  are_moves_valid = false;
+  own_pieces.clear();
+  opponent_pieces.clear();
+}
+
+void Position::undoMove(Move move) {
+  current_color = getOpponentColor(); // Change back to the color that made the move
+  
+  // Restore special move rights directly from the Move's bit rights
+  special_move_rights.clear();
+  
+  if (move.getWhiteShortCastleRight() || move.getWhiteLongCastleRight()) {
+      special_move_rights.setBit(E1_index);
+  }
+  if (move.getWhiteShortCastleRight()) special_move_rights.setBit(H1_index);
+  if (move.getWhiteLongCastleRight()) special_move_rights.setBit(A1_index);
+
+  if (move.getBlackShortCastleRight() || move.getBlackLongCastleRight()) {
+      special_move_rights.setBit(E8_index);
+  }
+  if (move.getBlackShortCastleRight()) special_move_rights.setBit(H8_index);
+  if (move.getBlackLongCastleRight()) special_move_rights.setBit(A8_index);
+  
+  if (move.isValidEnPassant()) {
+    BoardIndex ep_idx = move.getEnPassantIndex();
+    // Intersect the file (column) with the opponent's en passant row mask
+    special_move_rights.setBitsFrom(findCommonBits(getOpponentEnPassantRow(), Bitboard(COLUMN_A << ep_idx)));
+  }
+
+  if (move.getMiscMoveType() == MoveType::CASTLE_SHORT ||
+      move.getMiscMoveType() == MoveType::CASTLE_LONG) {
+    toggleCastle(move); // toggling castle again reverses it
+  } else {
+    if (move.isPromotion()) {
+      // Toggle back promotion
+      getPieceBoardRef(current_color, PieceType::PAWN).toggleBit(move.getOriginIndex());
+      getPieceBoardRef(current_color, move.getAbsoluteMovingType()).toggleBit(move.getDestinationIndex());
+    } else {
+      toggleMove(move); // toggling move again reverses it
+    }
+
+    if (move.isCapture()) {
+       // Toggle captured piece back onto the board
+      Bitboard &captured_board = getPieceBoardRef(getOpponentColor(), move.getCapturedType());
+      BoardIndex capture_idx = move.getDestinationIndex();
+
+      if (move.isEnPassant()) {
+        capture_idx = getEnPassantCaptureLocation(current_color, capture_idx).singleBitIndex();
+      }
+      captured_board.toggleBit(capture_idx);
+    }
+  }
+
   legal_moves.clear();
   are_moves_valid = false;
   own_pieces.clear();
@@ -183,7 +239,7 @@ Color Position::getOpponentColor() const {
   return (current_color == Color::WHITE ? Color::BLACK : Color::WHITE);
 }
 
-Bitboard Position::getOpponentEnPassant() const {
+Bitboard Position::getOpponentEnPassantRow() const {
   return Bitboard(
       (current_color == Color::WHITE ? BLACK_EN_PASSANT : WHITE_EN_PASSANT));
 }
@@ -227,7 +283,7 @@ Piece Position::getPieceAtTile(Bitboard tile) const {
     return {Color::WHITE, PieceType::NONE};
 }
 
-std::vector<Move> Position::getLegalMoves() const {
+MoveList Position::getLegalMoves() const {
   if (!are_moves_valid) {
     getAllOwnPieces();
     getAllOpponentPieces();
@@ -315,7 +371,7 @@ Move Position::currentBitRights() const {
             .hasRemainingBits());
   }
 
-  if (findCommonBits(getOpponentEnPassant(), special_move_rights)
+  if (findCommonBits(getOpponentEnPassantRow(), special_move_rights)
           .hasRemainingBits()) {
     rights.setEnPassantIndex(
         findCommonBits(Bitboard(ALL_EN_PASSANT), special_move_rights)

@@ -195,6 +195,30 @@ void Move::setEnPassantIndex(BoardIndex index) {
   setProperty(EN_PASSANT_INDEX_MASK, EN_PASSANT_INDEX_OFFSET, index);
 }
 
+bool Move::getWhiteShortCastleRight() const {
+  return (encodedMove & WHITE_SHORT_CASTLE_MASK) != 0;
+}
+
+bool Move::getWhiteLongCastleRight() const {
+  return (encodedMove & WHITE_LONG_CASTLE_MASK) != 0;
+}
+
+bool Move::getBlackShortCastleRight() const {
+  return (encodedMove & BLACK_SHORT_CASTLE_MASK) != 0;
+}
+
+bool Move::getBlackLongCastleRight() const {
+  return (encodedMove & BLACK_LONG_CASTLE_MASK) != 0;
+}
+
+bool Move::isValidEnPassant() const {
+  return (encodedMove & VALID_EN_PASSANT_MASK) != 0;
+}
+
+BoardIndex Move::getEnPassantIndex() const {
+  return (encodedMove & EN_PASSANT_INDEX_MASK);
+}
+
 
 std::string Move::verboseDecode() const {
   if (getMiscMoveType() == MoveType::CASTLE_SHORT) {

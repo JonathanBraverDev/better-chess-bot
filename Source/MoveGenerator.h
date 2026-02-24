@@ -1,46 +1,56 @@
 #pragma once
 
 #include "Position.h"
-#include <vector>
+#include "MoveList.h"
 
 class MoveGenerator {
 public:
-    static std::vector<Move> getLegalMoves(const Position& pos);
+    static MoveList getLegalMoves(const Position& pos);
     static bool isAttackedByAnyPattern(const Position& pos, Bitboard target, Bitboard blockers);
 
 private:
-   // Internal state for the generator (optional, or pass around)
-   // We'll use static helper functions passing necessary context
+   const Position& pos;
+   MoveList moves;
 
-   static void getPawnMoves(const Position& pos, std::vector<Move>& moves);
-   static void getKnightMoves(const Position& pos, std::vector<Move>& moves);
-   static void getBishopMoves(const Position& pos, std::vector<Move>& moves);
-   static void getRookMoves(const Position& pos, std::vector<Move>& moves);
-   static void getQueenMoves(const Position& pos, std::vector<Move>& moves);
-   static void getKingMoves(const Position& pos, std::vector<Move>& moves);
+   // Cached position data for this generation pass
+   Color current_color;
+   Bitboard empty_tiles;
+   Bitboard opponent_en_passant;
+   Bitboard all_own_pieces;
+   Bitboard all_opponent_pieces;
+   Bitboard all_pieces;
+
+   MoveGenerator(const Position& p);
+   MoveList generateLegalMoves();
+
+   void getPawnMoves();
+   void getKnightMoves();
+   void getBishopMoves();
+   void getRookMoves();
+   void getQueenMoves();
+   void getKingMoves();
    
-   static void getSlidingPieceMoves(const Position& pos, std::vector<Move>& moves, PieceType pieceType);
-   static void getCastlingMoves(const Position& pos, std::vector<Move>& moves, Bitboard king, Bitboard blockers, Move move_base);
+   void getSlidingPieceMoves(PieceType pieceType);
+   void getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base);
 
    // Helpers
-   static void checkAndAddPawnJump(const Position& pos, std::vector<Move>& moves, Bitboard step, Bitboard empty_tiles, Move move_base, Direction forward);
-   static void checkAndAddEnPassant(const Position& pos, std::vector<Move>& moves, Bitboard possible_en_passant, int pawn_move_index, Move move_base);
-   static void addPromotionMoves(const Position& pos, std::vector<Move>& moves, Bitboard step, Bitboard captures, Move move_base);
-   static void addNormalPawnMoves(const Position& pos, std::vector<Move>& moves, Move base_move, Bitboard step, Bitboard captures);
+   void checkAndAddPawnJump(Bitboard step, Move move_base, Direction forward);
+   void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index, Move move_base);
+   void addPromotionMoves(Bitboard step, Bitboard captures, Move move_base);
+   void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
    
-   static void finalizeMoves(const Position& pos, std::vector<Move>& moves, Bitboard destinations, Move move_base);
-   static void addDestinationMoves(const Position& pos, std::vector<Move>& moves, Bitboard destinations, Move move_base);
-   static void addCaptureMoves(const Position& pos, std::vector<Move>& moves, Bitboard captures, Move move_base);
+   void finalizeMoves(Bitboard destinations, Move move_base);
+   void addDestinationMoves(Bitboard destinations, Move move_base);
+   void addCaptureMoves(Bitboard captures, Move move_base);
 
-   static void CheckAndSaveMove(const Position& pos, std::vector<Move>& moves, Move proposed_move);
-   static bool selfCheckCheck(const Position& pos, Move proposed_move);
-   static bool enemyCheckCheck(const Position& pos, Move proposed_move);
+   void CheckAndSaveMove(Move proposed_move);
+   bool selfCheckCheck(Move proposed_move) const;
+   bool enemyCheckCheck(Move proposed_move) const;
 
-   static Bitboard getSlideDestinations(const Position& pos, Bitboard piece, AttackPattern pattern);
-   static Bitboard getSlideDestinations(const Position& pos, Bitboard piece, AttackPattern pattern, Bitboard blockers);
+   Bitboard getSlideDestinations(Bitboard piece, AttackPattern pattern) const;
+   Bitboard getSlideDestinations(Bitboard piece, AttackPattern pattern, Bitboard blockers) const;
 
-   static bool isAttackedBySlidePattern(const Position& pos, Bitboard target, AttackPattern pattern, Bitboard blockers, BoardIndex excluded_index = INVALID_INDEX);
-   static bool isAttackedByJumpPattern(const Position& pos, BoardIndex target_index, AttackPattern pattern, BoardIndex excluded_index = INVALID_INDEX);
-   // static bool isAttackedByAnyPattern(const Position& pos, Bitboard target, Bitboard blockers); // Moved to public
-   static bool canCastleWithRook(const Position& pos, const Bitboard king, const Bitboard rook, const Bitboard king_dest, const Bitboard rook_dest);
+   bool isAttackedBySlidePattern(Bitboard target, AttackPattern pattern, Bitboard blockers, BoardIndex excluded_index = INVALID_INDEX) const;
+   bool isAttackedByJumpPattern(BoardIndex target_index, AttackPattern pattern, BoardIndex excluded_index = INVALID_INDEX) const;
+   bool canCastleWithRook(const Bitboard king, const Bitboard rook, const Bitboard king_dest, const Bitboard rook_dest) const;
 };

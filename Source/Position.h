@@ -3,6 +3,7 @@
 #include "Bitboard.h"
 #include "Move.h"
 #include "Structs.h"
+#include "MoveList.h"
 #include <vector>
 #include <string>
 #include <cassert>
@@ -36,7 +37,7 @@ private:
   mutable Bitboard own_pieces;
   mutable Bitboard opponent_pieces;
   // moves that get here should be fully legal.
-  mutable std::vector<Move> legal_moves;
+  mutable MoveList legal_moves;
   mutable bool are_moves_valid;
 
   // Helpers for make/undo move
@@ -59,12 +60,13 @@ public:
   std::string toFen() const;
 
   void makeMove(Move move);
+  void undoMove(Move move);
 
   Bitboard getPieces(Color color, PieceType type) const;
   Piece getPieceAtIndex(BoardIndex index) const;
   Piece getPieceAtTile(Bitboard tile) const;
 
-  std::vector<Move> getLegalMoves() const;
+  MoveList getLegalMoves() const;
 
   Bitboard getOwnPieces(PieceType type) const;
   Bitboard getOpponentPieces(PieceType type) const;
@@ -86,7 +88,7 @@ public:
   Bitboard getSpecialMoveRights() const { return special_move_rights; }
   Bitboard& getSpecialMoveRightsRef() { return special_move_rights; }
   Color getOpponentColor() const;
-  Bitboard getOpponentEnPassant() const;
+  Bitboard getOpponentEnPassantRow() const;
   
   // Helpers for MoveGenerator
   static Bitboard getEnPassantCaptureLocation(Color capturing_color, BoardIndex en_passant_tile_index);

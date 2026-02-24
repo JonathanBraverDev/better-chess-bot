@@ -9,13 +9,13 @@ long long perft(Position &pos, int depth) {
     return 1;
   }
 
-  std::vector<Move> moves = pos.getLegalMoves();
+  MoveList moves = pos.getLegalMoves();
   long long nodes = 0;
 
   for (const auto &move : moves) {
-    Position nextPos = pos;
-    nextPos.makeMove(move);
-    nodes += perft(nextPos, depth - 1);
+    pos.makeMove(move);
+    nodes += perft(pos, depth - 1);
+    pos.undoMove(move);
   }
 
   return nodes;
@@ -25,7 +25,7 @@ long long perft(Position &pos, int depth) {
 PerftStats detailedPerft(Position &pos, int depth, bool isRoot) {
   PerftStats stats;
 
-  std::vector<Move> moves = pos.getLegalMoves();
+  MoveList moves = pos.getLegalMoves();
 
   if (depth == 1) {
     // At depth 1, count the leaf nodes and their properties
@@ -57,21 +57,21 @@ PerftStats detailedPerft(Position &pos, int depth, bool isRoot) {
         stats.checks++;
 
         // If there are no moves for a checked opponent, it's a checkmate
-        Position nextPos = pos;
-        nextPos.makeMove(move);
-        std::vector<Move> opponentMoves = nextPos.getLegalMoves();
+        pos.makeMove(move);
+        MoveList opponentMoves = pos.getLegalMoves();
         if (opponentMoves.empty()) {
           stats.checkmates++;
         }
+        pos.undoMove(move);
       }
     }
   } else {
     // Recurse deeper
     for (const auto &move : moves) {
-      Position nextPos = pos;
-      nextPos.makeMove(move);
-      PerftStats childStats = detailedPerft(nextPos, depth - 1, false);
+      pos.makeMove(move);
+      PerftStats childStats = detailedPerft(pos, depth - 1, false);
       stats += childStats;
+      pos.undoMove(move);
     }
   }
 
@@ -80,17 +80,18 @@ PerftStats detailedPerft(Position &pos, int depth, bool isRoot) {
 
 // Detailed Perft Divide - shows stats for each root move
 void detailedPerftDivide(Position &pos, int depth) {
-  std::vector<Move> moves = pos.getLegalMoves();
+  MoveList moves = pos.getLegalMoves();
   PerftStats totalStats;
 
   Reporter::printHeader("Detailed Perft Divide (Depth " + std::to_string(depth) + ")");
 
   for (const auto &move : moves) {
-    Position nextPos = pos;
-    nextPos.makeMove(move);
+    pos.makeMove(move);
 
-    PerftStats moveStats = detailedPerft(nextPos, depth - 1, false);
+    PerftStats moveStats = detailedPerft(pos, depth - 1, false);
     totalStats += moveStats;
+    
+    pos.undoMove(move);
 
     Reporter::printPerftMove(move.getOriginIndex(), move.getDestinationIndex(), moveStats.nodes);
   }
@@ -103,13 +104,14 @@ void detailedPerftDivide(Position &pos, int depth) {
 
 // Standard perft divide (kept for backward compatibility)
 void perftDivide(Position &pos, int depth) {
-  std::vector<Move> moves = pos.getLegalMoves();
+  MoveList moves = pos.getLegalMoves();
   long long totalNodes = 0;
 
   for (const auto &move : moves) {
-    Position nextPos = pos;
-    nextPos.makeMove(move);
-    long long nodes = perft(nextPos, depth - 1);
+    pos.makeMove(move);
+    long long nodes = perft(pos, depth - 1);
+    pos.undoMove(move);
+    
     totalNodes += nodes;
 
     Reporter::printPerftMove(move.getOriginIndex(), move.getDestinationIndex(), nodes);
