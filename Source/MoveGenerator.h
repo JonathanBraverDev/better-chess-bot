@@ -37,11 +37,8 @@ private:
    void checkAndAddPawnJump(Bitboard step, Move move_base, Direction forward);
    void checkAndAddEnPassant(Bitboard possible_en_passant, int pawn_move_index, Move move_base);
    void addPromotionMoves(Bitboard step, Bitboard captures, Move move_base);
-   void addNormalPawnMoves(Move base_move, Bitboard step, Bitboard captures);
    
    void finalizeMoves(Bitboard destinations, Move move_base);
-   void addDestinationMoves(Bitboard destinations, Move move_base);
-   void addCaptureMoves(Bitboard captures, Move move_base);
 
    void CheckAndSaveMove(Move proposed_move);
    bool selfCheckCheck(Move proposed_move) const;

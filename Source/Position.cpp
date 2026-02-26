@@ -353,6 +353,12 @@ Move Position::currentBitRights() const {
   return rights;
 }
 
+Move Position::initializeMove(PieceType type) const {
+    Move move = currentBitRights();
+    move.setMovingType(type);
+    return move;
+}
+
 Position::Position() {
   for (Color c : Colors) {
       for (PieceType t : PieceTypes) {

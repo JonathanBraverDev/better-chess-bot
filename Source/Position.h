@@ -81,6 +81,9 @@ public:
 
   // Creates an empty move with BitRights from the special move board
   Move currentBitRights() const;
+  
+  // Creates an initialized move containing current BitRights and the given PieceType
+  Move initializeMove(PieceType type) const;
 
   bool isInCheck() const;
 
