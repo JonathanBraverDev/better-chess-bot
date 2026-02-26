@@ -194,6 +194,16 @@ constexpr B64 BLACK_SHORT_CASTLE_ROOK_MASK = H8 | F8;
 constexpr B64 BLACK_LONG_CASTLE_KING_MASK = E8 | C8;
 constexpr B64 BLACK_LONG_CASTLE_ROOK_MASK = A8 | D8;
 
+struct CastleMasks { B64 king; B64 rook; };
+constexpr CastleMasks CASTLE_MASKS[2][2] = {
+    // White: [0] = Long, [1] = Short
+    {{WHITE_LONG_CASTLE_KING_MASK, WHITE_LONG_CASTLE_ROOK_MASK},
+     {WHITE_SHORT_CASTLE_KING_MASK, WHITE_SHORT_CASTLE_ROOK_MASK}},
+    // Black: [0] = Long, [1] = Short
+    {{BLACK_LONG_CASTLE_KING_MASK, BLACK_LONG_CASTLE_ROOK_MASK},
+     {BLACK_SHORT_CASTLE_KING_MASK, BLACK_SHORT_CASTLE_ROOK_MASK}}
+};
+
 // the row to which white writes en-passants
 constexpr B64 WHITE_EN_PASSANT = ROW_3;
 // the row to which black writes en-passants

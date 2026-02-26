@@ -80,34 +80,16 @@ void Position::toggleCastle(const Move move) {
   Bitboard &king_board = getPieceBoardRef(current_color, PieceType::KING);
   Bitboard &rook_board = getPieceBoardRef(current_color, PieceType::ROOK);
 
+  int colorIdx = colIdx(current_color);
   bool is_short_castle = (move.getMiscMoveType() == MoveType::CASTLE_SHORT);
 
-  // Use pre-calculated masks to toggle both origin and destination in one go
-  if (current_color == Color::WHITE) {
-    if (is_short_castle) {
-      king_board.toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_KING_MASK));
-      rook_board.toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_ROOK_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_KING_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_SHORT_CASTLE_ROOK_MASK));
-    } else {
-      king_board.toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_KING_MASK));
-      rook_board.toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_ROOK_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_KING_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(WHITE_LONG_CASTLE_ROOK_MASK));
-    }
-  } else {
-    if (is_short_castle) {
-      king_board.toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_KING_MASK));
-      rook_board.toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_ROOK_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_KING_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_SHORT_CASTLE_ROOK_MASK));
-    } else {
-      king_board.toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_KING_MASK));
-      rook_board.toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_ROOK_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_KING_MASK));
-      color_pieces[colIdx(current_color)].toggleBitsFrom(Bitboard(BLACK_LONG_CASTLE_ROOK_MASK));
-    }
-  }
+  Bitboard king_mask = Bitboard(CASTLE_MASKS[colorIdx][is_short_castle].king);
+  Bitboard rook_mask = Bitboard(CASTLE_MASKS[colorIdx][is_short_castle].rook);
+
+  king_board.toggleBitsFrom(king_mask);
+  rook_board.toggleBitsFrom(rook_mask);
+  color_pieces[colorIdx].toggleBitsFrom(king_mask);
+  color_pieces[colorIdx].toggleBitsFrom(rook_mask);
 
   // todo: support Fischer castling where nither pieceis at the usual position
   // in that case use the move's origin and destination to find pieces
