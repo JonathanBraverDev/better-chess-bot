@@ -41,11 +41,17 @@ private:
 
   // Helpers for make/undo move
   Bitboard &getPieceBoardRef(Color color, PieceType type);
+  inline void togglePiece(Color color, PieceType type, BoardIndex index) {
+      getPieceBoardRef(color, type).toggleBit(index);
+      color_pieces[colIdx(color)].toggleBit(index);
+  }
+  
   void toggleCastle(const Move move);
   void toggleMove(const Move move);
   void toggleCaptured(const Move move);
   void togglePromotion(const Move move);
   void updateSpecialMoveRights(const Move move);
+  void restoreSpecialMoveRights(const Move move);
 
   // Helper filters for MoveGenerator (formerly private)
   bool selfCheckCheck(Move proposed_move) const;

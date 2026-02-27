@@ -31,10 +31,7 @@ void Position::makeMove(Move move) {
   current_color = getOpponentColor();
 }
 
-void Position::undoMove(Move move) {
-  current_color = getOpponentColor(); // Change back to the color that made the move
-  
-  // Restore special move rights directly from the Move's bit rights
+void Position::restoreSpecialMoveRights(const Move move) {
   special_move_rights.clear();
   
   if (move.getWhiteShortCastleRight() || move.getWhiteLongCastleRight()) {
@@ -51,9 +48,15 @@ void Position::undoMove(Move move) {
   
   if (move.isValidEnPassant()) {
     BoardIndex ep_idx = move.getEnPassantIndex();
-    // Intersect the file (column) with the opponent's en passant row mask
     special_move_rights.setBitsFrom(findCommonBits(getOpponentEnPassantRow(), Bitboard(COLUMN_A << ep_idx)));
   }
+}
+
+void Position::undoMove(Move move) {
+  current_color = getOpponentColor(); // Change back to the color that made the move
+  
+  // Restore special move rights directly from the Move's bit rights
+  restoreSpecialMoveRights(move);
 
   if (move.getMiscMoveType() == MoveType::CASTLE_SHORT ||
       move.getMiscMoveType() == MoveType::CASTLE_LONG) {
@@ -96,40 +99,29 @@ void Position::toggleCastle(const Move move) {
 }
 
 void Position::toggleMove(const Move move) {
-  Bitboard &piece_board =
-      getPieceBoardRef(current_color, move.getAbsoluteMovingType());
-  piece_board.toggleBit(move.getOriginIndex());
-  piece_board.toggleBit(move.getDestinationIndex());
-  color_pieces[colIdx(current_color)].toggleBit(move.getOriginIndex());
-  color_pieces[colIdx(current_color)].toggleBit(move.getDestinationIndex());
+  PieceType moving_type = move.getAbsoluteMovingType();
+  togglePiece(current_color, moving_type, move.getOriginIndex());
+  togglePiece(current_color, moving_type, move.getDestinationIndex());
 }
 
 void Position::toggleCaptured(const Move move) {
-  Bitboard &captured_board =
-      getPieceBoardRef(getOpponentColor(), move.getCapturedType());
   BoardIndex capture_idx = move.getDestinationIndex();
 
   // If En Passant, the captured pawn is not on the destination square
   if (move.isEnPassant()) {
-
     capture_idx = getEnPassantCaptureLocation(current_color, capture_idx)
                       .singleBitIndex();
   }
 
-  captured_board.toggleBit(capture_idx);
-  color_pieces[colIdx(getOpponentColor())].toggleBit(capture_idx);
+  togglePiece(getOpponentColor(), move.getCapturedType(), capture_idx);
 }
 
 void Position::togglePromotion(const Move move) {
   // Remove pawn
-  getPieceBoardRef(current_color, PieceType::PAWN)
-      .toggleBit(move.getOriginIndex());
-  color_pieces[colIdx(current_color)].toggleBit(move.getOriginIndex());
+  togglePiece(current_color, PieceType::PAWN, move.getOriginIndex());
 
   // Add promoted piece
-  getPieceBoardRef(current_color, move.getAbsoluteMovingType())
-      .toggleBit(move.getDestinationIndex());
-  color_pieces[colIdx(current_color)].toggleBit(move.getDestinationIndex());
+  togglePiece(current_color, move.getAbsoluteMovingType(), move.getDestinationIndex());
 }
 
 void Position::updateSpecialMoveRights(const Move move) {
@@ -248,10 +240,16 @@ Piece Position::getPieceAtIndex(BoardIndex index) const {
 }
 
 Piece Position::getPieceAtTile(Bitboard tile) const {
-    for (Color c : Colors) {
+    if (findCommonBits(color_pieces[0], tile).hasRemainingBits()) {
         for (PieceType t : PieceTypes) {
-            if (findCommonBits(pieces[colIdx(c)][typeIdx(t)], tile).hasRemainingBits()) {
-                return {c, t};
+            if (findCommonBits(pieces[0][typeIdx(t)], tile).hasRemainingBits()) {
+                return {Color::WHITE, t};
+            }
+        }
+    } else if (findCommonBits(color_pieces[1], tile).hasRemainingBits()) {
+        for (PieceType t : PieceTypes) {
+            if (findCommonBits(pieces[1][typeIdx(t)], tile).hasRemainingBits()) {
+                return {Color::BLACK, t};
             }
         }
     }
@@ -259,10 +257,6 @@ Piece Position::getPieceAtTile(Bitboard tile) const {
 }
 
 MoveList Position::getLegalMoves() const {
-  getAllOwnPieces();
-  getAllOpponentPieces();
-
-  // Use MoveGenerator
   return MoveGenerator::getLegalMoves(*this);
 }
 
