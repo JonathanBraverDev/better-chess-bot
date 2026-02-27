@@ -8,6 +8,8 @@ public:
     static Move search(Position& pos, int depth);
 
 private:
+    static Move bestRootMove;
+    
     // Returns score relative to side to move
-    static int negamax(Position& pos, int depth, int alpha, int beta);
+    static int negamax(Position& pos, int depth, int maxDepth, int alpha, int beta);
 };
