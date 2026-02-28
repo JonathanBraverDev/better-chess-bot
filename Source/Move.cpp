@@ -8,9 +8,7 @@ Move::Move() : encodedMove(0) {}
 // Constructor with initial data
 Move::Move(BitMove encoded) : encodedMove(encoded) {}
 
-Move Move::copy() const {
-    return Move(encodedMove);
-}
+
 
 void Move::clearMoveData() {
     encodedMove &= BIT_RIGHTS_MASK;
@@ -52,7 +50,7 @@ PieceType Move::getAbsoluteMovingType() const {
     if (!isCapture() || isPromotion()) { // promotions use the regular types to aid with move ordering
         return getMovingOrPromotedType();
     } else {
-        return attackerTypeToPieceTypeMap.at(getAttackerType());
+        return toPieceType(getAttackerType());
     }
     return PieceType();
 }
@@ -141,12 +139,16 @@ void Move::setPromotion(bool is_promote) {
 }
 
 bool Move::isEnPassant() const {
-    return isCapture() && getMiscMoveType() == MoveType::PAWN_UNIQE;
+    return isCapture() && getMiscMoveType() == MoveType::PAWN_UNIQUE;
 }
 
 bool Move::isCastle() const {
   return getMiscMoveType() == MoveType::CASTLE_SHORT ||
          getMiscMoveType() == MoveType::CASTLE_LONG;
+}
+
+bool Move::isNull() const {
+    return (encodedMove & ~BIT_RIGHTS_MASK) == 0;
 }
 
 void Move::setWhiteShortCastleRight(bool can_castle) {
@@ -235,18 +237,18 @@ std::string Move::verboseDecode() const {
   if (isPromotion()) {
     description = "Pawn moves from " + origin;
     if (isCapture()) {
-      std::string capturedName = pieceTypeToNameMap.at(getCapturedType());
+      std::string capturedName = pieceTypeToName(getCapturedType());
       description += ", captures a " + capturedName + " on " + dest;
     } else {
       description += " to " + dest;
     }
-    std::string promotedName = pieceTypeToNameMap.at(getAbsoluteMovingType());
+    std::string promotedName = pieceTypeToName(getAbsoluteMovingType());
     description += " and promotes to a " + promotedName;
   } else {
-    std::string pieceName = pieceTypeToNameMap.at(getAbsoluteMovingType());
+    std::string pieceName = pieceTypeToName(getAbsoluteMovingType());
     description = pieceName + " moves from " + origin;
     if (isCapture()) {
-      std::string capturedName = pieceTypeToNameMap.at(getCapturedType());
+      std::string capturedName = pieceTypeToName(getCapturedType());
       description += " and captures a " + capturedName + " at " + dest;
     } else {
       description += " to " + dest;

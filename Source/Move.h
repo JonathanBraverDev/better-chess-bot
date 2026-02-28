@@ -20,8 +20,7 @@ private:
 public:
     Move();
     Move(BitMove encoded);
-    // returns a copy of the move
-    Move copy() const;
+
 
     // clears most components of the move, leaving BitRights intact
     void clearMoveData();
@@ -41,6 +40,7 @@ public:
   bool isPromotion() const;
   bool isEnPassant() const;
   bool isCastle() const;
+  bool isNull() const;
 
   void setOriginIndex(BoardIndex index);
   void setDestinationIndex(BoardIndex index);

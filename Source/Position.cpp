@@ -145,7 +145,7 @@ void Position::updateSpecialMoveRights(const Move move) {
 
   case PieceType::PAWN:
     // If a pawn jumps, add an En Passant right behind it
-    if (move.getMiscMoveType() == MoveType::PAWN_UNIQE && !move.isCapture()) {
+    if (move.getMiscMoveType() == MoveType::PAWN_UNIQUE && !move.isCapture()) {
       // Mark the destination tile
       Bitboard ep_location(0);
       ep_location.setBit(move.getDestinationIndex());
@@ -184,23 +184,6 @@ Bitboard Position::getEnPassantCaptureLocation(Color capturing_color,
   return capture_location;
 }
 
-void Position::CheckAndSaveMove(Move proposed_move) const {
-    // Only kept for potential internal usage, or we can just ignore it/remove it
-    // since MoveGenerator checks validity.
-}
-
-bool Position::selfCheckCheck(Move proposed_move) const {
-    // Moved to MoveGenerator
-    return false;
-}
-
-bool Position::enemyCheckCheck(Move proposed_move) const {
-    // Moved to MoveGenerator
-    return false;
-}
-
-// These helper check functions are now in MoveGenerator, or we need to update Position if we kept them.
-// But we moved them. So we remove valid implementation here.
 
 Color Position::getOpponentColor() const {
   return (current_color == Color::WHITE ? Color::BLACK : Color::WHITE);

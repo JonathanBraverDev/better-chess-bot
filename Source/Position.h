@@ -53,10 +53,7 @@ private:
   void updateSpecialMoveRights(const Move move);
   void restoreSpecialMoveRights(const Move move);
 
-  // Helper filters for MoveGenerator (formerly private)
-  bool selfCheckCheck(Move proposed_move) const;
-  bool enemyCheckCheck(Move proposed_move) const;
-  void CheckAndSaveMove(Move proposed_move) const;
+
 
 public:
   // allow initialization from string

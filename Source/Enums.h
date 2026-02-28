@@ -1,11 +1,15 @@
 #pragma once
 
-#include <map>
+
 #include <string>
 #include "BoardConstants.h"
 
 enum class Color { WHITE, BLACK };
 enum class PieceType { NONE, KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN };
+// inverted value for the capturing piece
+enum class AttackerType { NONE, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
+
+enum class AttackPattern { KING, PAWN, KNIGHT, LINE, DIAGONAL };
 
 constexpr Color Colors[] = {Color::WHITE, Color::BLACK};
 constexpr PieceType PieceTypes[] = {
@@ -38,36 +42,47 @@ inline PieceType charToPiece(char c) {
     }
 }
 
-enum class AttackPattern { KING, PAWN, KNIGHT, LINE, DIAGONAL };
-// inverted value for the capturing piece
-enum class AttackerType { NONE, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN };
 
-const std::map<PieceType, AttackerType> pieceTypeToAttackerMap = {
-  {PieceType::NONE, AttackerType::NONE},
-  {PieceType::KING, AttackerType::KING},
-  {PieceType::PAWN, AttackerType::PAWN},
-  {PieceType::KNIGHT, AttackerType::KNIGHT},
-  {PieceType::BISHOP, AttackerType::BISHOP},
-  {PieceType::ROOK, AttackerType::ROOK},
-  {PieceType::QUEEN, AttackerType::QUEEN},
-};
+// Conversion between PieceType and AttackerType (MVV-LVA ordering)
+inline constexpr AttackerType toAttackerType(PieceType type) {
+    constexpr AttackerType table[] = {
+        AttackerType::NONE,
+        AttackerType::KING,
+        AttackerType::PAWN,
+        AttackerType::KNIGHT,
+        AttackerType::BISHOP,
+        AttackerType::ROOK,
+        AttackerType::QUEEN,
+    };
+    return table[static_cast<int>(type)];
+}
 
-const std::map<AttackerType, PieceType> attackerTypeToPieceTypeMap = {
-  {AttackerType::NONE, PieceType::NONE},
-  {AttackerType::KING, PieceType::KING},
-  {AttackerType::PAWN, PieceType::PAWN},
-  {AttackerType::KNIGHT, PieceType::KNIGHT},
-  {AttackerType::BISHOP, PieceType::BISHOP},
-  {AttackerType::ROOK, PieceType::ROOK},
-  {AttackerType::QUEEN, PieceType::QUEEN},
-};
+inline constexpr PieceType toPieceType(AttackerType type) {
+    constexpr PieceType table[] = {
+        PieceType::NONE,
+        PieceType::KING,
+        PieceType::QUEEN,
+        PieceType::ROOK,
+        PieceType::BISHOP,
+        PieceType::KNIGHT,
+        PieceType::PAWN,
+    };
+    return table[static_cast<int>(type)];
+}
 
-enum class MoveType { NORMAL, PAWN_UNIQE, CASTLE_LONG, CASTLE_SHORT };
+inline const std::string& pieceTypeToName(PieceType type) {
+    static const std::string names[] = {
+        "None", "King", "Pawn", "Knight", "Bishop", "Rook", "Queen"
+    };
+    return names[static_cast<int>(type)];
+}
 
-enum class GameOverCause { CHECKMATE, RESIGNATION, TIMEOUT, STALEMALTE, INSUFFICENT_MATERIAL,
+enum class MoveType { NORMAL, PAWN_UNIQUE, CASTLE_LONG, CASTLE_SHORT };
+
+enum class GameOverCause { CHECKMATE, RESIGNATION, TIMEOUT, STALEMATE, INSUFFICIENT_MATERIAL,
                            FIFTY_MOVE_RULE, REPETITION, AGREED_DRAW };
 
-// All directional names are are according to the output of "visualize"
+// All directional names are according to the output of "visualize"
 enum Direction {
     UP,
     DOWN,
@@ -85,16 +100,6 @@ enum Direction {
     KNIGHT_LEFT_DOWN,
     KNIGHT_RIGHT_UP,
     KNIGHT_RIGHT_DOWN,
-};
-
-const std::map<PieceType, std::string> pieceTypeToNameMap = {
-  {PieceType::NONE, "None"},
-  {PieceType::KING, "King"},
-  {PieceType::PAWN, "Pawn"},
-  {PieceType::KNIGHT, "Knight"},
-  {PieceType::BISHOP, "Bishop"},
-  {PieceType::ROOK, "Rook"},
-  {PieceType::QUEEN, "Queen"},
 };
 
 const std::string tileNames[] = {

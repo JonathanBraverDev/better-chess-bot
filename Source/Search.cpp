@@ -4,19 +4,16 @@
 #include <algorithm>
 #include <limits>
 
-Move Search::bestRootMove;
-
 Move Search::search(Position& pos, int depth) {
-    bestRootMove = Move(); // Reset for safety
-    negamax(pos, depth, depth, -std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-    return bestRootMove;
+    SearchResult result = negamax(pos, depth, depth, -std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
+    return result.bestMove;
 }
 
-int Search::negamax(Position& pos, int depth, int maxDepth, int alpha, int beta) {
+SearchResult Search::negamax(Position& pos, int depth, int maxDepth, int alpha, int beta) {
     
     // Evaluate at target depth
     if (depth == 0) {
-        return Evaluator::evaluate(pos);
+        return {Evaluator::evaluate(pos), Move()};
     }
 
     // Generate moves
@@ -25,9 +22,9 @@ int Search::negamax(Position& pos, int depth, int maxDepth, int alpha, int beta)
     // Resolve static end game
     if (legalMoves.empty()) {
         if (pos.isInCheck()) {
-            return -WIN_VALUE + (maxDepth - depth); // Prefer faster mates
+            return {-WIN_VALUE + (maxDepth - depth), Move()}; // Prefer faster mates
         } else {
-            return DRAW_VALUE; // Stalemate
+            return {DRAW_VALUE, Move()}; // Stalemate
         }
     }
 
@@ -35,19 +32,19 @@ int Search::negamax(Position& pos, int depth, int maxDepth, int alpha, int beta)
     std::sort(legalMoves.begin(), legalMoves.end(), std::greater<Move>());
 
     int bestScore = -std::numeric_limits<int>::max();
+    Move bestMove;
 
     for (const Move& move : legalMoves) {
         pos.makeMove(move);
 
-        int score = -negamax(pos, depth - 1, maxDepth, -beta, -alpha);
+        SearchResult childResult = negamax(pos, depth - 1, maxDepth, -beta, -alpha);
+        int score = -childResult.score;
         
         pos.undoMove(move);
 
         if (score > bestScore) {
             bestScore = score;
-            if (depth == maxDepth) {
-                bestRootMove = move;
-            }
+            bestMove = move;
         }
 
         if (score > alpha) {
@@ -59,5 +56,5 @@ int Search::negamax(Position& pos, int depth, int maxDepth, int alpha, int beta)
         }
     }
 
-    return bestScore;
+    return {bestScore, bestMove};
 }

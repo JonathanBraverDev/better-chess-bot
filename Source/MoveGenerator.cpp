@@ -28,10 +28,7 @@ MoveList MoveGenerator::generateLegalMoves() {
 }
 
 void MoveGenerator::getPawnMoves() {
-    Color current_color = pos.getCurrentColor();
     Bitboard pawns = pos.getPieces(PieceType::PAWN);
-    Bitboard empty_tiles = pos.getAllPieces().getInverted();
-    Bitboard opponent_en_passant = pos.getOpponentEnPassantRow();
 
     Bitboard step;
     Bitboard captures;
@@ -79,7 +76,7 @@ void MoveGenerator::checkAndAddPawnJump(Bitboard step, Move move_base, Direction
         Bitboard jump = findCommonBits(step.look(forward), empty_tiles);
 
         if (jump.hasRemainingBits()) {
-            move_base.setMiscMoveType(MoveType::PAWN_UNIQE);
+            move_base.setMiscMoveType(MoveType::PAWN_UNIQUE);
             move_base.setDestinationIndex(jump.singleBitIndex());
 
             CheckAndSaveMove(move_base);
@@ -93,7 +90,7 @@ void MoveGenerator::checkAndAddEnPassant(Bitboard potential_en_passant, int pawn
 
     if (en_passant.hasRemainingBits()) {
         move_base.setAttackerType(AttackerType::PAWN);
-        move_base.setMiscMoveType(MoveType::PAWN_UNIQE);
+        move_base.setMiscMoveType(MoveType::PAWN_UNIQUE);
         move_base.setCapturedType(PieceType::PAWN);
         move_base.setDestinationIndex(en_passant.singleBitIndex());
         CheckAndSaveMove(move_base);
@@ -297,7 +294,7 @@ void MoveGenerator::finalizeMoves(Bitboard destinations, Move move_base) {
         destination = destinations.popLowestBit();
     }
 
-    move_base.setAttackerType(pieceTypeToAttackerMap.at(move_base.getAbsoluteMovingType()));
+    move_base.setAttackerType(toAttackerType(move_base.getAbsoluteMovingType()));
     
     Bitboard capture = captures.popLowestBit();
     while (capture.hasRemainingBits()) {
@@ -453,7 +450,7 @@ bool MoveGenerator::enemyCheckCheck(Move proposed_move) const {
     updated_blockers.clearBit(origin_index);
     updated_blockers.setBit(dest_index);
 
-    if (proposed_move.isCapture() && proposed_move.getMiscMoveType() == MoveType::PAWN_UNIQE) {
+    if (proposed_move.isCapture() && proposed_move.getMiscMoveType() == MoveType::PAWN_UNIQUE) {
         updated_blockers.clearBit(Position::getEnPassantCaptureLocation(pos.getCurrentColor(), dest_index).singleBitIndex());
     }
 
