@@ -45,7 +45,9 @@ int Search::negamax(Position& pos, int depth, int maxDepth, int alpha, int beta)
 
         if (score > bestScore) {
             bestScore = score;
-            bestRootMove = move;
+            if (depth == maxDepth) {
+                bestRootMove = move;
+            }
         }
 
         if (score > alpha) {
