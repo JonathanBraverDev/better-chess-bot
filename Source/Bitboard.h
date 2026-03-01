@@ -20,9 +20,6 @@ private:
 
   static const DirectionCheck direction_check[];
 
-  bool operator==(const Bitboard &other) const { return bits == other.bits; }
-  bool operator!=(const Bitboard &other) const { return bits != other.bits; }
-
   // Helpers for free functions (Hidden)
   template <typename T> static constexpr bool areAllSame() { return true; }
 
@@ -71,6 +68,9 @@ public:
   BoardIndex singleBitIndex() const;
   bool hasRemainingBits() const;
   bool isEmpty() const;
+
+  bool operator==(const Bitboard &other) const { return bits == other.bits; }
+  bool operator!=(const Bitboard &other) const { return bits != other.bits; }
 
   void setBit(BoardIndex index);
   void setBitsFrom(Bitboard otherBoard);

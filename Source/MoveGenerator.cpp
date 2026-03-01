@@ -28,7 +28,7 @@ MoveList MoveGenerator::generateLegalMoves() {
 }
 
 void MoveGenerator::getPawnMoves() {
-    Bitboard pawns = pos.getPieces(PieceType::PAWN);
+    Bitboard pawns = pos.getOwnPieces(PieceType::PAWN);
 
     Bitboard step;
     Bitboard captures;
@@ -461,7 +461,7 @@ bool MoveGenerator::enemyCheckCheck(Move proposed_move) const {
     };
 
     for (int i = 0; i < 2; ++i) {
-        Bitboard attackers = pos.getPiecesByPattern(patterns[i]);
+        Bitboard attackers = pos.getPiecesByPattern(pos.getCurrentColor(), patterns[i]);
         attackers.clearBit(origin_index);
         
         if (moving_type == slidingTypes[i][0] || moving_type == slidingTypes[i][1]) {

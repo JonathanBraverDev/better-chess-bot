@@ -243,13 +243,6 @@ MoveList Position::getLegalMoves() const {
   return MoveGenerator::getLegalMoves(*this);
 }
 
-Bitboard Position::getPieces(PieceType type) const {
-  return getPieces(current_color, type);
-}
-
-Bitboard Position::getPiecesByPattern(AttackPattern pattern) const {
-  return getPiecesByPattern(current_color, pattern);
-}
 
 Bitboard Position::getOpponentPiecesByPattern(AttackPattern pattern) const {
   return getPiecesByPattern(getOpponentColor(), pattern);

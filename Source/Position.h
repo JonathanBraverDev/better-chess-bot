@@ -65,7 +65,6 @@ public:
   void undoMove(Move move);
 
   Bitboard getPieces(Color color, PieceType type) const;
-  Bitboard getPieces(PieceType type) const;
   Piece getPieceAtIndex(BoardIndex index) const;
   Piece getPieceAtTile(Bitboard tile) const;
 
@@ -74,7 +73,6 @@ public:
   Bitboard getOwnPieces(PieceType type) const;
   Bitboard getOpponentPieces(PieceType type) const;
   Bitboard getPiecesByPattern(Color color, AttackPattern pattern) const;
-  Bitboard getPiecesByPattern(AttackPattern pattern) const;
   Bitboard getOpponentPiecesByPattern(AttackPattern pattern) const;
   Bitboard getAllOwnPieces() const;
   Bitboard getAllOpponentPieces() const;
