@@ -1,478 +1,533 @@
 #include "MoveGenerator.h"
-#include "MoveTables.h"
 #include "Enums.h"
+#include "MoveTables.h"
 #include <cassert>
 
-MoveGenerator::MoveGenerator(const Position& p) : pos(p) {
-    current_color = pos.getCurrentColor();
-    all_pieces = pos.getAllPieces();
-    empty_tiles = all_pieces.getInverted();
-    opponent_en_passant = pos.getOpponentEnPassantRow();
-    all_own_pieces = pos.getAllOwnPieces();
-    all_opponent_pieces = pos.getAllOpponentPieces();
+MoveGenerator::MoveGenerator(const Position &p) : pos(p) {
+  current_color = pos.getCurrentColor();
+  all_pieces = pos.getAllPieces();
+  empty_tiles = all_pieces.getInverted();
+  opponent_en_passant = pos.getOpponentEnPassantRow();
+  all_own_pieces = pos.getAllOwnPieces();
+  all_opponent_pieces = pos.getAllOpponentPieces();
 }
 
-MoveList MoveGenerator::getLegalMoves(const Position& pos) {
-    return MoveGenerator(pos).generateLegalMoves();
+MoveList MoveGenerator::getLegalMoves(const Position &pos) {
+  return MoveGenerator(pos).generateLegalMoves();
 }
 
 MoveList MoveGenerator::generateLegalMoves() {
-    getPawnMoves();
-    getKnightMoves();
-    getBishopMoves();
-    getRookMoves();
-    getQueenMoves();
-    getKingMoves();
+  getPawnMoves();
+  getKnightMoves();
+  getBishopMoves();
+  getRookMoves();
+  getQueenMoves();
+  getKingMoves();
 
-    return moves;
+  return moves;
 }
 
 void MoveGenerator::getPawnMoves() {
-    Bitboard pawns = pos.getOwnPieces(PieceType::PAWN);
+  Bitboard pawns = pos.getOwnPieces(PieceType::PAWN);
 
-    Bitboard step;
-    Bitboard captures;
-    Move pawn_move_base = pos.initializeMove(PieceType::PAWN);
-    Direction direction_forward = (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
-    int color_offset = (current_color == Color::WHITE ? 0 : 1);
-    BoardIndex pawn_index;
-    int pawn_move_index;
-    int adjusted_pawn_row;
+  Bitboard step;
+  Bitboard captures;
+  Move pawn_move_base = pos.initializeMove(PieceType::PAWN);
+  Direction direction_forward =
+      (current_color == Color::WHITE ? Direction::UP : Direction::DOWN);
+  int color_offset = (current_color == Color::WHITE ? 0 : 1);
+  BoardIndex pawn_index;
+  int pawn_move_index;
+  int adjusted_pawn_row;
 
-    Bitboard pawn = pawns.popLowestBit(); 
+  Bitboard pawn = pawns.popLowestBit();
 
-    while (pawn.hasRemainingBits()) {
-        Move move_base = pawn_move_base;
+  while (pawn.hasRemainingBits()) {
+    Move move_base = pawn_move_base;
 
-        pawn_index = pawn.singleBitIndex();
-        pawn_move_index = 2 * pawn_index + color_offset;
-        adjusted_pawn_row = (current_color == Color::WHITE
-            ? (pawn_index / BOARD_SIZE) + 1
-            : BOARD_SIZE - (pawn_index / BOARD_SIZE));
+    pawn_index = pawn.singleBitIndex();
+    pawn_move_index = 2 * pawn_index + color_offset;
+    adjusted_pawn_row = (current_color == Color::WHITE
+                             ? (pawn_index / BOARD_SIZE) + 1
+                             : BOARD_SIZE - (pawn_index / BOARD_SIZE));
 
-        step = findCommonBits(MoveTables::pawn_moves[pawn_move_index], empty_tiles);
-        captures = findCommonBits(MoveTables::pawn_attacks[pawn_move_index], pos.getAllOpponentPieces());
-        captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING));
+    step = findCommonBits(MoveTables::pawn_moves[pawn_move_index], empty_tiles);
+    captures = findCommonBits(MoveTables::pawn_attacks[pawn_move_index],
+                              pos.getAllOpponentPieces());
+    captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING));
 
-        move_base.setOriginIndex(pawn_index);
-        
-        if (adjusted_pawn_row == PAWN_PRE_PROMOTION_ROW) {
-            addPromotionMoves(step, captures, move_base);
-        } else {
-            if (adjusted_pawn_row == PAWN_INITIAL_ROW) {
-                checkAndAddPawnJump(step, move_base, direction_forward);
-            } else if (adjusted_pawn_row == PAWN_ENPASSANT_ROW) {
-                checkAndAddEnPassant(opponent_en_passant, pawn_move_index, move_base);
-            }
-            finalizeMoves(combineBoards(step, captures), move_base);
-        }
+    move_base.setOriginIndex(pawn_index);
 
-        pawn = pawns.popLowestBit();
+    if (adjusted_pawn_row == PAWN_PRE_PROMOTION_ROW) {
+      addPromotionMoves(step, captures, move_base);
+    } else {
+      if (adjusted_pawn_row == PAWN_INITIAL_ROW) {
+        checkAndAddPawnJump(step, move_base, direction_forward);
+      } else if (adjusted_pawn_row == PAWN_ENPASSANT_ROW) {
+        checkAndAddEnPassant(opponent_en_passant, pawn_move_index, move_base);
+      }
+      finalizeMoves(combineBoards(step, captures), move_base);
     }
+
+    pawn = pawns.popLowestBit();
+  }
 }
 
-void MoveGenerator::checkAndAddPawnJump(Bitboard step, Move move_base, Direction forward) {
-    if (step.hasRemainingBits()) {
-        Bitboard jump = findCommonBits(step.look(forward), empty_tiles);
+void MoveGenerator::checkAndAddPawnJump(Bitboard step, Move move_base,
+                                        Direction forward) {
+  if (step.hasRemainingBits()) {
+    Bitboard jump = findCommonBits(step.look(forward), empty_tiles);
 
-        if (jump.hasRemainingBits()) {
-            move_base.setMiscMoveType(MoveType::PAWN_UNIQUE);
-            move_base.setDestinationIndex(jump.singleBitIndex());
+    if (jump.hasRemainingBits()) {
+      move_base.setMiscMoveType(MoveType::PAWN_UNIQUE);
+      move_base.setDestinationIndex(jump.singleBitIndex());
 
-            CheckAndSaveMove(move_base);
-        }
+      CheckAndSaveMove(move_base);
     }
+  }
 }
 
-void MoveGenerator::checkAndAddEnPassant(Bitboard potential_en_passant, int pawn_move_index, Move move_base) {
-    Bitboard en_passant = findCommonBits(MoveTables::pawn_attacks[pawn_move_index],
-        potential_en_passant, pos.getSpecialMoveRights());
+void MoveGenerator::checkAndAddEnPassant(Bitboard potential_en_passant,
+                                         int pawn_move_index, Move move_base) {
+  Bitboard en_passant =
+      findCommonBits(MoveTables::pawn_attacks[pawn_move_index],
+                     potential_en_passant, pos.getSpecialMoveRights());
 
-    if (en_passant.hasRemainingBits()) {
-        move_base.setAttackerType(AttackerType::PAWN);
-        move_base.setMiscMoveType(MoveType::PAWN_UNIQUE);
-        move_base.setCapturedType(PieceType::PAWN);
-        move_base.setDestinationIndex(en_passant.singleBitIndex());
+  if (en_passant.hasRemainingBits()) {
+    move_base.setAttackerType(AttackerType::PAWN);
+    move_base.setMiscMoveType(MoveType::PAWN_UNIQUE);
+    move_base.setCapturedType(PieceType::PAWN);
+    move_base.setDestinationIndex(en_passant.singleBitIndex());
+    CheckAndSaveMove(move_base);
+  }
+}
+
+void MoveGenerator::addPromotionMoves(Bitboard step, Bitboard captures,
+                                      Move move_base) {
+  auto processPromotions = [&](Bitboard targets, bool isCapture) {
+    Bitboard target = targets.popLowestBit();
+    while (target.hasRemainingBits()) {
+      move_base.setDestinationIndex(target.singleBitIndex());
+      if (isCapture) {
+        move_base.setCapturedType(pos.getPieceAtTile(target).type);
+        move_base.setCapture(true);
+      }
+      for (PieceType promotionType : {PieceType::QUEEN, PieceType::ROOK,
+                                      PieceType::BISHOP, PieceType::KNIGHT}) {
+        move_base.setPromotedType(promotionType);
         CheckAndSaveMove(move_base);
+      }
+      target = targets.popLowestBit();
     }
-}
+  };
 
-void MoveGenerator::addPromotionMoves(Bitboard step, Bitboard captures, Move move_base) {
-    auto processPromotions = [&](Bitboard targets, bool isCapture) {
-        Bitboard target = targets.popLowestBit();
-        while (target.hasRemainingBits()) {
-            move_base.setDestinationIndex(target.singleBitIndex());
-            if (isCapture) {
-                move_base.setCapturedType(pos.getPieceAtTile(target).type);
-                move_base.setCapture(true);
-            }
-            for (PieceType promotionType : {PieceType::QUEEN, PieceType::ROOK, PieceType::BISHOP, PieceType::KNIGHT}) {
-                move_base.setPromotedType(promotionType);
-                CheckAndSaveMove(move_base);
-            }
-            target = targets.popLowestBit();
-        }
-    };
+  if (step.hasRemainingBits()) {
+    processPromotions(step, false);
+  }
 
-    if (step.hasRemainingBits()) {
-        processPromotions(step, false);
-    }
-
-    if (captures.hasRemainingBits()) {
-        processPromotions(captures, true);
-    }
+  if (captures.hasRemainingBits()) {
+    processPromotions(captures, true);
+  }
 }
 
 void MoveGenerator::getKnightMoves() {
-    Bitboard knights = pos.getOwnPieces(PieceType::KNIGHT);
-    Bitboard destinations;
-    Move move_base = pos.initializeMove(PieceType::KNIGHT);
-    Bitboard knight = knights.popLowestBit();
+  Bitboard knights = pos.getOwnPieces(PieceType::KNIGHT);
+  Bitboard destinations;
+  Move move_base = pos.initializeMove(PieceType::KNIGHT);
+  Bitboard knight = knights.popLowestBit();
 
-    while (knight.hasRemainingBits()) {
-        destinations.clear();
-        move_base.setOriginIndex(knight.singleBitIndex());
+  while (knight.hasRemainingBits()) {
+    destinations.clear();
+    move_base.setOriginIndex(knight.singleBitIndex());
 
-        destinations = MoveTables::knight_moves[knight.singleBitIndex()];
-        destinations.clearBitsFrom(pos.getAllOwnPieces());
+    destinations = MoveTables::knight_moves[knight.singleBitIndex()];
+    destinations.clearBitsFrom(pos.getAllOwnPieces());
 
-        finalizeMoves(destinations, move_base);
+    finalizeMoves(destinations, move_base);
 
-        knight = knights.popLowestBit();
-    }
+    knight = knights.popLowestBit();
+  }
 }
 
 void MoveGenerator::getSlidingPieceMoves(const PieceType pieceType) {
-    Bitboard pieces = pos.getOwnPieces(pieceType);
-    Bitboard destinations;
-    Move move_base = pos.initializeMove(pieceType);
-    Bitboard piece = pieces.popLowestBit();
+  Bitboard pieces = pos.getOwnPieces(pieceType);
+  Bitboard destinations;
+  Move move_base = pos.initializeMove(pieceType);
+  Bitboard piece = pieces.popLowestBit();
 
-    while (piece.hasRemainingBits()) {
-        destinations.clear();
-        move_base.setOriginIndex(piece.singleBitIndex());
+  while (piece.hasRemainingBits()) {
+    destinations.clear();
+    move_base.setOriginIndex(piece.singleBitIndex());
 
-        if (pieceType == PieceType::QUEEN || pieceType == PieceType::ROOK) {
-            destinations = combineBoards(destinations, getSlideDestinations(piece, AttackPattern::LINE));
-        }
-        if (pieceType == PieceType::QUEEN || pieceType == PieceType::BISHOP) {
-            destinations = combineBoards(destinations, getSlideDestinations(piece, AttackPattern::DIAGONAL));
-        }
-
-        destinations.clearBitsFrom(pos.getAllOwnPieces());
-        finalizeMoves(destinations, move_base);
-        piece = pieces.popLowestBit();
+    if (pieceType == PieceType::QUEEN || pieceType == PieceType::ROOK) {
+      destinations = combineBoards(
+          destinations, getSlideDestinations(piece, AttackPattern::LINE));
     }
+    if (pieceType == PieceType::QUEEN || pieceType == PieceType::BISHOP) {
+      destinations = combineBoards(
+          destinations, getSlideDestinations(piece, AttackPattern::DIAGONAL));
+    }
+
+    destinations.clearBitsFrom(pos.getAllOwnPieces());
+    finalizeMoves(destinations, move_base);
+    piece = pieces.popLowestBit();
+  }
 }
 
-Bitboard MoveGenerator::getSlideDestinations(const Bitboard piece, const AttackPattern pattern) const {
-    return getSlideDestinations(piece, pattern, pos.getAllPieces());
+Bitboard
+MoveGenerator::getSlideDestinations(const Bitboard piece,
+                                    const AttackPattern pattern) const {
+  return getSlideDestinations(piece, pattern, pos.getAllPieces());
 }
 
-Bitboard MoveGenerator::getSlideDestinations(const Bitboard piece, const AttackPattern pattern, const Bitboard blockers) const {
-    assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
-    Bitboard destinations;
+Bitboard MoveGenerator::getSlideDestinations(const Bitboard piece,
+                                             const AttackPattern pattern,
+                                             const Bitboard blockers) const {
+  assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
+  Bitboard destinations;
 
-    switch (pattern) {
-    case AttackPattern::DIAGONAL:
-        destinations = combineBoards(
-            piece.slidePath(Direction::UP_LEFT, blockers),
-            piece.slidePath(Direction::UP_RIGHT, blockers),
-            piece.slidePath(Direction::DOWN_LEFT, blockers),
-            piece.slidePath(Direction::DOWN_RIGHT, blockers));
-        break;
-    case AttackPattern::LINE:
-        destinations = combineBoards(
-            piece.slidePath(Direction::UP, blockers),
-            piece.slidePath(Direction::DOWN, blockers),
-            piece.slidePath(Direction::LEFT, blockers),
-            piece.slidePath(Direction::RIGHT, blockers));
-        break;
-    default:
-        break;
-    }
-    return destinations;
+  switch (pattern) {
+  case AttackPattern::DIAGONAL:
+    destinations =
+        combineBoards(piece.slidePath(Direction::UP_LEFT, blockers),
+                      piece.slidePath(Direction::UP_RIGHT, blockers),
+                      piece.slidePath(Direction::DOWN_LEFT, blockers),
+                      piece.slidePath(Direction::DOWN_RIGHT, blockers));
+    break;
+  case AttackPattern::LINE:
+    destinations = combineBoards(piece.slidePath(Direction::UP, blockers),
+                                 piece.slidePath(Direction::DOWN, blockers),
+                                 piece.slidePath(Direction::LEFT, blockers),
+                                 piece.slidePath(Direction::RIGHT, blockers));
+    break;
+  default:
+    break;
+  }
+  return destinations;
 }
 
 void MoveGenerator::getBishopMoves() {
-    getSlidingPieceMoves(PieceType::BISHOP);
+  getSlidingPieceMoves(PieceType::BISHOP);
 }
 
-void MoveGenerator::getRookMoves() {
-    getSlidingPieceMoves(PieceType::ROOK);
-}
+void MoveGenerator::getRookMoves() { getSlidingPieceMoves(PieceType::ROOK); }
 
-void MoveGenerator::getQueenMoves() {
-    getSlidingPieceMoves(PieceType::QUEEN);
-}
+void MoveGenerator::getQueenMoves() { getSlidingPieceMoves(PieceType::QUEEN); }
 
 void MoveGenerator::getKingMoves() {
-    Bitboard king = pos.getOwnPieces(PieceType::KING);
-    Bitboard own_pieces = pos.getAllOwnPieces();
-    Bitboard opponent_pieces = pos.getAllOpponentPieces();
-    Bitboard destinations;
-    Move move_base = pos.initializeMove(PieceType::KING);
-    
-    move_base.setOriginIndex(king.singleBitIndex());
+  Bitboard king = pos.getOwnPieces(PieceType::KING);
+  Bitboard own_pieces = pos.getAllOwnPieces();
+  Bitboard opponent_pieces = pos.getAllOpponentPieces();
+  Bitboard destinations;
+  Move move_base = pos.initializeMove(PieceType::KING);
 
-    destinations = MoveTables::king_moves[king.singleBitIndex()];
-    destinations.clearBitsFrom(own_pieces);
+  move_base.setOriginIndex(king.singleBitIndex());
 
-    finalizeMoves(destinations, move_base);
-    getCastlingMoves(king, combineBoards(own_pieces, opponent_pieces), move_base);
+  destinations = MoveTables::king_moves[king.singleBitIndex()];
+  destinations.clearBitsFrom(own_pieces);
+
+  finalizeMoves(destinations, move_base);
+  getCastlingMoves(king, combineBoards(own_pieces, opponent_pieces), move_base);
 }
 
-void MoveGenerator::getCastlingMoves(Bitboard king, Bitboard blockers, Move move_base) {
-    if (!findCommonBits(king, pos.getSpecialMoveRights()).hasRemainingBits() ||
-        isAttackedByAnyPattern(pos, king, pos.getAllPieces())) {
-        return;
-    }
+void MoveGenerator::getCastlingMoves(Bitboard king, Bitboard blockers,
+                                     Move move_base) {
+  if (!findCommonBits(king, pos.getSpecialMoveRights()).hasRemainingBits() ||
+      isAttackedByAnyPattern(pos, king, pos.getAllPieces())) {
+    return;
+  }
 
-    Color current_color = pos.getCurrentColor();
-    Bitboard own_rooks = pos.getOwnPieces(PieceType::ROOK);
-    Bitboard own_castle_row = (current_color == Color::WHITE ? WHITE_CASTLE_ROW : BLACK_CASTLE_ROW);
-    Bitboard long_rook = findCommonBits(king.lowerThanSingleBit(), own_rooks, pos.getSpecialMoveRights(), own_castle_row);
-    Bitboard short_rook = findCommonBits(king.higherThanSingleBit(), own_rooks, pos.getSpecialMoveRights(), own_castle_row);
+  Color current_color = pos.getCurrentColor();
+  Bitboard own_rooks = pos.getOwnPieces(PieceType::ROOK);
+  Bitboard own_castle_row =
+      (current_color == Color::WHITE ? WHITE_CASTLE_ROW : BLACK_CASTLE_ROW);
+  Bitboard long_rook =
+      findCommonBits(king.lowerThanSingleBit(), own_rooks,
+                     pos.getSpecialMoveRights(), own_castle_row);
+  Bitboard short_rook =
+      findCommonBits(king.higherThanSingleBit(), own_rooks,
+                     pos.getSpecialMoveRights(), own_castle_row);
 
-    Bitboard long_king_dest = findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_KING_COLUMN));
-    Bitboard long_rook_dest = findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_ROOK_COLUMN));
-    Bitboard short_king_dest = findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_KING_COLUMN));
-    Bitboard short_rook_dest = findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_ROOK_COLUMN));
+  Bitboard long_king_dest =
+      findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_KING_COLUMN));
+  Bitboard long_rook_dest =
+      findCommonBits(own_castle_row, Bitboard(LONG_CASTLE_ROOK_COLUMN));
+  Bitboard short_king_dest =
+      findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_KING_COLUMN));
+  Bitboard short_rook_dest =
+      findCommonBits(own_castle_row, Bitboard(SHORT_CASTLE_ROOK_COLUMN));
 
-    move_base = pos.currentBitRights();
-    move_base.setOriginIndex(king.singleBitIndex());
-    move_base.setMovingType(PieceType::KING);
+  move_base = pos.currentBitRights();
+  move_base.setOriginIndex(king.singleBitIndex());
+  move_base.setMovingType(PieceType::KING);
 
-    if (long_rook.hasRemainingBits() && canCastleWithRook(king, long_rook, long_king_dest, long_rook_dest)) {
-        move_base.setDestinationIndex(long_rook.singleBitIndex());
-        move_base.setMiscMoveType(MoveType::CASTLE_LONG);
-        moves.push_back(move_base);
-    }
+  if (long_rook.hasRemainingBits() &&
+      canCastleWithRook(king, long_rook, long_king_dest, long_rook_dest)) {
+    move_base.setDestinationIndex(long_rook.singleBitIndex());
+    move_base.setMiscMoveType(MoveType::CASTLE_LONG);
+    moves.push_back(move_base);
+  }
 
-    if (short_rook.hasRemainingBits() && canCastleWithRook(king, short_rook, short_king_dest, short_rook_dest)) {
-        move_base.setDestinationIndex(short_rook.singleBitIndex());
-        move_base.setMiscMoveType(MoveType::CASTLE_SHORT);
-        moves.push_back(move_base);
-    }
+  if (short_rook.hasRemainingBits() &&
+      canCastleWithRook(king, short_rook, short_king_dest, short_rook_dest)) {
+    move_base.setDestinationIndex(short_rook.singleBitIndex());
+    move_base.setMiscMoveType(MoveType::CASTLE_SHORT);
+    moves.push_back(move_base);
+  }
 }
 
-bool MoveGenerator::canCastleWithRook(const Bitboard king, const Bitboard rook, const Bitboard king_dest, const Bitboard rook_dest) const {
-    if (!rook.getCommonBitsWith(pos.getSpecialMoveRights()).hasRemainingBits()) {
-        return false;
-    }
+bool MoveGenerator::canCastleWithRook(const Bitboard king, const Bitboard rook,
+                                      const Bitboard king_dest,
+                                      const Bitboard rook_dest) const {
+  if (!rook.getCommonBitsWith(pos.getSpecialMoveRights()).hasRemainingBits()) {
+    return false;
+  }
 
-    Bitboard all_pieces = pos.getAllPieces();
-    Bitboard king_path = king.sameRowPathTo(king_dest);
-    Bitboard rook_path = rook.sameRowPathTo(rook_dest);
-    Bitboard castling_pieces = combineBoards(king, rook);
-    Bitboard blockers = all_pieces.getWithoutBitsFrom(castling_pieces);
+  Bitboard all_pieces = pos.getAllPieces();
+  Bitboard king_path = king.sameRowPathTo(king_dest);
+  Bitboard rook_path = rook.sameRowPathTo(rook_dest);
+  Bitboard castling_pieces = combineBoards(king, rook);
+  Bitboard blockers = all_pieces.getWithoutBitsFrom(castling_pieces);
 
-    if (isAttackedByAnyPattern(pos, king_path, blockers)) {
-        return false;
-    }
+  if (isAttackedByAnyPattern(pos, king_path, blockers)) {
+    return false;
+  }
 
-    Bitboard interfering_pieces = combineBoards(findCommonBits(blockers, rook_path), findCommonBits(blockers, king_path));
-    if (interfering_pieces.hasRemainingBits()) {
-        return false;
-    }
+  Bitboard interfering_pieces = combineBoards(
+      findCommonBits(blockers, rook_path), findCommonBits(blockers, king_path));
+  if (interfering_pieces.hasRemainingBits()) {
+    return false;
+  }
 
-    return true;
+  return true;
 }
 
 void MoveGenerator::finalizeMoves(Bitboard destinations, Move move_base) {
-    destinations.clearBitsFrom(pos.getAllOwnPieces());
-    Bitboard captures = findCommonBits(destinations, pos.getAllOpponentPieces());
-    destinations.clearBitsFrom(captures);
-    captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING)); 
+  destinations.clearBitsFrom(pos.getAllOwnPieces());
+  Bitboard captures = findCommonBits(destinations, pos.getAllOpponentPieces());
+  destinations.clearBitsFrom(captures);
+  captures.clearBitsFrom(pos.getOpponentPieces(PieceType::KING));
 
-    Bitboard destination = destinations.popLowestBit();
-    Move move;
-    while (destination.hasRemainingBits()) {
-        move = move_base;
-        move.setDestinationIndex(destination.singleBitIndex());
-        CheckAndSaveMove(move);
-        destination = destinations.popLowestBit();
-    }
+  Bitboard destination = destinations.popLowestBit();
+  Move move;
+  while (destination.hasRemainingBits()) {
+    move = move_base;
+    move.setDestinationIndex(destination.singleBitIndex());
+    CheckAndSaveMove(move);
+    destination = destinations.popLowestBit();
+  }
 
-    move_base.setAttackerType(toAttackerType(move_base.getAbsoluteMovingType()));
-    
-    Bitboard capture = captures.popLowestBit();
-    while (capture.hasRemainingBits()) {
-        move = move_base;
-        move.setDestinationIndex(capture.singleBitIndex());
-        move.setCapturedType(pos.getPieceAtTile(capture).type);
-        move.setCapture(true);
-        CheckAndSaveMove(move);
-        capture = captures.popLowestBit();
-    }
+  move_base.setAttackerType(toAttackerType(move_base.getAbsoluteMovingType()));
+
+  Bitboard capture = captures.popLowestBit();
+  while (capture.hasRemainingBits()) {
+    move = move_base;
+    move.setDestinationIndex(capture.singleBitIndex());
+    move.setCapturedType(pos.getPieceAtTile(capture).type);
+    move.setCapture(true);
+    CheckAndSaveMove(move);
+    capture = captures.popLowestBit();
+  }
 }
 
 void MoveGenerator::CheckAndSaveMove(Move proposed_move) {
-    if (!selfCheckCheck(proposed_move)) {
-        if (enemyCheckCheck(proposed_move)) {
-            proposed_move.setCheck(true);
-        }
-        moves.push_back(proposed_move);
+  if (!selfCheckCheck(proposed_move)) {
+    if (enemyCheckCheck(proposed_move)) {
+      proposed_move.setCheck(true);
     }
+    moves.push_back(proposed_move);
+  }
 }
 
 bool MoveGenerator::selfCheckCheck(Move proposed_move) const {
-    Bitboard own_king = pos.getOwnPieces(PieceType::KING);
-    BoardIndex king_index;
-    Bitboard blockers = pos.getAllPieces();
+  Bitboard own_king = pos.getOwnPieces(PieceType::KING);
+  BoardIndex king_index;
+  Bitboard blockers = pos.getAllPieces();
 
-    blockers.clearBit(proposed_move.getOriginIndex());
-    blockers.setBit(proposed_move.getDestinationIndex());
+  blockers.clearBit(proposed_move.getOriginIndex());
+  blockers.setBit(proposed_move.getDestinationIndex());
 
-    BoardIndex capture_excluded = INVALID_INDEX;
-    if (proposed_move.isCapture()) {
-        capture_excluded = proposed_move.getDestinationIndex();
+  BoardIndex capture_excluded = INVALID_INDEX;
+  if (proposed_move.isCapture()) {
+    capture_excluded = proposed_move.getDestinationIndex();
+  }
+
+  if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
+    own_king.clear();
+    own_king.setBit(proposed_move.getDestinationIndex());
+    king_index = proposed_move.getDestinationIndex();
+  } else {
+    king_index = own_king.singleBitIndex();
+
+    if (proposed_move.isEnPassant()) {
+      blockers.clearBitsFrom(Position::getEnPassantCaptureLocation(
+          pos.getCurrentColor(), proposed_move.getDestinationIndex()));
     }
+  }
 
-    if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
-        own_king.clear();
-        own_king.setBit(proposed_move.getDestinationIndex());
-        king_index = proposed_move.getDestinationIndex();
-    } else {
-        king_index = own_king.singleBitIndex();
+  // Common slide checks extracted identically from both branches
+  if (isAttackedBySlidePattern(own_king, AttackPattern::LINE, blockers,
+                               capture_excluded) ||
+      isAttackedBySlidePattern(own_king, AttackPattern::DIAGONAL, blockers,
+                               capture_excluded)) {
+    return true;
+  }
 
-        if (proposed_move.isEnPassant()) {
-            blockers.clearBitsFrom(Position::getEnPassantCaptureLocation(pos.getCurrentColor(), proposed_move.getDestinationIndex()));
-        }
+  if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
+    if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT,
+                                capture_excluded) ||
+        isAttackedByJumpPattern(king_index, AttackPattern::PAWN,
+                                capture_excluded) ||
+        isAttackedByJumpPattern(king_index, AttackPattern::KING,
+                                capture_excluded)) {
+      return true;
     }
+  } else {
+    if (pos.isInCheck()) {
+      BoardIndex jump_excluded = capture_excluded;
+      if (proposed_move.isEnPassant()) {
+        jump_excluded =
+            Position::getEnPassantCaptureLocation(
+                pos.getCurrentColor(), proposed_move.getDestinationIndex())
+                .singleBitIndex();
+      }
 
-    // Common slide checks extracted identically from both branches
-    if (isAttackedBySlidePattern(own_king, AttackPattern::LINE, blockers, capture_excluded) ||
-        isAttackedBySlidePattern(own_king, AttackPattern::DIAGONAL, blockers, capture_excluded)) {
+      if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT,
+                                  jump_excluded) ||
+          isAttackedByJumpPattern(king_index, AttackPattern::PAWN,
+                                  jump_excluded)) {
         return true;
+      }
     }
-
-    if (proposed_move.getAbsoluteMovingType() == PieceType::KING) {
-        if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT, capture_excluded) ||
-            isAttackedByJumpPattern(king_index, AttackPattern::PAWN, capture_excluded) ||
-            isAttackedByJumpPattern(king_index, AttackPattern::KING, capture_excluded)) {
-            return true;
-        }
-    } else {
-        if (pos.isInCheck()) {
-            BoardIndex jump_excluded = capture_excluded;
-            if (proposed_move.isEnPassant()) {
-                jump_excluded = Position::getEnPassantCaptureLocation(pos.getCurrentColor(), proposed_move.getDestinationIndex()).singleBitIndex();
-            }
-
-            if (isAttackedByJumpPattern(king_index, AttackPattern::KNIGHT, jump_excluded) ||
-                isAttackedByJumpPattern(king_index, AttackPattern::PAWN, jump_excluded)) {
-                return true;
-            }
-        }
-    }
-    return false;
+  }
+  return false;
 }
 
-bool MoveGenerator::isAttackedBySlidePattern(Bitboard target, AttackPattern pattern, Bitboard blockers, BoardIndex excluded_index) const {
-    assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
-    Bitboard slide_path = getSlideDestinations(target, pattern, blockers);
-    Bitboard slide_attackers = pos.getOpponentPiecesByPattern(pattern);
-    if (excluded_index != INVALID_INDEX) {
-        slide_attackers.clearBit(excluded_index);
-    }
-    return findCommonBits(slide_attackers, slide_path).hasRemainingBits();
+bool MoveGenerator::isAttackedBySlidePattern(Bitboard target,
+                                             AttackPattern pattern,
+                                             Bitboard blockers,
+                                             BoardIndex excluded_index) const {
+  assert(pattern == AttackPattern::DIAGONAL || pattern == AttackPattern::LINE);
+  Bitboard slide_path = getSlideDestinations(target, pattern, blockers);
+  Bitboard slide_attackers = pos.getOpponentPiecesByPattern(pattern);
+  if (excluded_index != INVALID_INDEX) {
+    slide_attackers.clearBit(excluded_index);
+  }
+  return findCommonBits(slide_attackers, slide_path).hasRemainingBits();
 }
 
-bool MoveGenerator::isAttackedByJumpPattern(BoardIndex target_index, AttackPattern pattern, BoardIndex excluded_index) const {
-    assert(pattern == AttackPattern::PAWN || pattern == AttackPattern::KNIGHT || pattern == AttackPattern::KING);
-    Bitboard jump_origins;
-    switch (pattern) {
-    case AttackPattern::KNIGHT:
-        jump_origins = MoveTables::knight_moves[target_index];
-        break;
-    case AttackPattern::PAWN:
-        jump_origins = MoveTables::pawn_attacks[2 * target_index + (pos.getCurrentColor() == Color::WHITE ? 0 : 1)];
-        break;
-    case AttackPattern::KING:
-        jump_origins = MoveTables::king_moves[target_index];
-        break;
-    default:
-        assert(false);
-        break;
-    }
+bool MoveGenerator::isAttackedByJumpPattern(BoardIndex target_index,
+                                            AttackPattern pattern,
+                                            BoardIndex excluded_index) const {
+  assert(pattern == AttackPattern::PAWN || pattern == AttackPattern::KNIGHT ||
+         pattern == AttackPattern::KING);
+  Bitboard jump_origins;
+  switch (pattern) {
+  case AttackPattern::KNIGHT:
+    jump_origins = MoveTables::knight_moves[target_index];
+    break;
+  case AttackPattern::PAWN:
+    jump_origins = MoveTables::pawn_attacks
+        [2 * target_index + (pos.getCurrentColor() == Color::WHITE ? 0 : 1)];
+    break;
+  case AttackPattern::KING:
+    jump_origins = MoveTables::king_moves[target_index];
+    break;
+  default:
+    assert(false);
+    break;
+  }
 
-    Bitboard attackers = pos.getOpponentPiecesByPattern(pattern);
-    if (excluded_index != INVALID_INDEX) {
-        attackers.clearBit(excluded_index);
-    }
-    return findCommonBits(jump_origins, attackers).hasRemainingBits();
+  Bitboard attackers = pos.getOpponentPiecesByPattern(pattern);
+  if (excluded_index != INVALID_INDEX) {
+    attackers.clearBit(excluded_index);
+  }
+  return findCommonBits(jump_origins, attackers).hasRemainingBits();
 }
 
-bool MoveGenerator::isAttackedByAnyPattern(const Position& pos, Bitboard targets, Bitboard blockers) {
-    // We instantiate a throwaway MoveGenerator since this is a static method
-    MoveGenerator tempGen(pos);
-    if (tempGen.isAttackedBySlidePattern(targets, AttackPattern::LINE, blockers) ||
-        tempGen.isAttackedBySlidePattern(targets, AttackPattern::DIAGONAL, blockers)) {
-        return true;
-    }
+bool MoveGenerator::isAttackedByAnyPattern(const Position &pos,
+                                           Bitboard targets,
+                                           Bitboard blockers) {
+  // We instantiate a throwaway MoveGenerator since this is a static method
+  MoveGenerator tempGen(pos);
+  if (tempGen.isAttackedBySlidePattern(targets, AttackPattern::LINE,
+                                       blockers) ||
+      tempGen.isAttackedBySlidePattern(targets, AttackPattern::DIAGONAL,
+                                       blockers)) {
+    return true;
+  }
 
-    BoardIndex target_index;
-    Bitboard target = targets.popLowestBit();
+  BoardIndex target_index;
+  Bitboard target = targets.popLowestBit();
 
-    while (target.hasRemainingBits()) {
-        target_index = target.singleBitIndex();
-        if (tempGen.isAttackedByJumpPattern(target_index, AttackPattern::KNIGHT) ||
-            tempGen.isAttackedByJumpPattern(target_index, AttackPattern::PAWN) ||
-            tempGen.isAttackedByJumpPattern(target_index, AttackPattern::KING)) {
-            return true;
-        }
-        target = targets.popLowestBit();
+  while (target.hasRemainingBits()) {
+    target_index = target.singleBitIndex();
+    if (tempGen.isAttackedByJumpPattern(target_index, AttackPattern::KNIGHT) ||
+        tempGen.isAttackedByJumpPattern(target_index, AttackPattern::PAWN) ||
+        tempGen.isAttackedByJumpPattern(target_index, AttackPattern::KING)) {
+      return true;
     }
-    return false;
+    target = targets.popLowestBit();
+  }
+  return false;
 }
 
 bool MoveGenerator::enemyCheckCheck(Move proposed_move) const {
-    Bitboard opponent_king = pos.getOpponentPieces(PieceType::KING);
-    if (!opponent_king.hasRemainingBits()) {
-        return false;
-    }
-
-    PieceType moving_type = proposed_move.getAbsoluteMovingType();
-    BoardIndex dest_index = proposed_move.getDestinationIndex();
-    BoardIndex origin_index = proposed_move.getOriginIndex();
-
-    if (moving_type == PieceType::KNIGHT) {
-        if (MoveTables::knight_moves[dest_index].getCommonBitsWith(opponent_king).hasRemainingBits())
-            return true;
-    } else if (moving_type == PieceType::PAWN) {
-        int attack_idx = 2 * dest_index + (pos.getCurrentColor() == Color::WHITE ? 0 : 1);
-        if (MoveTables::pawn_attacks[attack_idx].getCommonBitsWith(opponent_king).hasRemainingBits())
-            return true;
-    }
-
-    Bitboard updated_blockers = pos.getAllPieces();
-    updated_blockers.clearBit(origin_index);
-    updated_blockers.setBit(dest_index);
-
-    if (proposed_move.isCapture() && proposed_move.getMiscMoveType() == MoveType::PAWN_UNIQUE) {
-        updated_blockers.clearBit(Position::getEnPassantCaptureLocation(pos.getCurrentColor(), dest_index).singleBitIndex());
-    }
-
-    const AttackPattern patterns[] = {AttackPattern::LINE, AttackPattern::DIAGONAL};
-    const PieceType slidingTypes[][2] = {
-        {PieceType::ROOK, PieceType::QUEEN},
-        {PieceType::BISHOP, PieceType::QUEEN}
-    };
-
-    for (int i = 0; i < 2; ++i) {
-        Bitboard attackers = pos.getPiecesByPattern(pos.getCurrentColor(), patterns[i]);
-        attackers.clearBit(origin_index);
-        
-        if (moving_type == slidingTypes[i][0] || moving_type == slidingTypes[i][1]) {
-            attackers.setBit(dest_index);
-        }
-
-        Bitboard rays = getSlideDestinations(opponent_king, patterns[i], updated_blockers);
-        if (rays.getCommonBitsWith(attackers).hasRemainingBits()) {
-            return true;
-        }
-    }
-
+  Bitboard opponent_king = pos.getOpponentPieces(PieceType::KING);
+  if (!opponent_king.hasRemainingBits()) {
     return false;
+  }
+
+  PieceType moving_type = proposed_move.getAbsoluteMovingType();
+  BoardIndex dest_index = proposed_move.getDestinationIndex();
+  BoardIndex origin_index = proposed_move.getOriginIndex();
+
+  if (moving_type == PieceType::KNIGHT) {
+    if (MoveTables::knight_moves[dest_index]
+            .getCommonBitsWith(opponent_king)
+            .hasRemainingBits())
+      return true;
+  } else if (moving_type == PieceType::PAWN) {
+    int attack_idx =
+        2 * dest_index + (pos.getCurrentColor() == Color::WHITE ? 0 : 1);
+    if (MoveTables::pawn_attacks[attack_idx]
+            .getCommonBitsWith(opponent_king)
+            .hasRemainingBits())
+      return true;
+  }
+
+  Bitboard updated_blockers = pos.getAllPieces();
+  updated_blockers.clearBit(origin_index);
+  updated_blockers.setBit(dest_index);
+
+  if (proposed_move.isCapture() &&
+      proposed_move.getMiscMoveType() == MoveType::PAWN_UNIQUE) {
+    updated_blockers.clearBit(
+        Position::getEnPassantCaptureLocation(pos.getCurrentColor(), dest_index)
+            .singleBitIndex());
+  }
+
+  const AttackPattern patterns[] = {AttackPattern::LINE,
+                                    AttackPattern::DIAGONAL};
+  const PieceType slidingTypes[][2] = {{PieceType::ROOK, PieceType::QUEEN},
+                                       {PieceType::BISHOP, PieceType::QUEEN}};
+
+  for (int i = 0; i < 2; ++i) {
+    Bitboard attackers =
+        pos.getPiecesByPattern(pos.getCurrentColor(), patterns[i]);
+    attackers.clearBit(origin_index);
+
+    if (moving_type == slidingTypes[i][0] ||
+        moving_type == slidingTypes[i][1]) {
+      attackers.setBit(dest_index);
+    }
+
+    Bitboard rays =
+        getSlideDestinations(opponent_king, patterns[i], updated_blockers);
+    if (rays.getCommonBitsWith(attackers).hasRemainingBits()) {
+      return true;
+    }
+  }
+
+  return false;
 }

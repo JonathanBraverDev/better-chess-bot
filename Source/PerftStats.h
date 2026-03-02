@@ -1,34 +1,34 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <iostream>
+#include <string>
 
 // Structure to hold detailed perft statistics
 struct PerftStats {
-    uint64_t nodes = 0;
-    uint64_t captures = 0;
-    uint64_t enPassant = 0;
-    uint64_t castles = 0;
-    uint64_t promotions = 0;
-    uint64_t checks = 0;
-    uint64_t checkmates = 0;
+  uint64_t nodes = 0;
+  uint64_t captures = 0;
+  uint64_t enPassant = 0;
+  uint64_t castles = 0;
+  uint64_t promotions = 0;
+  uint64_t checks = 0;
+  uint64_t checkmates = 0;
 
-    // Operator overloads for easy accumulation
-    PerftStats& operator+=(const PerftStats& other) {
-        nodes += other.nodes;
-        captures += other.captures;
-        enPassant += other.enPassant;
-        castles += other.castles;
-        promotions += other.promotions;
-        checks += other.checks;
-        checkmates += other.checkmates;
-        return *this;
-    }
+  // Operator overloads for easy accumulation
+  PerftStats &operator+=(const PerftStats &other) {
+    nodes += other.nodes;
+    captures += other.captures;
+    enPassant += other.enPassant;
+    castles += other.castles;
+    promotions += other.promotions;
+    checks += other.checks;
+    checkmates += other.checkmates;
+    return *this;
+  }
 
-    PerftStats operator+(const PerftStats& other) const {
-        PerftStats result = *this;
-        result += other;
-        return result;
-    }
+  PerftStats operator+(const PerftStats &other) const {
+    PerftStats result = *this;
+    result += other;
+    return result;
+  }
 };

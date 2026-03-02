@@ -1,14 +1,18 @@
 #pragma once
 
-#include "Position.h"
+#include "GameState.h"
 #include "Move.h"
+#include "Position.h"
 
 class Player {
 private:
-    Color color; // to make each player 'aware' of thier own pieces
-    int evaluationParameter; // very much a placeholder for a WAY more complex... something
+  Color color;             // to make each player 'aware' of thier own pieces
+  int evaluationParameter; // very much a placeholder for a WAY more complex...
+                           // something
 public:
-    virtual Move pickMove(const GameState& gameState) = 0; // not quite sure how i want to handle eval at the moment
+  virtual Move
+  pickMove(const GameState &gameState) = 0; // not quite sure how i want to
+                                            // handle eval at the moment
 };
 
 // Bot class with fins move and eval

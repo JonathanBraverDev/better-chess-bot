@@ -6,6 +6,6 @@
 
 class FenUtility {
 public:
-    static Position fromFen(const std::string& fen);
-    static std::string toFen(const Position& pos);
+  static Position fromFen(const std::string &fen);
+  static std::string toFen(const Position &pos);
 };

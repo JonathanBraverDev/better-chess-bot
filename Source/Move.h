@@ -5,26 +5,27 @@
 
 class Move {
 private:
-    BitMove encodedMove;
+  BitMove encodedMove;
 
-    // leaving potential coding mistakes localzied to the class
-    PieceType getMovingOrPromotedType() const;
-    AttackerType getAttackerType() const;
+  // leaving potential coding mistakes localzied to the class
+  PieceType getMovingOrPromotedType() const;
+  AttackerType getAttackerType() const;
 
-    // mask and offset MUST match
-    template<typename T>
-    inline void setProperty(BitMove mask, int offset, T value) {
-        encodedMove = (encodedMove & ~mask) | ((static_cast<uint8_t>(value) << offset) & mask);
-    }
+  // mask and offset MUST match
+  template <typename T>
+  inline void setProperty(BitMove mask, int offset, T value) {
+    encodedMove = (encodedMove & ~mask) |
+                  ((static_cast<uint8_t>(value) << offset) & mask);
+  }
 
 public:
-    Move();
-    Move(BitMove encoded);
+  Move();
+  Move(BitMove encoded);
 
-    // resets ALL componets of the move, use sparingly
-    void fullClear();
+  // resets ALL componets of the move, use sparingly
+  void fullClear();
 
-    BitMove getEncodedMove() const;
+  BitMove getEncodedMove() const;
 
   BoardIndex getOriginIndex() const;
   BoardIndex getDestinationIndex() const;
@@ -40,16 +41,16 @@ public:
 
   void setOriginIndex(BoardIndex index);
   void setDestinationIndex(BoardIndex index);
-    void setMovingType(PieceType type);
-    // Sets promotion flag too
-    void setPromotedType(PieceType type);
-    // Sets capture flag too
-    void setAttackerType(AttackerType type);
-    void setCapturedType(PieceType type);
-    void setMiscMoveType(MoveType miscType);
-    void setCapture(bool is_capture);
-    void setCheck(bool is_check);
-    void setPromotion(bool is_promote);
+  void setMovingType(PieceType type);
+  // Sets promotion flag too
+  void setPromotedType(PieceType type);
+  // Sets capture flag too
+  void setAttackerType(AttackerType type);
+  void setCapturedType(PieceType type);
+  void setMiscMoveType(MoveType miscType);
+  void setCapture(bool is_capture);
+  void setCheck(bool is_check);
+  void setPromotion(bool is_promote);
 
   void setWhiteShortCastleRight(bool can_castle);
   void setWhiteLongCastleRight(bool can_castle);
@@ -67,11 +68,11 @@ public:
   bool isValidEnPassant() const;
   BoardIndex getEnPassantIndex() const;
 
-    // add conversion to text form
-    std::string verboseDecode() const;
+  // add conversion to text form
+  std::string verboseDecode() const;
 
-    // for sorting, higher BitMove values are considered better
-    bool operator>(const Move& other) const {
-        return encodedMove > other.encodedMove;
-    }
+  // for sorting, higher BitMove values are considered better
+  bool operator>(const Move &other) const {
+    return encodedMove > other.encodedMove;
+  }
 };

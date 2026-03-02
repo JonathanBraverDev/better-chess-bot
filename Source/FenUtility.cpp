@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 
-Position FenUtility::fromFen(const std::string& fen) {
+Position FenUtility::fromFen(const std::string &fen) {
   Position pos;
 
   std::stringstream ss(fen);
@@ -25,8 +25,8 @@ Position FenUtility::fromFen(const std::string& fen) {
 
         PieceType type = charToPiece(c);
         if (type != PieceType::NONE) {
-            Color color = isupper(c) ? Color::WHITE : Color::BLACK;
-            pos.getPieceBoardRef(color, type).setBit(index);
+          Color color = isupper(c) ? Color::WHITE : Color::BLACK;
+          pos.getPieceBoardRef(color, type).setBit(index);
         }
         file++;
       }
@@ -35,9 +35,9 @@ Position FenUtility::fromFen(const std::string& fen) {
 
   // Active Color
   if (std::getline(ss, segment, ' ')) {
-      pos.setCurrentColor((segment == "w") ? Color::WHITE : Color::BLACK);
+    pos.setCurrentColor((segment == "w") ? Color::WHITE : Color::BLACK);
   } else {
-      pos.setCurrentColor(Color::WHITE); // Default
+    pos.setCurrentColor(Color::WHITE); // Default
   }
 
   // Castling Rights
@@ -47,20 +47,20 @@ Position FenUtility::fromFen(const std::string& fen) {
       for (char c : segment) {
         switch (c) {
         case 'K':
-            pos.getSpecialMoveRightsRef().setBit(E1_index);
-            pos.getSpecialMoveRightsRef().setBit(H1_index);
+          pos.getSpecialMoveRightsRef().setBit(E1_index);
+          pos.getSpecialMoveRightsRef().setBit(H1_index);
           break;
         case 'Q':
-            pos.getSpecialMoveRightsRef().setBit(E1_index);
-            pos.getSpecialMoveRightsRef().setBit(A1_index);
+          pos.getSpecialMoveRightsRef().setBit(E1_index);
+          pos.getSpecialMoveRightsRef().setBit(A1_index);
           break;
         case 'k':
-            pos.getSpecialMoveRightsRef().setBit(E8_index);
-            pos.getSpecialMoveRightsRef().setBit(H8_index);
+          pos.getSpecialMoveRightsRef().setBit(E8_index);
+          pos.getSpecialMoveRightsRef().setBit(H8_index);
           break;
         case 'q':
-            pos.getSpecialMoveRightsRef().setBit(E8_index);
-            pos.getSpecialMoveRightsRef().setBit(A8_index);
+          pos.getSpecialMoveRightsRef().setBit(E8_index);
+          pos.getSpecialMoveRightsRef().setBit(A8_index);
           break;
         }
       }
@@ -79,13 +79,14 @@ Position FenUtility::fromFen(const std::string& fen) {
     }
   }
 
-  // Populate the incremental color_pieces cache from the individual piece boards
+  // Populate the incremental color_pieces cache from the individual piece
+  // boards
   pos.updateCachedPieces();
 
   return pos;
 }
 
-std::string FenUtility::toFen(const Position& pos) {
+std::string FenUtility::toFen(const Position &pos) {
   std::stringstream ss;
 
   // 1. Piece Placement
@@ -125,18 +126,22 @@ std::string FenUtility::toFen(const Position& pos) {
   ss << " ";
   bool castling_available = false;
   Bitboard rights = pos.getSpecialMoveRights();
-  
+
   if (rights.getBit(E1_index) && rights.getBit(H1_index)) {
-      ss << "K"; castling_available = true;
+    ss << "K";
+    castling_available = true;
   }
   if (rights.getBit(E1_index) && rights.getBit(A1_index)) {
-      ss << "Q"; castling_available = true;
+    ss << "Q";
+    castling_available = true;
   }
   if (rights.getBit(E8_index) && rights.getBit(H8_index)) {
-      ss << "k"; castling_available = true;
+    ss << "k";
+    castling_available = true;
   }
   if (rights.getBit(E8_index) && rights.getBit(A8_index)) {
-      ss << "q"; castling_available = true;
+    ss << "q";
+    castling_available = true;
   }
   if (!castling_available) {
     ss << "-";

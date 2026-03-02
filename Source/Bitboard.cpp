@@ -2,8 +2,8 @@
 #include "BoardConstants.h"
 #include "DeBruijn.h"
 #include <cassert>
-#include <iostream>
 #include <intrin.h> // For __popcnt64
+#include <iostream>
 
 const DirectionCheck Bitboard::direction_check[] = {
     // UP and DOWN will be shifted out naturally, masked for consistency
@@ -34,8 +34,9 @@ Bitboard::Bitboard() : bits(0) {}
 Bitboard::Bitboard(B64 initialData) : bits(initialData) {}
 
 Bitboard Bitboard::boardFromIndex(BoardIndex index) {
-    if (index == INVALID_INDEX) return Bitboard(0);
-    return Bitboard(1ULL << index);
+  if (index == INVALID_INDEX)
+    return Bitboard(0);
+  return Bitboard(1ULL << index);
 }
 
 void Bitboard::clear() { bits = 0; }
@@ -136,8 +137,8 @@ void Bitboard::shift(Direction direction) {
       bits &
       direction_check[direction].boundCheck; // stops odd shifting teleportation
   // Avoid negative shifts by fliping the shift direction and value
-  bits = (shift_amount >= 0) ? (bits << shift_amount)
-                              : (bits >> (-shift_amount));
+  bits =
+      (shift_amount >= 0) ? (bits << shift_amount) : (bits >> (-shift_amount));
 }
 
 void Bitboard::nextTile() { bits <<= 1; }

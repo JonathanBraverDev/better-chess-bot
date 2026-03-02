@@ -28,18 +28,14 @@ private:
     return std::is_same<T, U>::value && areAllSame<T, Rest...>();
   }
 
-  static B64 combineBoardsJoiner(Bitboard board) {
-    return board.bits;
-  }
+  static B64 combineBoardsJoiner(Bitboard board) { return board.bits; }
 
   template <typename... Boards>
   static B64 combineBoardsJoiner(Bitboard board, Boards... boards) {
     return board.bits | combineBoardsJoiner(boards...);
   }
 
-  static B64 findCommonBitsJoiner(Bitboard board) {
-    return board.bits;
-  }
+  static B64 findCommonBitsJoiner(Bitboard board) { return board.bits; }
 
   template <typename... Boards>
   static B64 findCommonBitsJoiner(Bitboard board, Boards... boards) {
@@ -54,9 +50,10 @@ private:
   friend Bitboard findCommonBits(T b, Boards... boards);
 
 public:
-  Bitboard();                 // Default constructor
-  Bitboard(B64 initialData);  // Constructor with initial data
-  static Bitboard boardFromIndex(BoardIndex index); // creates a board with only the given index set
+  Bitboard();                // Default constructor
+  Bitboard(B64 initialData); // Constructor with initial data
+  static Bitboard boardFromIndex(
+      BoardIndex index); // creates a board with only the given index set
   void clear();
 
   void visualize() const;

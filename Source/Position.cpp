@@ -1,14 +1,13 @@
 #include "Position.h"
 #include "Bitboard.h"
-#include "Enums.h"
-#include "Structs.h"
-#include "MoveGenerator.h"
-#include "FenUtility.h"
-#include "MoveTables.h"
 #include "BoardConstants.h"
+#include "Enums.h"
+#include "FenUtility.h"
+#include "MoveGenerator.h"
+#include "MoveTables.h"
+#include "Structs.h"
 #include <cassert>
 #include <string>
-
 
 void Position::makeMove(Move move) {
 
@@ -33,28 +32,34 @@ void Position::makeMove(Move move) {
 
 void Position::restoreSpecialMoveRights(const Move move) {
   special_move_rights.clear();
-  
+
   if (move.getWhiteShortCastleRight() || move.getWhiteLongCastleRight()) {
-      special_move_rights.setBit(E1_index);
+    special_move_rights.setBit(E1_index);
   }
-  if (move.getWhiteShortCastleRight()) special_move_rights.setBit(H1_index);
-  if (move.getWhiteLongCastleRight()) special_move_rights.setBit(A1_index);
+  if (move.getWhiteShortCastleRight())
+    special_move_rights.setBit(H1_index);
+  if (move.getWhiteLongCastleRight())
+    special_move_rights.setBit(A1_index);
 
   if (move.getBlackShortCastleRight() || move.getBlackLongCastleRight()) {
-      special_move_rights.setBit(E8_index);
+    special_move_rights.setBit(E8_index);
   }
-  if (move.getBlackShortCastleRight()) special_move_rights.setBit(H8_index);
-  if (move.getBlackLongCastleRight()) special_move_rights.setBit(A8_index);
-  
+  if (move.getBlackShortCastleRight())
+    special_move_rights.setBit(H8_index);
+  if (move.getBlackLongCastleRight())
+    special_move_rights.setBit(A8_index);
+
   if (move.isValidEnPassant()) {
     BoardIndex ep_idx = move.getEnPassantIndex();
-    special_move_rights.setBitsFrom(findCommonBits(getOpponentEnPassantRow(), Bitboard(COLUMN_A << ep_idx)));
+    special_move_rights.setBitsFrom(findCommonBits(
+        getOpponentEnPassantRow(), Bitboard(COLUMN_A << ep_idx)));
   }
 }
 
 void Position::undoMove(Move move) {
-  current_color = getOpponentColor(); // Change back to the color that made the move
-  
+  current_color =
+      getOpponentColor(); // Change back to the color that made the move
+
   // Restore special move rights directly from the Move's bit rights
   restoreSpecialMoveRights(move);
 
@@ -121,7 +126,8 @@ void Position::togglePromotion(const Move move) {
   togglePiece(current_color, PieceType::PAWN, move.getOriginIndex());
 
   // Add promoted piece
-  togglePiece(current_color, move.getAbsoluteMovingType(), move.getDestinationIndex());
+  togglePiece(current_color, move.getAbsoluteMovingType(),
+              move.getDestinationIndex());
 }
 
 void Position::updateSpecialMoveRights(const Move move) {
@@ -168,7 +174,8 @@ void Position::updateSpecialMoveRights(const Move move) {
 }
 
 // finds the location of the pawn that was captured by en passant
-Bitboard Position::getEnPassantCaptureLocation(Color capturing_color,
+Bitboard
+Position::getEnPassantCaptureLocation(Color capturing_color,
                                       BoardIndex en_passant_tile_index) {
   Bitboard capture_location(0);
   capture_location.setBit(en_passant_tile_index);
@@ -183,7 +190,6 @@ Bitboard Position::getEnPassantCaptureLocation(Color capturing_color,
 
   return capture_location;
 }
-
 
 Color Position::getOpponentColor() const {
   return (current_color == Color::WHITE ? Color::BLACK : Color::WHITE);
@@ -210,12 +216,12 @@ Bitboard Position::getPiecesByPattern(Color color,
     return getPieces(color, PieceType::KING);
   case AttackPattern::DIAGONAL:
     return combineBoards(getPieces(color, PieceType::BISHOP),
-                                   getPieces(color, PieceType::QUEEN));
+                         getPieces(color, PieceType::QUEEN));
   case AttackPattern::LINE:
     return combineBoards(getPieces(color, PieceType::ROOK),
-                                   getPieces(color, PieceType::QUEEN));
+                         getPieces(color, PieceType::QUEEN));
   }
-    return Bitboard(0);
+  return Bitboard(0);
 }
 
 Piece Position::getPieceAtIndex(BoardIndex index) const {
@@ -223,26 +229,25 @@ Piece Position::getPieceAtIndex(BoardIndex index) const {
 }
 
 Piece Position::getPieceAtTile(Bitboard tile) const {
-    if (findCommonBits(color_pieces[0], tile).hasRemainingBits()) {
-        for (PieceType t : PieceTypes) {
-            if (findCommonBits(pieces[0][typeIdx(t)], tile).hasRemainingBits()) {
-                return {Color::WHITE, t};
-            }
-        }
-    } else if (findCommonBits(color_pieces[1], tile).hasRemainingBits()) {
-        for (PieceType t : PieceTypes) {
-            if (findCommonBits(pieces[1][typeIdx(t)], tile).hasRemainingBits()) {
-                return {Color::BLACK, t};
-            }
-        }
+  if (findCommonBits(color_pieces[0], tile).hasRemainingBits()) {
+    for (PieceType t : PieceTypes) {
+      if (findCommonBits(pieces[0][typeIdx(t)], tile).hasRemainingBits()) {
+        return {Color::WHITE, t};
+      }
     }
-    return {Color::WHITE, PieceType::NONE};
+  } else if (findCommonBits(color_pieces[1], tile).hasRemainingBits()) {
+    for (PieceType t : PieceTypes) {
+      if (findCommonBits(pieces[1][typeIdx(t)], tile).hasRemainingBits()) {
+        return {Color::BLACK, t};
+      }
+    }
+  }
+  return {Color::WHITE, PieceType::NONE};
 }
 
 MoveList Position::getLegalMoves() const {
   return MoveGenerator::getLegalMoves(*this);
 }
-
 
 Bitboard Position::getOpponentPiecesByPattern(AttackPattern pattern) const {
   return getPiecesByPattern(getOpponentColor(), pattern);
@@ -268,13 +273,11 @@ Bitboard Position::getAllPieces() const {
   return combineBoards(color_pieces[0], color_pieces[1]);
 }
 
-void Position::InitializeMoves() {
-    MoveTables::initialize();
-}
+void Position::InitializeMoves() { MoveTables::initialize(); }
 
 bool Position::isInCheck() const {
-    Bitboard king = getPieces(current_color, PieceType::KING);
-    return MoveGenerator::isAttackedByAnyPattern(*this, king, getAllPieces());
+  Bitboard king = getPieces(current_color, PieceType::KING);
+  return MoveGenerator::isAttackedByAnyPattern(*this, king, getAllPieces());
 }
 
 Move Position::currentBitRights() const {
@@ -286,29 +289,27 @@ Move Position::currentBitRights() const {
   Bitboard black_rooks = pieces[colIdx(Color::BLACK)][typeIdx(PieceType::ROOK)];
 
   // operating directly regardless of color
-  if (findCommonBits(white_king, special_move_rights)
-          .hasRemainingBits()) {
+  if (findCommonBits(white_king, special_move_rights).hasRemainingBits()) {
     rights.setWhiteLongCastleRight(
         findCommonBits(white_king.lowerThanSingleBit(), white_rooks,
-                                 special_move_rights)
+                       special_move_rights)
             .hasRemainingBits());
 
     rights.setWhiteShortCastleRight(
         findCommonBits(white_king.higherThanSingleBit(), white_rooks,
-                                 special_move_rights)
+                       special_move_rights)
             .hasRemainingBits());
   }
 
-  if (findCommonBits(black_king, special_move_rights)
-          .hasRemainingBits()) {
+  if (findCommonBits(black_king, special_move_rights).hasRemainingBits()) {
     rights.setBlackLongCastleRight(
         findCommonBits(black_king.lowerThanSingleBit(), black_rooks,
-                                 special_move_rights)
+                       special_move_rights)
             .hasRemainingBits());
 
     rights.setBlackShortCastleRight(
         findCommonBits(black_king.higherThanSingleBit(), black_rooks,
-                                 special_move_rights)
+                       special_move_rights)
             .hasRemainingBits());
   }
 
@@ -324,16 +325,16 @@ Move Position::currentBitRights() const {
 }
 
 Move Position::initializeMove(PieceType type) const {
-    Move move = currentBitRights();
-    move.setMovingType(type);
-    return move;
+  Move move = currentBitRights();
+  move.setMovingType(type);
+  return move;
 }
 
 Position::Position() {
   for (Color c : Colors) {
-      for (PieceType t : PieceTypes) {
-          pieces[colIdx(c)][typeIdx(t)].clear();
-      }
+    for (PieceType t : PieceTypes) {
+      pieces[colIdx(c)][typeIdx(t)].clear();
+    }
   }
 
   special_move_rights.clear();
@@ -351,11 +352,6 @@ void Position::updateCachedPieces() {
   }
 }
 
-Position Position::fromFen(FenString fen) {
-  return FenUtility::fromFen(fen);
-}
+Position Position::fromFen(FenString fen) { return FenUtility::fromFen(fen); }
 
-std::string Position::toFen() const {
-  return FenUtility::toFen(*this);
-}
-
+std::string Position::toFen() const { return FenUtility::toFen(*this); }
