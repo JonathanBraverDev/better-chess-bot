@@ -8,7 +8,6 @@
 #include <string>
 #include <cassert>
 
-// out of structs.h cuse codependancy mess
 // all the needed information to make a legal move
 class Position {
   friend class FenUtility;
@@ -16,7 +15,7 @@ class Position {
 
 private:
   // Array bitboard storage: [Color][PieceType]
-  // keys by the respective Enums
+  // keyed by the respective Enums
   Bitboard pieces[2][6];
 
   inline int colIdx(Color c) const {
@@ -88,7 +87,7 @@ public:
 
   bool isInCheck() const;
 
-    // Accessors needed by MoveGenerator and FenUtility
+  // Accessors needed by MoveGenerator and FenUtility
   Color getCurrentColor() const { return current_color; }
   void setCurrentColor(Color color) { current_color = color; }
   Bitboard getSpecialMoveRights() const { return special_move_rights; }

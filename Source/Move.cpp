@@ -9,11 +9,6 @@ Move::Move() : encodedMove(0) {}
 Move::Move(BitMove encoded) : encodedMove(encoded) {}
 
 
-
-void Move::clearMoveData() {
-    encodedMove &= BIT_RIGHTS_MASK;
-}
-
 void Move::fullClear() {
     encodedMove = 0;
 }
