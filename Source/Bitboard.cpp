@@ -3,6 +3,7 @@
 #include "DeBruijn.h"
 #include <cassert>
 #include <iostream>
+#include <intrin.h> // For __popcnt64
 
 const DirectionCheck Bitboard::direction_check[] = {
     // UP and DOWN will be shifted out naturally, masked for consistency
@@ -69,13 +70,7 @@ B64 Bitboard::lowestBitBoard() const {
 }
 
 int Bitboard::countSetBits() const {
-  int count;
-  B64 bits_copy = bits;
-  // runs until the copy is zeroed out, counting iterations
-  for (count = 0; bits_copy; count++)
-    // removes one bit per iteration
-    bits_copy &= (bits_copy - 1);
-  return count;
+  return static_cast<int>(__popcnt64(bits));
 }
 
 // returns the index of the active bit
