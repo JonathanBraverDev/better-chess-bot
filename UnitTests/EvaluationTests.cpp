@@ -18,7 +18,7 @@ namespace UnitTests {
       // Score should be +100 (from white perspective)
       Position pos = Position::fromFen("8/8/8/8/8/8/P7/8 w - - 0 1");
       int score = Evaluator::evaluate(pos);
-      Assert::AreEqual(CENTIPAWNS.pawn_value, score);
+      Assert::AreEqual(CENTIPAWNS.pawn, score);
     }
 
     TEST_METHOD(MaterialCount_BlackAdvantage) {
@@ -27,7 +27,7 @@ namespace UnitTests {
       // Score should be -100.
       Position pos = Position::fromFen("8/p7/8/8/8/8/8/8 w - - 0 1");
       int score = Evaluator::evaluate(pos);
-      Assert::AreEqual(-CENTIPAWNS.pawn_value, score);
+      Assert::AreEqual(-CENTIPAWNS.pawn, score);
     }
 
     TEST_METHOD(MaterialCount_BlackToMove_Relative) {
@@ -37,7 +37,7 @@ namespace UnitTests {
       // Score should be +100 (from black perspective).
       Position pos = Position::fromFen("8/p7/8/8/8/8/8/8 b - - 0 1");
       int score = Evaluator::evaluate(pos);
-      Assert::AreEqual(CENTIPAWNS.pawn_value, score);
+      Assert::AreEqual(CENTIPAWNS.pawn, score);
     }
   };
 }
