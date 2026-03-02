@@ -6,139 +6,139 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace UnitTests {
 
     TEST_CLASS(BitboardMovementTests) {
-    public:
+public:
 
-        TEST_METHOD(Up) {
-            // Arrange
-            Bitboard test_board(A1);
+    TEST_METHOD(Up) {
+        // Arrange
+        Bitboard test_board(A1);
 
-            // Act
-            test_board.shift(Direction::UP);
+        // Act
+        test_board.shift(Direction::UP);
 
-            // Assert
-            // Add assertions to check the expected state of the board after the move
-            Assert::AreEqual(A2, test_board.getBoard());
-        }
+        // Assert
+        // Add assertions to check the expected state of the board after the move
+        Assert::AreEqual(A2, test_board.getBoard());
+    }
 
-        TEST_METHOD(UpOut) {
-            Bitboard test_board(C8);
+    TEST_METHOD(UpOut) {
+        Bitboard test_board(C8);
 
-            test_board.shift(Direction::UP);
+        test_board.shift(Direction::UP);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(Down) {
-            Bitboard test_board(H5);
+    TEST_METHOD(Down) {
+        Bitboard test_board(H5);
 
-            test_board.shift(Direction::DOWN);
+        test_board.shift(Direction::DOWN);
 
-            Assert::AreEqual(H4, test_board.getBoard());
-        }
+        Assert::AreEqual(H4, test_board.getBoard());
+    }
 
-        TEST_METHOD(DownOut) {
-            Bitboard test_board(D1);
+    TEST_METHOD(DownOut) {
+        Bitboard test_board(D1);
 
-            test_board.shift(Direction::DOWN);
+        test_board.shift(Direction::DOWN);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(Left) {
-            Bitboard test_board(D3);
+    TEST_METHOD(Left) {
+        Bitboard test_board(D3);
 
-            test_board.shift(Direction::LEFT);
+        test_board.shift(Direction::LEFT);
 
-            Assert::AreEqual(C3, test_board.getBoard());
-        }
+        Assert::AreEqual(C3, test_board.getBoard());
+    }
 
-        TEST_METHOD(LeftOut) {
-            Bitboard test_board(A5);
+    TEST_METHOD(LeftOut) {
+        Bitboard test_board(A5);
 
-            test_board.shift(Direction::LEFT);
+        test_board.shift(Direction::LEFT);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(Right) {
-            Bitboard test_board(E2);
+    TEST_METHOD(Right) {
+        Bitboard test_board(E2);
 
-            test_board.shift(Direction::RIGHT);
+        test_board.shift(Direction::RIGHT);
 
-            Assert::AreEqual(F2, test_board.getBoard());
-        }
+        Assert::AreEqual(F2, test_board.getBoard());
+    }
 
-        TEST_METHOD(RightOut) {
-            Bitboard test_board(H2);
+    TEST_METHOD(RightOut) {
+        Bitboard test_board(H2);
 
-            test_board.shift(Direction::RIGHT);
+        test_board.shift(Direction::RIGHT);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(UpLeft) {
-            Bitboard test_board(B2);
+    TEST_METHOD(UpLeft) {
+        Bitboard test_board(B2);
 
-            test_board.shift(Direction::UP_LEFT);
+        test_board.shift(Direction::UP_LEFT);
 
-            Assert::AreEqual(A3, test_board.getBoard());
-        }
+        Assert::AreEqual(A3, test_board.getBoard());
+    }
 
-        TEST_METHOD(UpLeftOut) {
-            Bitboard test_board(A2);
+    TEST_METHOD(UpLeftOut) {
+        Bitboard test_board(A2);
 
-            test_board.shift(Direction::UP_LEFT);
+        test_board.shift(Direction::UP_LEFT);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(UpRight) {
-            Bitboard test_board(F4);
+    TEST_METHOD(UpRight) {
+        Bitboard test_board(F4);
 
-            test_board.shift(Direction::UP_RIGHT);
+        test_board.shift(Direction::UP_RIGHT);
 
-            Assert::AreEqual(G5, test_board.getBoard());
-        }
+        Assert::AreEqual(G5, test_board.getBoard());
+    }
 
-        TEST_METHOD(UpRightOut) {
-            Bitboard test_board(H7);
+    TEST_METHOD(UpRightOut) {
+        Bitboard test_board(H7);
 
-            test_board.shift(Direction::UP_RIGHT);
+        test_board.shift(Direction::UP_RIGHT);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(DownLeft) {
-            Bitboard test_board(F6);
+    TEST_METHOD(DownLeft) {
+        Bitboard test_board(F6);
 
-            test_board.shift(Direction::DOWN_LEFT);
+        test_board.shift(Direction::DOWN_LEFT);
 
-            Assert::AreEqual(E5, test_board.getBoard());
-        }
+        Assert::AreEqual(E5, test_board.getBoard());
+    }
 
-        TEST_METHOD(DownLeftOut) {
-            Bitboard test_board(C1);
+    TEST_METHOD(DownLeftOut) {
+        Bitboard test_board(C1);
 
-            test_board.shift(Direction::DOWN_LEFT);
+        test_board.shift(Direction::DOWN_LEFT);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
 
-        TEST_METHOD(DownRight) {
-            Bitboard test_board(B7);
+    TEST_METHOD(DownRight) {
+        Bitboard test_board(B7);
 
-            test_board.shift(Direction::DOWN_RIGHT);
+        test_board.shift(Direction::DOWN_RIGHT);
 
-            Assert::AreEqual(C6, test_board.getBoard());
-        }
+        Assert::AreEqual(C6, test_board.getBoard());
+    }
 
-        TEST_METHOD(DownRightOut) {
-            Bitboard test_board(A1);
+    TEST_METHOD(DownRightOut) {
+        Bitboard test_board(A1);
 
-            test_board.shift(Direction::DOWN_RIGHT);
+        test_board.shift(Direction::DOWN_RIGHT);
 
-            Assert::AreEqual(0ULL, test_board.getBoard());
-        }
+        Assert::AreEqual(0ULL, test_board.getBoard());
+    }
     };
 
     TEST_CLASS(BitboardSlideTests) {
